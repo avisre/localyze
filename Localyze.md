@@ -105,8 +105,8 @@ Important release status:
 
 | Item | Status |
 | --- | --- |
-| Debug APK | Built locally for device testing |
-| Release AAB | BLOCKED until release signing password is configured |
+| Debug APK | Built locally for device testing at `dist/localyze.apk` |
+| Release AAB | BLOCKED at `signReleaseBundle` until `LOCALYZE_KEYSTORE_PASSWORD` and `LOCALYZE_KEY_PASSWORD` are configured |
 | Play upload | BLOCKED until Play Console API/service account credentials are available |
 | Subscription product | BLOCKED until Google Play Billing is implemented in app code and configured in Play Console |
 
