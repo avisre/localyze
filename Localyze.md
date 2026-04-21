@@ -89,6 +89,37 @@ Ship only the features that are reliable, explainable, and privacy-aligned:
 9. No auto-send email, SMS, calendar, or alarm actions in the MVP.
 10. Play Billing annual subscription before any production paid release.
 
+## Play Closed Testing Setup
+
+Closed testing target:
+
+| Item | Value |
+| --- | --- |
+| Track | Closed testing |
+| Tester group | testers-community@googlegroups.com |
+| Default price | USD 79 per year |
+| Suggested subscription id | localyze_premium_annual |
+| App artifact | Signed release AAB required for Play upload |
+
+Important release status:
+
+| Item | Status |
+| --- | --- |
+| Debug APK | Built locally for device testing |
+| Release AAB | BLOCKED until release signing password is configured |
+| Play upload | BLOCKED until Play Console API/service account credentials are available |
+| Subscription product | BLOCKED until Google Play Billing is implemented in app code and configured in Play Console |
+
+Console checklist:
+
+1. Create or open the Localyze app in Play Console with package `com.localassistant`.
+2. Add `testers-community@googlegroups.com` to the closed testing track testers.
+3. Upload the signed release AAB to the closed testing track.
+4. Create subscription `localyze_premium_annual` with a one-year base plan at USD 79.
+5. Add the Play Billing Library implementation in the app before enforcing the subscription.
+6. Complete Data Safety, privacy policy, app content, target audience, and permissions declarations.
+7. Submit only the closed testing release, not production.
+
 ## Must Fix Before Production
 
 | Priority | Item | Why |
