@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -7,19 +7,19 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val releaseKeystorePassword = providers.gradleProperty("LOCALASSISTANT_KEYSTORE_PASSWORD")
-    .orElse(providers.environmentVariable("LOCALASSISTANT_KEYSTORE_PASSWORD"))
+val releaseKeystorePassword = providers.gradleProperty("LOCALYZE_KEYSTORE_PASSWORD")
+    .orElse(providers.environmentVariable("LOCALYZE_KEYSTORE_PASSWORD"))
     .orNull
-val releaseKeyPassword = providers.gradleProperty("LOCALASSISTANT_KEY_PASSWORD")
-    .orElse(providers.environmentVariable("LOCALASSISTANT_KEY_PASSWORD"))
+val releaseKeyPassword = providers.gradleProperty("LOCALYZE_KEY_PASSWORD")
+    .orElse(providers.environmentVariable("LOCALYZE_KEY_PASSWORD"))
     .orNull
 
 android {
-    namespace = "com.localassistant"
+    namespace = "com.localyze"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.localassistant"
+        applicationId = "com.localyze"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
@@ -33,9 +33,9 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../localassistant-release.keystore")
+            storeFile = file("../localyze-release.keystore")
             storePassword = releaseKeystorePassword
-            keyAlias = "localassistant"
+            keyAlias = "localyze"
             keyPassword = releaseKeyPassword
         }
     }
@@ -78,7 +78,7 @@ android {
     }
 
     // With Kotlin 2.1.0+, the Compose compiler is managed by the
-    // org.jetbrains.kotlin.plugin.compose plugin — no need for composeOptions
+    // org.jetbrains.kotlin.plugin.compose plugin â€” no need for composeOptions
 
     packaging {
         resources {
@@ -95,7 +95,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.activity:activity-compose:1.10.1")
 
-    // Compose BOM — updated to match AI Edge Gallery's version
+    // Compose BOM â€” updated to match AI Edge Gallery's version
     val composeBom = platform("androidx.compose:compose-bom:2025.01.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
@@ -109,17 +109,17 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.9")
 
-    // Hilt — updated to match AI Edge Gallery
+    // Hilt â€” updated to match AI Edge Gallery
     implementation("com.google.dagger:hilt-android:2.57.2")
     ksp("com.google.dagger:hilt-android-compiler:2.57.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
-    // Room — updated to be compatible with Kotlin 2.1
+    // Room â€” updated to be compatible with Kotlin 2.1
     implementation("androidx.room:room-runtime:2.7.0")
     implementation("androidx.room:room-ktx:2.7.0")
     ksp("androidx.room:room-compiler:2.7.0")
 
-    // ── AI / ML ──────────────────────────────────────────────────────────────
+    // â”€â”€ AI / ML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // LiteRT-LM: The official Google runtime for running .litertlm models
     // This replaces the old MediaPipe GenAI (tasks-genai) which had NO NPU support.
     // LiteRT-LM natively supports Backend.NPU() for Hexagon HTP on Snapdragon.

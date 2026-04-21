@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -41,14 +41,14 @@
     </queries>
 
     <application
-        android:name=".LocalAssistantApp"
+        android:name=".LocalyzeApp"
         android:allowBackup="true"
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LocalAssistant"
+        android:theme="@style/Theme.Localyze"
         tools:targetApi="35">
 
         <!-- GPU backend: OpenCL native library -->
@@ -61,7 +61,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:resizeableActivity="true"
-            android:theme="@style/Theme.LocalAssistant">
+            android:theme="@style/Theme.Localyze">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -102,7 +102,7 @@
             android:name=".receivers.AlarmReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.localassistant.ALARM_TRIGGER" />
+                <action android:name="com.localyze.ALARM_TRIGGER" />
             </intent-filter>
         </receiver>
 

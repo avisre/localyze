@@ -1,13 +1,13 @@
-# Add project specific ProGuard rules here.
+﻿# Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.kts.
 
 # Keep Room entities
--keep class com.localassistant.domain.models.** { *; }
+-keep class com.localyze.domain.models.** { *; }
 
 # Keep serialized classes
--keep class com.localassistant.domain.models.ToolCall { *; }
--keep class com.localassistant.domain.models.ToolResult { *; }
+-keep class com.localyze.domain.models.ToolCall { *; }
+-keep class com.localyze.domain.models.ToolResult { *; }
 
 # Keep Hilt generated classes
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
@@ -31,11 +31,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class com.localassistant.**$$serializer { *; }
--keepclassmembers class com.localassistant.** {
+-keep,includedescriptorclasses class com.localyze.**$$serializer { *; }
+-keepclassmembers class com.localyze.** {
     *** Companion;
 }
 
--keepclasseswithmembers class com.localassistant.** {
+-keepclasseswithmembers class com.localyze.** {
     kotlinx.serialization.KSerializer serializer(...);
 }

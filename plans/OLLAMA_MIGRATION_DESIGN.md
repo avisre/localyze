@@ -1,8 +1,8 @@
-# Ollama Cloud Integration Architecture — LocalAssistant Migration Design
+﻿# Ollama Cloud Integration Architecture â€” Localyze Migration Design
 
 ## 1. Executive Summary
 
-This document specifies the architecture for replacing LocalAssistant's on-device Gemma 4 E4B inference (via MediaPipe LiteRT-LM) with **Kimi K2.6 via Ollama REST API** (cloud-hosted). The migration shifts from a 3.65 GB local model file to a stateless HTTP-based inference backend, fundamentally changing the app's initialization, inference, context management, and tool-calling patterns.
+This document specifies the architecture for replacing Localyze's on-device Gemma 4 E4B inference (via MediaPipe LiteRT-LM) with **Kimi K2.6 via Ollama REST API** (cloud-hosted). The migration shifts from a 3.65 GB local model file to a stateless HTTP-based inference backend, fundamentally changing the app's initialization, inference, context management, and tool-calling patterns.
 
 ### Key Architectural Shifts
 
@@ -11,7 +11,7 @@ This document specifies the architecture for replacing LocalAssistant's on-devic
 | Inference location | On-device (NPU/GPU/CPU) | Cloud Ollama server |
 | Model format | `.litertlm` file (~3.65 GB) | Server-hosted, no local file |
 | API style | LiteRT-LM Kotlin callbacks | REST API (NDJSON streaming) |
-| Context tracking | `Conversation` object tracks history internally | Stateless — full history sent per request |
+| Context tracking | `Conversation` object tracks history internally | Stateless â€” full history sent per request |
 | Tool calling | LiteRT-LM native `ToolProvider` + regex fallback | Ollama native `tools` parameter in request |
 | Image support | `Content.ImageBytes` in LiteRT-LM | Base64 in `images` field of message |
 | Audio support | `Content.AudioBytes` with WAV wrapper | Transcription to text (no native audio API) |
@@ -76,33 +76,33 @@ The current real-engine path **bypasses** `ContextWindowManager` because LiteRT-
 
 | File | Purpose |
 |---|---|
-| `app/src/main/java/com/localassistant/ai/OllamaInferenceEngine.kt` | New inference engine using Ollama REST API |
-| `app/src/main/java/com/localassistant/ai/OllamaMessageMapper.kt` | Converts domain `Message` objects to Ollama API format |
-| `app/src/main/java/com/localassistant/ai/OllamaStreamingParser.kt` | NDJSON line parser for Ollama streaming responses |
-| `app/src/main/java/com/localassistant/data/repository/OllamaServerRepository.kt` | Server URL storage, health checks, model availability |
-| `app/src/main/java/com/localassistant/data/repository/ConnectionState.kt` | Sealed class for connection states (replaces download progress for onboarding) |
+| `app/src/main/java/com/localyze/ai/OllamaInferenceEngine.kt` | New inference engine using Ollama REST API |
+| `app/src/main/java/com/localyze/ai/OllamaMessageMapper.kt` | Converts domain `Message` objects to Ollama API format |
+| `app/src/main/java/com/localyze/ai/OllamaStreamingParser.kt` | NDJSON line parser for Ollama streaming responses |
+| `app/src/main/java/com/localyze/data/repository/OllamaServerRepository.kt` | Server URL storage, health checks, model availability |
+| `app/src/main/java/com/localyze/data/repository/ConnectionState.kt` | Sealed class for connection states (replaces download progress for onboarding) |
 
 ### 3.2 Files to MODIFY
 
 | File | Changes |
 |---|---|
-| `app/src/main/java/com/localassistant/domain/usecases/SendMessageUseCase.kt` | Replace `GemmaInferenceEngine` with `OllamaInferenceEngine`; always use context window; update tool loop for Ollama native tool calling |
-| `app/src/main/java/com/localassistant/ai/SystemPromptBuilder.kt` | Remove `<start_of_turn>` format references; update tool prompt for Ollama format; keep mode prompts as-is |
-| `app/src/main/java/com/localassistant/ai/ContextWindowManager.kt` | Update `MAX_CONTEXT_TOKENS` for Kimi K2.6; add method to build Ollama `messages` array; use server-reported token counts when available |
-| `app/src/main/java/com/localassistant/ai/InferenceToken.kt` | No changes — same sealed class interface |
-| `app/src/main/java/com/localassistant/ai/ModelLoadState.kt` | Repurpose: `NotLoaded` → Disconnected, `Loading` → Connecting, `Loaded` → Connected, `Error` → Connection error |
-| `app/src/main/java/com/localassistant/ai/ModelExceptions.kt` | Add `OllamaConnectionException`, `OllamaTimeoutException`; keep existing exceptions |
-| `app/src/main/java/com/localassistant/ui/viewmodels/OnboardingViewModel.kt` | Replace model download flow with server URL input + connection test |
-| `app/src/main/java/com/localassistant/ui/viewmodels/OnboardingUiState.kt` | Replace download/verifying states with server config + connection test states |
-| `app/src/main/java/com/localassistant/ui/screens/OnboardingScreen.kt` | Replace download UI with server URL input + test connection UI |
-| `app/src/main/java/com/localassistant/ui/viewmodels/SettingsViewModel.kt` | Replace model info with Ollama server info; add server URL/model name editing; remove model delete |
-| `app/src/main/java/com/localassistant/ui/viewmodels/SettingsUiState.kt` | Replace `ModelInfo` with `OllamaServerInfo`; add server URL/model name fields |
-| `app/src/main/java/com/localassistant/ui/screens/SettingsScreen.kt` | Replace model download/delete section with Ollama server configuration |
-| `app/src/main/java/com/localassistant/ui/navigation/MainNavigation.kt` | Replace `isModelDownloaded` check with `isServerConfigured` check; remove model auto-init |
-| `app/src/main/java/com/localassistant/ui/viewmodels/ChatViewModel.kt` | Update `resetEngineForCurrentConversation` — no-op for Ollama (stateless); update timeout from 60s to 120s for network latency |
-| `app/src/main/java/com/localassistant/di/AppModule.kt` | Provide `OllamaInferenceEngine` instead of `GemmaInferenceEngine`; add Ollama-specific OkHttp client with streaming timeouts |
-| `app/src/main/java/com/localassistant/data/local/SettingsDataStore.kt` | Add `ollamaServerUrl`, `ollamaModelName` keys |
-| `app/src/main/java/com/localassistant/LocalAssistantApp.kt` | Remove models directory creation; no foreground service needed |
+| `app/src/main/java/com/localyze/domain/usecases/SendMessageUseCase.kt` | Replace `GemmaInferenceEngine` with `OllamaInferenceEngine`; always use context window; update tool loop for Ollama native tool calling |
+| `app/src/main/java/com/localyze/ai/SystemPromptBuilder.kt` | Remove `<start_of_turn>` format references; update tool prompt for Ollama format; keep mode prompts as-is |
+| `app/src/main/java/com/localyze/ai/ContextWindowManager.kt` | Update `MAX_CONTEXT_TOKENS` for Kimi K2.6; add method to build Ollama `messages` array; use server-reported token counts when available |
+| `app/src/main/java/com/localyze/ai/InferenceToken.kt` | No changes â€” same sealed class interface |
+| `app/src/main/java/com/localyze/ai/ModelLoadState.kt` | Repurpose: `NotLoaded` â†’ Disconnected, `Loading` â†’ Connecting, `Loaded` â†’ Connected, `Error` â†’ Connection error |
+| `app/src/main/java/com/localyze/ai/ModelExceptions.kt` | Add `OllamaConnectionException`, `OllamaTimeoutException`; keep existing exceptions |
+| `app/src/main/java/com/localyze/ui/viewmodels/OnboardingViewModel.kt` | Replace model download flow with server URL input + connection test |
+| `app/src/main/java/com/localyze/ui/viewmodels/OnboardingUiState.kt` | Replace download/verifying states with server config + connection test states |
+| `app/src/main/java/com/localyze/ui/screens/OnboardingScreen.kt` | Replace download UI with server URL input + test connection UI |
+| `app/src/main/java/com/localyze/ui/viewmodels/SettingsViewModel.kt` | Replace model info with Ollama server info; add server URL/model name editing; remove model delete |
+| `app/src/main/java/com/localyze/ui/viewmodels/SettingsUiState.kt` | Replace `ModelInfo` with `OllamaServerInfo`; add server URL/model name fields |
+| `app/src/main/java/com/localyze/ui/screens/SettingsScreen.kt` | Replace model download/delete section with Ollama server configuration |
+| `app/src/main/java/com/localyze/ui/navigation/MainNavigation.kt` | Replace `isModelDownloaded` check with `isServerConfigured` check; remove model auto-init |
+| `app/src/main/java/com/localyze/ui/viewmodels/ChatViewModel.kt` | Update `resetEngineForCurrentConversation` â€” no-op for Ollama (stateless); update timeout from 60s to 120s for network latency |
+| `app/src/main/java/com/localyze/di/AppModule.kt` | Provide `OllamaInferenceEngine` instead of `GemmaInferenceEngine`; add Ollama-specific OkHttp client with streaming timeouts |
+| `app/src/main/java/com/localyze/data/local/SettingsDataStore.kt` | Add `ollamaServerUrl`, `ollamaModelName` keys |
+| `app/src/main/java/com/localyze/LocalyzeApp.kt` | Remove models directory creation; no foreground service needed |
 | `app/build.gradle.kts` | Remove `com.google.ai.edge.litertlm:litertlm-android:0.10.0`; remove `USE_MOCK_ENGINE` and `USE_TEST_DOWNLOAD` build config fields; add `USE_MOCK_ENGINE` as DataStore preference |
 | `app/src/main/AndroidManifest.xml` | Remove `ModelLoadingService` declaration if present; ensure `INTERNET` permission present |
 
@@ -110,21 +110,21 @@ The current real-engine path **bypasses** `ContextWindowManager` because LiteRT-
 
 | File | Reason |
 |---|---|
-| `app/src/main/java/com/localassistant/ai/GemmaInferenceEngine.kt` | Replaced by `OllamaInferenceEngine` |
-| `app/src/main/java/com/localassistant/data/repository/ModelRepository.kt` | Replaced by `OllamaServerRepository` |
-| `app/src/main/java/com/localassistant/data/repository/DownloadProgress.kt` | No longer downloading model files |
-| `app/src/main/java/com/localassistant/ai/ModelLoadingService.kt` | No model to keep in memory (if this file exists) |
+| `app/src/main/java/com/localyze/ai/GemmaInferenceEngine.kt` | Replaced by `OllamaInferenceEngine` |
+| `app/src/main/java/com/localyze/data/repository/ModelRepository.kt` | Replaced by `OllamaServerRepository` |
+| `app/src/main/java/com/localyze/data/repository/DownloadProgress.kt` | No longer downloading model files |
+| `app/src/main/java/com/localyze/ai/ModelLoadingService.kt` | No model to keep in memory (if this file exists) |
 
 ### 3.4 Files to KEEP UNCHANGED
 
 | File | Reason |
 |---|---|
-| `app/src/main/java/com/localassistant/ai/MockGemmaEngine.kt` | Still needed for development/CI; rename optional |
-| `app/src/main/java/com/localassistant/ai/AudioInputProcessor.kt` | Audio recording still works; transcription path unchanged |
-| `app/src/main/java/com/localassistant/ai/AudioRecordingState.kt` | No changes |
-| `app/src/main/java/com/localassistant/tools/*` | All 11 tools unchanged — same `Tool` interface |
-| `app/src/main/java/com/localassistant/domain/models/*` | All domain models unchanged |
-| `app/src/main/java/com/localassistant/data/local/AppDatabase.kt` | Room database unchanged |
+| `app/src/main/java/com/localyze/ai/MockGemmaEngine.kt` | Still needed for development/CI; rename optional |
+| `app/src/main/java/com/localyze/ai/AudioInputProcessor.kt` | Audio recording still works; transcription path unchanged |
+| `app/src/main/java/com/localyze/ai/AudioRecordingState.kt` | No changes |
+| `app/src/main/java/com/localyze/tools/*` | All 11 tools unchanged â€” same `Tool` interface |
+| `app/src/main/java/com/localyze/domain/models/*` | All domain models unchanged |
+| `app/src/main/java/com/localyze/data/local/AppDatabase.kt` | Room database unchanged |
 | All UI components in `ui/components/` | No changes to reusable components |
 | All theme files | No changes |
 
@@ -151,11 +151,11 @@ class OllamaInferenceEngine @Inject constructor(
 |---|---|---|
 | `initialize()` | `suspend fun initialize()` | Test connection to Ollama server; verify Kimi K2.6 is available; set `ModelLoadState.Loaded` on success |
 | `generateResponse()` | `fun generateResponse(messages: List<Message>, systemPrompt: String, capabilityMode: String, enableThinking: Boolean): Flow<InferenceToken>` | Text-only streaming inference via `POST /api/chat` |
-| `generateResponseWithImage()` | `fun generateResponseWithImage(messages: List<Message>, imageBitmap: Bitmap, prompt: String, capabilityMode: String, enableThinking: Boolean): Flow<InferenceToken>` | Vision inference — image encoded as base64 in message `images` field |
-| `generateResponseWithAudio()` | `fun generateResponseWithAudio(messages: List<Message>, audioBytes: ByteArray, prompt: String, capabilityMode: String, enableThinking: Boolean): Flow<InferenceToken>` | Audio fallback — transcribes to text, then calls text inference |
-| `resetConversation()` | `fun resetConversation(capabilityMode: String, enableThinking: Boolean, ...)` | No-op for Ollama (stateless server) — kept for API compatibility |
+| `generateResponseWithImage()` | `fun generateResponseWithImage(messages: List<Message>, imageBitmap: Bitmap, prompt: String, capabilityMode: String, enableThinking: Boolean): Flow<InferenceToken>` | Vision inference â€” image encoded as base64 in message `images` field |
+| `generateResponseWithAudio()` | `fun generateResponseWithAudio(messages: List<Message>, audioBytes: ByteArray, prompt: String, capabilityMode: String, enableThinking: Boolean): Flow<InferenceToken>` | Audio fallback â€” transcribes to text, then calls text inference |
+| `resetConversation()` | `fun resetConversation(capabilityMode: String, enableThinking: Boolean, ...)` | No-op for Ollama (stateless server) â€” kept for API compatibility |
 | `stopGeneration()` | `fun stopGeneration()` | Cancels the active OkHttp call via `Call.cancel()` |
-| `release()` | `fun release()` | No-op — nothing to release from memory |
+| `release()` | `fun release()` | No-op â€” nothing to release from memory |
 | `isModelLoaded()` | `fun isModelLoaded(): Boolean` | Returns `true` if `ModelLoadState` is `Loaded` (i.e., server is connected) |
 | `modelLoadState` | `val modelLoadState: StateFlow<ModelLoadState>` | Exposes connection state as `StateFlow` |
 
@@ -170,13 +170,13 @@ private var currentModelName: String = "kimi-k2.6"
 
 ### Key Design Decisions
 
-1. **Reuses `ModelLoadState` sealed class** — `NotLoaded` = server not configured, `Loading` = testing connection, `Loaded` = server reachable + model available, `Error` = connection failed. This minimizes changes across consumers.
+1. **Reuses `ModelLoadState` sealed class** â€” `NotLoaded` = server not configured, `Loading` = testing connection, `Loaded` = server reachable + model available, `Error` = connection failed. This minimizes changes across consumers.
 
-2. **Reuses `Flow<InferenceToken>` return type** — The existing `InferenceToken` sealed class (`TextToken`, `ThinkingToken`, `ToolCallToken`, `EndOfStream`, `Error`) maps perfectly to Ollama's streaming response. No changes needed to `ChatResponseEvent` or `ChatViewModel`.
+2. **Reuses `Flow<InferenceToken>` return type** â€” The existing `InferenceToken` sealed class (`TextToken`, `ThinkingToken`, `ToolCallToken`, `EndOfStream`, `Error`) maps perfectly to Ollama's streaming response. No changes needed to `ChatResponseEvent` or `ChatViewModel`.
 
-3. **`resetConversation()` is a no-op** — Ollama is stateless; each request contains full history. The method exists solely for API compatibility with `SendMessageUseCase`.
+3. **`resetConversation()` is a no-op** â€” Ollama is stateless; each request contains full history. The method exists solely for API compatibility with `SendMessageUseCase`.
 
-4. **No foreground service needed** — Unlike the on-device model which required ~4 GB RAM held indefinitely, Ollama requires no resident memory.
+4. **No foreground service needed** â€” Unlike the on-device model which required ~4 GB RAM held indefinitely, Ollama requires no resident memory.
 
 ---
 
@@ -279,7 +279,7 @@ GET /api/tags
 }
 ```
 
-The `images` array accepts base64-encoded PNG/JPEG strings. The `OllamaMessageMapper` converts `Bitmap` → PNG bytes → base64 string.
+The `images` array accepts base64-encoded PNG/JPEG strings. The `OllamaMessageMapper` converts `Bitmap` â†’ PNG bytes â†’ base64 string.
 
 ---
 
@@ -422,7 +422,7 @@ fun generateResponse(
 
         response.close()
     } catch (e: CancellationException) {
-        // User cancelled — this is expected from stopGeneration()
+        // User cancelled â€” this is expected from stopGeneration()
         trySend(InferenceToken.EndOfStream)
     } catch (e: java.net.SocketTimeoutException) {
         trySend(InferenceToken.Error("Request timed out. The server may be overloaded."))
@@ -545,10 +545,10 @@ fun mapToolResultToMessage(toolResult: ToolResult): JsonObject {
 
 The current `SendMessageUseCase.generateWithToolLoop()` needs these changes:
 
-1. **Always build context window** — Since Ollama is stateless, every iteration must include full message history
-2. **Include tool results in message history** — Tool results are added as `role: "tool"` messages in the Ollama `messages` array
-3. **Remove the "send tool results as user message" hack** — The current code sends tool results as a fake user message. With Ollama's native tool calling, results go in proper `tool` role messages
-4. **Keep MAX_TOOL_ITERATIONS = 3** — Same limit applies
+1. **Always build context window** â€” Since Ollama is stateless, every iteration must include full message history
+2. **Include tool results in message history** â€” Tool results are added as `role: "tool"` messages in the Ollama `messages` array
+3. **Remove the "send tool results as user message" hack** â€” The current code sends tool results as a fake user message. With Ollama's native tool calling, results go in proper `tool` role messages
+4. **Keep MAX_TOOL_ITERATIONS = 3** â€” Same limit applies
 
 ```mermaid
 sequenceDiagram
@@ -597,9 +597,9 @@ fun mapImageMessage(
 
 **Key difference from current**: The current engine sends `Content.ImageBytes` to LiteRT-LM. With Ollama, the image is base64-encoded and included in the JSON request body. This increases request payload size significantly (a 1080p PNG is ~2-4 MB base64), so we should:
 
-1. **Compress images** — Resize to max 1024px on the longest side before encoding
-2. **Use JPEG for photos** — JPEG at 85% quality is much smaller than PNG for photographs
-3. **Consider WebP** — Even smaller, but Ollama compatibility should be verified
+1. **Compress images** â€” Resize to max 1024px on the longest side before encoding
+2. **Use JPEG for photos** â€” JPEG at 85% quality is much smaller than PNG for photographs
+3. **Consider WebP** â€” Even smaller, but Ollama compatibility should be verified
 
 ### 8.2 Audio Fallback Strategy
 
@@ -622,7 +622,7 @@ graph TD
    - The transcribed text is sent as a regular text message via `generateResponse()`
    - The audio bytes are discarded after transcription
 
-2. The `ChatViewModel.sendAudioMessage()` already calls `recordAudioUseCase.stopRecording()` which returns a transcription string. This transcription is then sent via `sendMessage(text)`. **No changes needed in ChatViewModel** — the audio → text path already works.
+2. The `ChatViewModel.sendAudioMessage()` already calls `recordAudioUseCase.stopRecording()` which returns a transcription string. This transcription is then sent via `sendMessage(text)`. **No changes needed in ChatViewModel** â€” the audio â†’ text path already works.
 
 3. The `sendMessageWithAudio()` method in `SendMessageUseCase` should be updated to:
    - If using Ollama engine: save the user message as text (the transcription), call `generateResponse()` instead of `generateResponseWithAudio()`
@@ -630,7 +630,7 @@ graph TD
 
 ### 8.3 Image + Audio Conversation Mode
 
-The current `ensureConversation()` method resets the `Conversation` when switching between text/image/audio modes. With Ollama, this is unnecessary — the server handles all modalities in the same chat endpoint. The `resetConversation()` call becomes a no-op.
+The current `ensureConversation()` method resets the `Conversation` when switching between text/image/audio modes. With Ollama, this is unnecessary â€” the server handles all modalities in the same chat endpoint. The `resetConversation()` call becomes a no-op.
 
 ---
 
@@ -648,7 +648,7 @@ The current `ensureConversation()` method resets the `Conversation` when switchi
 | **Context Too Long** | HTTP 400 with context error | The conversation is too long. Starting a new chat may help. | Truncate context or new chat |
 | **Rate Limited** | HTTP 429 | Too many requests. Please wait a moment and try again. | Retry after delay |
 | **Malformed Response** | JSON parse error | Received an invalid response from the server. | Retry |
-| **Cancelled** | `CancellationException` | (Silent — user pressed stop) | No action needed |
+| **Cancelled** | `CancellationException` | (Silent â€” user pressed stop) | No action needed |
 
 ### 9.2 Retry Strategy
 
@@ -703,9 +703,9 @@ private fun startConnectionMonitor() {
 
 Since the app now requires network connectivity:
 
-1. **Pre-send network check** — Before calling `sendMessage()`, check `ConnectivityManager` for active network
-2. **Queue messages offline** — If network is lost, show a clear error: "No internet connection. This app requires a connection to the Ollama server."
-3. **No offline mode** — Unlike the on-device model, there is no offline fallback. The mock engine can serve as a development fallback but should not be exposed to end users as an offline mode.
+1. **Pre-send network check** â€” Before calling `sendMessage()`, check `ConnectivityManager` for active network
+2. **Queue messages offline** â€” If network is lost, show a clear error: "No internet connection. This app requires a connection to the Ollama server."
+3. **No offline mode** â€” Unlike the on-device model, there is no offline fallback. The mock engine can serve as a development fallback but should not be exposed to end users as an offline mode.
 
 ---
 
@@ -771,16 +771,16 @@ stateDiagram-v2
 
 | Current Screen | Replacement |
 |---|---|
-| Welcome (same) | Welcome — update subtitle from "running entirely on your device" to "powered by Kimi K2.6 via Ollama" |
-| CheckingModel | **Removed** — no RAM/storage check needed |
-| ReadyToDownload | **ConfigureServer** — URL input field + model name field + "Test Connection" button |
-| NetworkWarning | **Removed** — no 3.6 GB download to warn about |
-| Downloading | **TestingConnection** — spinner + "Connecting to server..." / "Verifying model..." |
-| Verifying | **Removed** — no file integrity check |
-| InsufficientRam | **Removed** — no local model to load |
-| InsufficientStorage | **Removed** — no model file to store |
-| ReadyToChat (same) | ReadyToChat — update text to "Connected to Ollama server" |
-| Error | Error — update messages for connection failures |
+| Welcome (same) | Welcome â€” update subtitle from "running entirely on your device" to "powered by Kimi K2.6 via Ollama" |
+| CheckingModel | **Removed** â€” no RAM/storage check needed |
+| ReadyToDownload | **ConfigureServer** â€” URL input field + model name field + "Test Connection" button |
+| NetworkWarning | **Removed** â€” no 3.6 GB download to warn about |
+| Downloading | **TestingConnection** â€” spinner + "Connecting to server..." / "Verifying model..." |
+| Verifying | **Removed** â€” no file integrity check |
+| InsufficientRam | **Removed** â€” no local model to load |
+| InsufficientStorage | **Removed** â€” no model file to store |
+| ReadyToChat (same) | ReadyToChat â€” update text to "Connected to Ollama server" |
+| Error | Error â€” update messages for connection failures |
 
 ### 10.4 OnboardingViewModel Changes
 
@@ -793,7 +793,7 @@ class OnboardingViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun checkPrerequisites() {
-        // No RAM/storage check — just check network
+        // No RAM/storage check â€” just check network
         viewModelScope.launch {
             if (!ollamaServerRepository.isNetworkAvailable()) {
                 _uiState.value = OnboardingUiState.NoNetwork
@@ -857,7 +857,7 @@ class OnboardingViewModel @Inject constructor(
 
 ```kotlin
 data class SettingsUiState(
-    // ── Existing (keep) ──
+    // â”€â”€ Existing (keep) â”€â”€
     val darkMode: Boolean = false,
     val thinkingMode: Boolean = true,
     val streamTokens: Boolean = true,
@@ -871,7 +871,7 @@ data class SettingsUiState(
     val memoryTransparencyText: String = "",
     val showClearMemoriesDialog: Boolean = false,
 
-    // ── Replaced ──
+    // â”€â”€ Replaced â”€â”€
     val ollamaServerInfo: OllamaServerInfo = OllamaServerInfo(),
     // REMOVED: modelInfo, storageInfo, showDeleteModelDialog, allowCellularDownload
 )
@@ -893,11 +893,11 @@ data class OllamaServerInfo(
 | **Model Info** card (Gemma 4 E4B, size, loaded status) | Replace with **Ollama Server** card: URL, model name, connection status, latency |
 | **Delete Model** button | Replace with **Test Connection** button |
 | **Storage Info** card (model size, DB size, available) | Remove model size; keep DB size if desired |
-| **Allow Cellular Download** toggle | Remove — no large downloads |
-| **Temperature / Top-K** sliders | Keep — these map to Ollama `options.temperature` and `options.top_k` |
-| **Server URL** field | **NEW** — editable text field with URL validation |
-| **Model Name** field | **NEW** — editable text field, default "kimi-k2.6" |
-| **Refresh Models** button | **NEW** — calls `GET /api/tags` and populates available models list |
+| **Allow Cellular Download** toggle | Remove â€” no large downloads |
+| **Temperature / Top-K** sliders | Keep â€” these map to Ollama `options.temperature` and `options.top_k` |
+| **Server URL** field | **NEW** â€” editable text field with URL validation |
+| **Model Name** field | **NEW** â€” editable text field, default "kimi-k2.6" |
+| **Refresh Models** button | **NEW** â€” calls `GET /api/tags` and populates available models list |
 
 ### 11.3 SettingsViewModel Changes
 
@@ -933,7 +933,7 @@ class OllamaServerRepository @Inject constructor(
         const val DEFAULT_MODEL_NAME = "kimi-k2.6"
     }
 
-    // ── Server Configuration ──
+    // â”€â”€ Server Configuration â”€â”€
 
     suspend fun getServerUrl(): String
     suspend fun setServerUrl(url: String)
@@ -941,7 +941,7 @@ class OllamaServerRepository @Inject constructor(
     suspend fun setModelName(name: String)
     fun isServerConfigured(): Boolean
 
-    // ── Health Checks ──
+    // â”€â”€ Health Checks â”€â”€
 
     suspend fun checkConnection(): ConnectionResult
     suspend fun isModelAvailable(modelName: String = getModelName()): Boolean
@@ -949,7 +949,7 @@ class OllamaServerRepository @Inject constructor(
     suspend fun getModelInfo(modelName: String): OllamaModelInfo?
     suspend fun measureLatency(): Long  // Returns round-trip time in ms
 
-    // ── Network ──
+    // â”€â”€ Network â”€â”€
 
     fun isNetworkAvailable(): Boolean
     fun getNetworkType(): String  // "WiFi", "Cellular", "Ethernet", "None"
@@ -1064,7 +1064,7 @@ fun mapToOllamaMessages(
                 put("content", message.toolResult ?: message.content)
                 put("name", message.toolName ?: "unknown")
             })
-            MessageRole.SYSTEM -> { /* Skip — system prompt is already added */ }
+            MessageRole.SYSTEM -> { /* Skip â€” system prompt is already added */ }
         }
     }
 
@@ -1083,7 +1083,7 @@ fun mapToOllamaMessages(
 | `MAX_CONTEXT_TOKENS` | 128,000 | 131,072 (Kimi K2.6's `num_ctx` default) |
 | `TRUNCATION_THRESHOLD` | 100,000 | 110,000 |
 | Token estimation | Heuristic (chars/words) | Heuristic + server-reported counts when available |
-| Usage | Only used for mock engine | **Always used** — mandatory for Ollama |
+| Usage | Only used for mock engine | **Always used** â€” mandatory for Ollama |
 
 ### 14.2 New Method: Build Ollama Messages
 
@@ -1157,8 +1157,8 @@ object AppModule {
             .build()
     }
 
-    // REMOVED: provideModelsDir() — no local model files
-    // REMOVED: provideCacheDir() — no AI cache needed
+    // REMOVED: provideModelsDir() â€” no local model files
+    // REMOVED: provideCacheDir() â€” no AI cache needed
 }
 ```
 
@@ -1234,10 +1234,10 @@ class SendMessageUseCase @Inject constructor(
 
 ```kotlin
 dependencies {
-    // ── REMOVED ──
+    // â”€â”€ REMOVED â”€â”€
     // implementation("com.google.ai.edge.litertlm:litertlm-android:0.10.0")
 
-    // ── KEPT ──
+    // â”€â”€ KEPT â”€â”€
     implementation("com.squareup.okhttp3:okhttp:4.12.0")  // Already present
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")  // Already present
 }
@@ -1351,68 +1351,68 @@ fun MainNavigation(
 
 ### Phase 1: Foundation (No UI changes yet)
 
-- [ ] Create `OllamaStreamingParser.kt` — NDJSON line parser
-- [ ] Create `OllamaMessageMapper.kt` — Domain messages → Ollama API format
-- [ ] Create `OllamaServerRepository.kt` — Server URL storage, health checks
-- [ ] Create `ConnectionState.kt` — Connection state sealed class
+- [ ] Create `OllamaStreamingParser.kt` â€” NDJSON line parser
+- [ ] Create `OllamaMessageMapper.kt` â€” Domain messages â†’ Ollama API format
+- [ ] Create `OllamaServerRepository.kt` â€” Server URL storage, health checks
+- [ ] Create `ConnectionState.kt` â€” Connection state sealed class
 - [ ] Add `KEY_OLLAMA_SERVER_URL`, `KEY_OLLAMA_MODEL_NAME`, `KEY_USE_MOCK_ENGINE` to `SettingsDataStore.kt`
-- [ ] Update `AppModule.kt` — Add `@Named("ollama")` OkHttpClient; remove `provideModelsDir()`
-- [ ] Create `AIModule.kt` — Wire `OllamaInferenceEngine`, `OllamaMessageMapper`, `OllamaStreamingParser`
+- [ ] Update `AppModule.kt` â€” Add `@Named("ollama")` OkHttpClient; remove `provideModelsDir()`
+- [ ] Create `AIModule.kt` â€” Wire `OllamaInferenceEngine`, `OllamaMessageMapper`, `OllamaStreamingParser`
 
 ### Phase 2: Inference Engine
 
-- [ ] Create `OllamaInferenceEngine.kt` — Full implementation with streaming
-- [ ] Update `ModelExceptions.kt` — Add `OllamaConnectionException`, `OllamaTimeoutException`
-- [ ] Update `ContextWindowManager.kt` — Change `MAX_CONTEXT_TOKENS` to 131072; add calibration method
-- [ ] Update `SystemPromptBuilder.kt` — Remove `<start_of_turn>` references; update tool prompt format for Ollama
+- [ ] Create `OllamaInferenceEngine.kt` â€” Full implementation with streaming
+- [ ] Update `ModelExceptions.kt` â€” Add `OllamaConnectionException`, `OllamaTimeoutException`
+- [ ] Update `ContextWindowManager.kt` â€” Change `MAX_CONTEXT_TOKENS` to 131072; add calibration method
+- [ ] Update `SystemPromptBuilder.kt` â€” Remove `<start_of_turn>` references; update tool prompt format for Ollama
 
 ### Phase 3: Use Case Layer
 
-- [ ] Update `SendMessageUseCase.kt` — Replace `GemmaInferenceEngine` with `OllamaInferenceEngine`; always use context window; update tool loop for native Ollama tool calling; update audio path
-- [ ] Verify `ChatResponseEvent.kt` — No changes needed
-- [ ] Verify `InferenceToken.kt` — No changes needed
+- [ ] Update `SendMessageUseCase.kt` â€” Replace `GemmaInferenceEngine` with `OllamaInferenceEngine`; always use context window; update tool loop for native Ollama tool calling; update audio path
+- [ ] Verify `ChatResponseEvent.kt` â€” No changes needed
+- [ ] Verify `InferenceToken.kt` â€” No changes needed
 
 ### Phase 4: Onboarding
 
-- [ ] Update `OnboardingUiState.kt` — Replace download states with server config states
-- [ ] Update `OnboardingViewModel.kt` — Replace download flow with server config + connection test
-- [ ] Update `OnboardingScreen.kt` — Replace download UI with server URL input + test connection
+- [ ] Update `OnboardingUiState.kt` â€” Replace download states with server config states
+- [ ] Update `OnboardingViewModel.kt` â€” Replace download flow with server config + connection test
+- [ ] Update `OnboardingScreen.kt` â€” Replace download UI with server URL input + test connection
 
 ### Phase 5: Settings
 
-- [ ] Update `SettingsUiState.kt` — Replace `ModelInfo` with `OllamaServerInfo`; remove storage/download fields
-- [ ] Update `SettingsViewModel.kt` — Replace model management with Ollama server management
-- [ ] Update `SettingsScreen.kt` — Replace model section with Ollama server configuration
+- [ ] Update `SettingsUiState.kt` â€” Replace `ModelInfo` with `OllamaServerInfo`; remove storage/download fields
+- [ ] Update `SettingsViewModel.kt` â€” Replace model management with Ollama server management
+- [ ] Update `SettingsScreen.kt` â€” Replace model section with Ollama server configuration
 
 ### Phase 6: Navigation & Chat
 
-- [ ] Update `MainNavigation.kt` — Replace model readiness check with server configured check; update function signature
-- [ ] Update `ChatViewModel.kt` — Update `resetEngineForCurrentConversation` (no-op for Ollama); increase timeout to 120s
-- [ ] Update `MainActivity.kt` — Update `MainNavigation` call with new parameters
+- [ ] Update `MainNavigation.kt` â€” Replace model readiness check with server configured check; update function signature
+- [ ] Update `ChatViewModel.kt` â€” Update `resetEngineForCurrentConversation` (no-op for Ollama); increase timeout to 120s
+- [ ] Update `MainActivity.kt` â€” Update `MainNavigation` call with new parameters
 
 ### Phase 7: Build & Cleanup
 
-- [ ] Update `app/build.gradle.kts` — Remove LiteRT-LM dependency; remove `USE_MOCK_ENGINE`/`USE_TEST_DOWNLOAD` build config fields
+- [ ] Update `app/build.gradle.kts` â€” Remove LiteRT-LM dependency; remove `USE_MOCK_ENGINE`/`USE_TEST_DOWNLOAD` build config fields
 - [ ] Delete `GemmaInferenceEngine.kt`
 - [ ] Delete `ModelRepository.kt`
 - [ ] Delete `DownloadProgress.kt`
 - [ ] Delete `ModelLoadingService.kt` (if it exists)
-- [ ] Update `LocalAssistantApp.kt` — Remove models directory creation; remove foreground service
-- [ ] Update `AndroidManifest.xml` — Remove `ModelLoadingService` declaration; verify `INTERNET` permission
-- [ ] Update unit tests — Remove `DownloadResumeTest.kt`; update `AgenticAbilitiesTest.kt` for Ollama
-- [ ] Update instrumented tests — Update `DataLayerIntegrationTest.kt` for Ollama
+- [ ] Update `LocalyzeApp.kt` â€” Remove models directory creation; remove foreground service
+- [ ] Update `AndroidManifest.xml` â€” Remove `ModelLoadingService` declaration; verify `INTERNET` permission
+- [ ] Update unit tests â€” Remove `DownloadResumeTest.kt`; update `AgenticAbilitiesTest.kt` for Ollama
+- [ ] Update instrumented tests â€” Update `DataLayerIntegrationTest.kt` for Ollama
 
 ### Phase 8: Testing & Validation
 
-- [ ] Test onboarding flow: Welcome → Configure Server → Test Connection → Ready to Chat
-- [ ] Test chat with streaming: Send message → receive streaming tokens → completion
-- [ ] Test tool calling: Send message that triggers tool → tool execution → response with results
-- [ ] Test image support: Send image → base64 encoding → vision response
-- [ ] Test audio fallback: Record audio → transcription → text message
+- [ ] Test onboarding flow: Welcome â†’ Configure Server â†’ Test Connection â†’ Ready to Chat
+- [ ] Test chat with streaming: Send message â†’ receive streaming tokens â†’ completion
+- [ ] Test tool calling: Send message that triggers tool â†’ tool execution â†’ response with results
+- [ ] Test image support: Send image â†’ base64 encoding â†’ vision response
+- [ ] Test audio fallback: Record audio â†’ transcription â†’ text message
 - [ ] Test error handling: Server unreachable, timeout, model not found, rate limiting
 - [ ] Test settings: Change server URL, model name, test connection
 - [ ] Test mock engine: Verify mock mode still works for development
-- [ ] Test network transitions: WiFi → cellular → offline → online
+- [ ] Test network transitions: WiFi â†’ cellular â†’ offline â†’ online
 - [ ] Performance test: Measure latency, streaming throughput, token rates
 
 ---
@@ -1434,16 +1434,16 @@ fun MainNavigation(
 
 ## 20. Future Considerations
 
-1. **Ollama API Key / Authentication** — If the Ollama server requires authentication, add an API key field in Settings and include it as a Bearer token in requests.
+1. **Ollama API Key / Authentication** â€” If the Ollama server requires authentication, add an API key field in Settings and include it as a Bearer token in requests.
 
-2. **Multiple Server Profiles** — Allow users to configure multiple Ollama servers (e.g., local vs. cloud) and switch between them.
+2. **Multiple Server Profiles** â€” Allow users to configure multiple Ollama servers (e.g., local vs. cloud) and switch between them.
 
-3. **WebSocket Transport** — For lower latency, consider using Ollama's WebSocket support (if available) instead of HTTP streaming.
+3. **WebSocket Transport** â€” For lower latency, consider using Ollama's WebSocket support (if available) instead of HTTP streaming.
 
-4. **Local Ollama Detection** — Auto-detect Ollama running on the local network (mDNS or port scanning on common ports like 11434).
+4. **Local Ollama Detection** â€” Auto-detect Ollama running on the local network (mDNS or port scanning on common ports like 11434).
 
-5. **Model Switching** — Allow switching between models (e.g., kimi-k2.6 for complex tasks, a smaller model for quick responses) from the chat interface.
+5. **Model Switching** â€” Allow switching between models (e.g., kimi-k2.6 for complex tasks, a smaller model for quick responses) from the chat interface.
 
-6. **Response Caching** — Cache identical requests locally to reduce server load and improve response times for repeated queries.
+6. **Response Caching** â€” Cache identical requests locally to reduce server load and improve response times for repeated queries.
 
-7. **Streaming Token Counting** — Use Ollama's `eval_count` in the final response to display token usage in the UI.
+7. **Streaming Token Counting** â€” Use Ollama's `eval_count` in the final response to display token usage in the UI.

@@ -1,10 +1,10 @@
-# AGENT HANDOFF — LocalAssistant Android App
+﻿# AGENT HANDOFF â€” Localyze Android App
 
 **Date:** 2026-04-20  
 **Project path:** `C:\Users\avina\Downloads\ai7` (Windows)  
 **Device:** OnePlus NE2211 (Snapdragon 8 Gen 1 / QCS8275), Android 16 (SDK 36), 12GB RAM  
 **Build:** Debug, compiles successfully (`BUILD SUCCESSFUL`)  
-**App package:** `com.localassistant`  
+**App package:** `com.localyze`  
 **ADB note:** Windows Git Bash requires `MSYS_NO_PATHCONV=1` prefix for all `adb` commands that use `/data/` paths  
 
 ---
@@ -17,38 +17,38 @@ An on-device AI assistant running Google's **Gemma 4 E4B** model via **LiteRT-LM
 
 ## CURRENT STATE: WHAT WORKS
 
-### 1. Model loads on GPU ✅
+### 1. Model loads on GPU âœ…
 - `gemma-4-E4B-it.litertlm` (3.65GB) loads in ~12 seconds on GPU backend
 - Logs confirm: `Backend: GPU`, `EncoderBackend: GPU`, `AdapterBackend: CPU`
 - Model uses ~3.8GB GPU memory (OnePlus flags this as a "memory leak" event but it's normal)
 
-### 2. Chat inference produces responses ✅
+### 2. Chat inference produces responses âœ…
 - User can type a message, tap send, and get an AI response
 - Confirmed via screenshot: model responded with text to "Hello" input
 - Streaming tokens display as they generate
 - Stop generation button available during streaming
 
-### 3. App builds and installs ✅
+### 3. App builds and installs âœ…
 - Kotlin 2.2.0, AGP 8.8.2, Hilt 2.57.2, KSP 2.2.0-2.0.2
 - Debug APK at `app/build/outputs/apk/debug/app-debug.apk`
 - Install via: `adb install -r app/build/outputs/apk/debug/app-debug.apk`
 
-### 4. Database persistence layer exists ✅
+### 4. Database persistence layer exists âœ…
 - Room database: `local_assistant_db` with `conversations` and `messages` tables
 - `ConversationDao` has: insert, update, delete, deleteById, getAllConversations, searchConversations, updateTitle, updatePinnedStatus, updateCapabilityMode
 - `MessageDao` has: insert, update, delete, deleteByConversationId, getMessagesForConversation, getRecentMessages, getMessageById, updateContent, searchMessagesSimple
 - `ChatRepositoryImpl` implements full CRUD for both entities
 - WAL file size (197KB) confirms data IS being written to the database
 
-### 5. NPU model detection + error messaging ✅
+### 5. NPU model detection + error messaging âœ…
 - If an NPU-only model file is detected, app shows error and tells user to download generic model
-- `findModelFile()` priority: generic E2B → E4B → NPU → legacy names
+- `findModelFile()` priority: generic E2B â†’ E4B â†’ NPU â†’ legacy names
 
 ---
 
 ## CURRENT STATE: WHAT IS BROKEN / MISSING
 
-### 🔴 CRITICAL BUG 1: No conversation list / drawer UI
+### ðŸ”´ CRITICAL BUG 1: No conversation list / drawer UI
 **Problem:** There is NO way for the user to see, switch between, or delete past conversations. The app has:
 - A "+" FAB button that creates a new conversation
 - Individual chat messages that get saved to Room DB
@@ -72,7 +72,7 @@ An on-device AI assistant running Google's **Gemma 4 E4B** model via **LiteRT-LM
 - A hamburger/menu button in ChatScreen top bar that opens the drawer
 - Wire `onOpenDrawer` callback in `ChatScreen` to toggle the drawer
 
-### 🔴 CRITICAL BUG 2: No conversation auto-load on app restart
+### ðŸ”´ CRITICAL BUG 2: No conversation auto-load on app restart
 **Problem:** When the app restarts, `ChatUiState.currentConversationId = -1L`. The `init` block checks `SavedStateHandle` for a conversation ID, but the `"chat"` navigation route doesn't pass any ID:
 ```kotlin
 composable("chat") {
@@ -85,7 +85,7 @@ So every time the app restarts, the user sees an empty chat. All previous conver
 - On app startup, load the most recent conversation from `chatRepository.getAllConversations()` and set `currentConversationId`
 - OR add a conversation list UI so the user can pick one
 
-### 🔴 CRITICAL BUG 3: Capabilities screen creates orphaned conversations
+### ðŸ”´ CRITICAL BUG 3: Capabilities screen creates orphaned conversations
 **Problem:** When user taps a capability card (e.g., "Code Help"), `CapabilitiesViewModel.selectCapability()` creates a new Conversation in the DB. Then navigation goes to `chat` route, but the ChatViewModel doesn't receive the new conversation ID:
 ```kotlin
 LaunchedEffect(createdConversationId) {
@@ -102,7 +102,7 @@ The conversation ID is consumed but never passed to ChatScreen. ChatScreen creat
 - OR use shared ViewModel state between CapabilitiesViewModel and ChatViewModel
 - OR use a `SavedStateHandle` with the conversation ID
 
-### 🟡 MODERATE BUG 4: DB verification is blocked by ADB binary transfer issues
+### ðŸŸ¡ MODERATE BUG 4: DB verification is blocked by ADB binary transfer issues
 **Problem:** Cannot read Room DB from device because:
 - `adb shell "run-as ... cat databases/local_assistant_db"` truncates on first null byte (4KB instead of full DB)
 - No `sqlite3` binary on the device
@@ -116,23 +116,23 @@ The conversation ID is consumed but never passed to ChatScreen. ChatScreen creat
 4. Add a `/data/local/tmp/` bridge with proper permissions
 5. Add a diagnostic broadcast receiver that dumps DB contents to logcat
 
-### 🟡 MODERATE BUG 5: No conversation title editing UI
+### ðŸŸ¡ MODERATE BUG 5: No conversation title editing UI
 **Problem:** `ConversationDao.updateTitle()` exists but is never called from the UI. Auto-generated titles come from the first AI response, but the user can't edit them.
 
 **Fix needed:**
-- Add title editing in the conversation drawer (long-press → rename, or inline edit)
+- Add title editing in the conversation drawer (long-press â†’ rename, or inline edit)
 
-### 🟡 MODERATE BUG 6: No conversation delete UI
+### ðŸŸ¡ MODERATE BUG 6: No conversation delete UI
 **Problem:** `chatRepository.deleteConversation()` exists but is never triggered from the UI. Conversations accumulate forever.
 
 **Fix needed:**
-- Add delete button in conversation drawer (long-press → delete with confirmation)
+- Add delete button in conversation drawer (long-press â†’ delete with confirmation)
 
 ---
 
-## NPU BACKEND STATUS (BLOCKED — NOT FIXABLE BY US)
+## NPU BACKEND STATUS (BLOCKED â€” NOT FIXABLE BY US)
 
-- **`Backend.NPU()` + `Engine.initialize()` → SIGABRT** in `liblitertlm_jni.so` at `nativeCreateEngine`
+- **`Backend.NPU()` + `Engine.initialize()` â†’ SIGABRT** in `liblitertlm_jni.so` at `nativeCreateEngine`
 - Occurs on Snapdragon 8 Gen 1 (QCS8275)
 - NPU-only model file (`gemma-4-E2B-it_qualcomm_qcs8275.litertlm`) also REQUIRES NPU backend: error `"Model requires one of [npu] but Main backend is GPU"`
 - Upstream issues: https://github.com/google-ai-edge/LiteRT-LM/issues/774, https://github.com/google-ai-edge/LiteRT/issues/5159
@@ -144,20 +144,20 @@ The conversation ID is consumed but never passed to ChatScreen. ChatScreen creat
 
 ### Task 1: Build Conversation Drawer UI (CRUD for conversations)
 **Files to create/modify:**
-- **NEW:** `app/src/main/java/com/localassistant/ui/components/ConversationDrawer.kt`
+- **NEW:** `app/src/main/java/com/localyze/ui/components/ConversationDrawer.kt`
   - Side panel or ModalNavigationDrawer
   - Lists all conversations from `chatRepository.getAllConversations()` 
   - Each row: title, updatedAt relative time, message count, capability mode icon
-  - Tap → load that conversation
-  - Long-press → bottom sheet with: Rename, Pin/Unpin, Delete (with confirmation dialog)
+  - Tap â†’ load that conversation
+  - Long-press â†’ bottom sheet with: Rename, Pin/Unpin, Delete (with confirmation dialog)
   - Search bar at top to filter conversations
   - "New Chat" button at bottom
-- **MODIFY:** `app/src/main/java/com/localassistant/ui/screens/ChatScreen.kt`
+- **MODIFY:** `app/src/main/java/com/localyze/ui/screens/ChatScreen.kt`
   - Add hamburger/menu icon button in top-left that opens the drawer
   - Wire `onOpenDrawer` callback
   - When a conversation is selected from drawer, call `viewModel.loadConversation(id)`
   - Show current conversation title in the header area
-- **MODIFY:** `app/src/main/java/com/localassistant/ui/viewmodels/ChatViewModel.kt`
+- **MODIFY:** `app/src/main/java/com/localyze/ui/viewmodels/ChatViewModel.kt`
   - Add `allConversations: StateFlow<List<Conversation>>` collected from `chatRepository.getAllConversations()`
   - Add `deleteConversation(id: Long)` method
   - Add `renameConversation(id: Long, title: String)` method
@@ -167,7 +167,7 @@ The conversation ID is consumed but never passed to ChatScreen. ChatScreen creat
 
 ### Task 2: Fix conversation ID passing in navigation
 **Files to modify:**
-- **MODIFY:** `app/src/main/java/com/localassistant/ui/navigation/MainNavigation.kt`
+- **MODIFY:** `app/src/main/java/com/localyze/ui/navigation/MainNavigation.kt`
   - Change chat route from `"chat"` to `"chat?conversationId={conversationId}"`
   - When navigating from Capabilities, pass the created conversation ID
   - In ChatScreen composable, extract conversationId from SavedStateHandle
@@ -175,12 +175,12 @@ The conversation ID is consumed but never passed to ChatScreen. ChatScreen creat
 
 ### Task 3: Add DB diagnostic tool for verification
 **Files to modify:**
-- **MODIFY:** `app/src/main/java/com/localassistant/ui/viewmodels/ChatViewModel.kt`
+- **MODIFY:** `app/src/main/java/com/localyze/ui/viewmodels/ChatViewModel.kt`
   - Add `dumpConversationsToLog()` that queries all conversations and logs them
   - Add `dumpMessagesToLog(conversationId)` that queries all messages and logs them
-- **MODIFY:** `app/src/main/java/com/localassistant/MainActivity.kt`
-  - Add a BroadcastReceiver for `com.localassistant.DUMP_DB` that calls the dump methods
-  - This allows `adb shell am broadcast -a com.localassistant.DUMP_DB` to verify DB contents
+- **MODIFY:** `app/src/main/java/com/localyze/MainActivity.kt`
+  - Add a BroadcastReceiver for `com.localyze.DUMP_DB` that calls the dump methods
+  - This allows `adb shell am broadcast -a com.localyze.DUMP_DB` to verify DB contents
 
 ### Task 4: Test 20-question chat flow
 After Tasks 1-3 are done:
@@ -194,8 +194,8 @@ After Tasks 1-3 are done:
 8. Kill and restart app, verify conversations persist
 
 ### Task 5: Test additional features
-- Voice input (mic button → record → send audio)
-- Image input (attach button → pick image → describe)
+- Voice input (mic button â†’ record â†’ send audio)
+- Image input (attach button â†’ pick image â†’ describe)
 - Thinking mode toggle
 - Capability mode switching (through Capabilities screen)
 - Stop generation mid-stream
@@ -206,37 +206,37 @@ After Tasks 1-3 are done:
 ## ARCHITECTURE OVERVIEW
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         UI Layer                                 │
-│  ChatScreen.kt  │  CapabilitiesScreen.kt  │  SettingsScreen.kt  │
-│       ↓                  ↓                      ↓               │
-│  ChatViewModel   │  CapabilitiesViewModel    │  SettingsViewModel│
-└──────────────────────────────────────────────────────────────────┘
-                              ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                       Domain Layer                                │
-│  SendMessageUseCase │ RecordAudioUseCase │ ManageMemoryUseCase   │
-│  ExecuteToolUseCase │ ContextWindowManager │ SystemPromptBuilder  │
-└──────────────────────────────────────────────────────────────────┘
-                              ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                        Data Layer                                  │
-│  ChatRepository ← ChatRepositoryImpl                             │
-│  ModelRepository ← ModelDownloadService                           │
-│  MemoryRepository │ TaskRepository                                │
-│       ↓                                                            │
-│  Room DB: AppDatabase → ConversationDao, MessageDao, MemoryDao,    │
-│           TaskDao                                                  │
-│  Entities: Conversation, Message, Memory, Task                    │
-└──────────────────────────────────────────────────────────────────┘
-                              ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                        AI Engine Layer                             │
-│  GemmaInferenceEngine (real)  │  MockGemmaEngine (dev/fallback)   │
-│  Uses: LiteRT-LM 0.10.0 (com.google.ai.edge:litertlm)            │
-│  Backend: GPU (working) │ NPU (SIGABRT — upstream bug)            │
-│  Model: gemma-4-E4B-it.litertlm (3.65GB) on GPU                  │
-└──────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                         UI Layer                                 â”‚
+â”‚  ChatScreen.kt  â”‚  CapabilitiesScreen.kt  â”‚  SettingsScreen.kt  â”‚
+â”‚       â†“                  â†“                      â†“               â”‚
+â”‚  ChatViewModel   â”‚  CapabilitiesViewModel    â”‚  SettingsViewModelâ”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â†“
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                       Domain Layer                                â”‚
+â”‚  SendMessageUseCase â”‚ RecordAudioUseCase â”‚ ManageMemoryUseCase   â”‚
+â”‚  ExecuteToolUseCase â”‚ ContextWindowManager â”‚ SystemPromptBuilder  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â†“
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        Data Layer                                  â”‚
+â”‚  ChatRepository â† ChatRepositoryImpl                             â”‚
+â”‚  ModelRepository â† ModelDownloadService                           â”‚
+â”‚  MemoryRepository â”‚ TaskRepository                                â”‚
+â”‚       â†“                                                            â”‚
+â”‚  Room DB: AppDatabase â†’ ConversationDao, MessageDao, MemoryDao,    â”‚
+â”‚           TaskDao                                                  â”‚
+â”‚  Entities: Conversation, Message, Memory, Task                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              â†“
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                        AI Engine Layer                             â”‚
+â”‚  GemmaInferenceEngine (real)  â”‚  MockGemmaEngine (dev/fallback)   â”‚
+â”‚  Uses: LiteRT-LM 0.10.0 (com.google.ai.edge:litertlm)            â”‚
+â”‚  Backend: GPU (working) â”‚ NPU (SIGABRT â€” upstream bug)            â”‚
+â”‚  Model: gemma-4-E4B-it.litertlm (3.65GB) on GPU                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Key Architecture Decisions (matching AI Edge Gallery)
@@ -252,31 +252,31 @@ After Tasks 1-3 are done:
 
 | File | Purpose | Status |
 |---|---|---|
-| `app/src/main/java/com/localassistant/ai/GemmaInferenceEngine.kt` | Real inference engine (Gallery pattern) | ✅ Rewritten, working |
-| `app/src/main/java/com/localassistant/ai/MockGemmaEngine.kt` | Mock engine for dev | ✅ Unchanged |
-| `app/src/main/java/com/localassistant/domain/usecases/SendMessageUseCase.kt` | Message send + tool loop | ✅ Rewritten |
-| `app/src/main/java/com/localassistant/ui/viewmodels/ChatViewModel.kt` | Chat state management | ⚠️ Needs conversation list support |
-| `app/src/main/java/com/localassistant/ui/screens/ChatScreen.kt` | Chat UI composable | ⚠️ Needs drawer + menu button |
-| `app/src/main/java/com/localassistant/ui/navigation/MainNavigation.kt` | Nav graph | ⚠️ Needs conversation ID passing |
-| `app/src/main/java/com/localassistant/data/repository/ChatRepositoryImpl.kt` | Room CRUD | ✅ Full CRUD exists |
-| `app/src/main/java/com/localassistant/data/local/ConversationDao.kt` | Room DAO | ✅ All queries exist |
-| `app/src/main/java/com/localassistant/data/local/MessageDao.kt` | Room DAO | ✅ All queries exist |
-| `app/src/main/java/com/localassistant/domain/models/Conversation.kt` | Room entity | ✅ Complete |
-| `app/src/main/java/com/localassistant/domain/models/Message.kt` | Room entity | ✅ Complete |
-| `app/src/main/java/com/localassistant/data/local/AppDatabase.kt` | Room DB | ✅ Working |
-| `app/src/main/java/com/localassistant/data/repository/ModelRepository.kt` | Model download/find | ✅ Updated for generic model |
-| `app/src/main/java/com/localassistant/ui/screens/CapabilitiesScreen.kt` | Capability picker grid | ✅ Working |
-| `app/src/main/java/com/localassistant/ui/viewmodels/CapabilitiesViewModel.kt` | Creates conversation on capability select | ⚠️ ID not passed to ChatScreen |
-| `app/src/main/java/com/localassistant/ui/components/` | UI components dir | Needs ConversationDrawer.kt |
-| `app/build.gradle.kts` | Build config | ✅ Updated deps |
-| `build.gradle.kts` | Root build config | ✅ Updated |
+| `app/src/main/java/com/localyze/ai/GemmaInferenceEngine.kt` | Real inference engine (Gallery pattern) | âœ… Rewritten, working |
+| `app/src/main/java/com/localyze/ai/MockGemmaEngine.kt` | Mock engine for dev | âœ… Unchanged |
+| `app/src/main/java/com/localyze/domain/usecases/SendMessageUseCase.kt` | Message send + tool loop | âœ… Rewritten |
+| `app/src/main/java/com/localyze/ui/viewmodels/ChatViewModel.kt` | Chat state management | âš ï¸ Needs conversation list support |
+| `app/src/main/java/com/localyze/ui/screens/ChatScreen.kt` | Chat UI composable | âš ï¸ Needs drawer + menu button |
+| `app/src/main/java/com/localyze/ui/navigation/MainNavigation.kt` | Nav graph | âš ï¸ Needs conversation ID passing |
+| `app/src/main/java/com/localyze/data/repository/ChatRepositoryImpl.kt` | Room CRUD | âœ… Full CRUD exists |
+| `app/src/main/java/com/localyze/data/local/ConversationDao.kt` | Room DAO | âœ… All queries exist |
+| `app/src/main/java/com/localyze/data/local/MessageDao.kt` | Room DAO | âœ… All queries exist |
+| `app/src/main/java/com/localyze/domain/models/Conversation.kt` | Room entity | âœ… Complete |
+| `app/src/main/java/com/localyze/domain/models/Message.kt` | Room entity | âœ… Complete |
+| `app/src/main/java/com/localyze/data/local/AppDatabase.kt` | Room DB | âœ… Working |
+| `app/src/main/java/com/localyze/data/repository/ModelRepository.kt` | Model download/find | âœ… Updated for generic model |
+| `app/src/main/java/com/localyze/ui/screens/CapabilitiesScreen.kt` | Capability picker grid | âœ… Working |
+| `app/src/main/java/com/localyze/ui/viewmodels/CapabilitiesViewModel.kt` | Creates conversation on capability select | âš ï¸ ID not passed to ChatScreen |
+| `app/src/main/java/com/localyze/ui/components/` | UI components dir | Needs ConversationDrawer.kt |
+| `app/build.gradle.kts` | Build config | âœ… Updated deps |
+| `build.gradle.kts` | Root build config | âœ… Updated |
 
 ---
 
 ## DEVICE-SPECIFIC NOTES
 
 - **ADB on Windows Git Bash:** Always prefix paths with `MSYS_NO_PATHCONV=1`, e.g.:  
-  `MSYS_NO_PATHCONV=1 adb shell "run-as com.localassistant ls databases/"`  
+  `MSYS_NO_PATHCONV=1 adb shell "run-as com.localyze ls databases/"`  
   Without this, Git Bash converts `/data/` paths to Windows paths.
 - **Binary file transfer via ADB:** `adb shell "run-as ... cat database_file"` truncates on first null byte. Use `base64` encoding or `adb backup` instead.
 - **Input via ADB:** `input text` works for Compose TextFields after tapping to focus. `input keyevent KEYCODE_*` for individual characters works but mapping is tricky (KEYCODE_H sends 'h' lowercase).
@@ -288,17 +288,17 @@ After Tasks 1-3 are done:
 ## MODEL FILES ON DEVICE
 
 ```
-/data/user/0/com.localassistant/files/models/
-├── gemma-4-E4B-it.litertlm                     (3.65GB — generic, working on GPU)
-├── gemma-4-E4B-it.litertlm.audio_adapter.xnnpack_cache  (15MB)
-├── gemma-4-E4B-it.litertlm.audio_encoder.xnnpack_cache  (91MB)
-├── gemma-4-E4B-it.litertlm.vision_adapter.xnnpack_cache  (8MB)
-├── gemma-4-E4B-it.litertlm_*.bin                (152MB — weight cache)
-└── gemma-4-E4B-it.litertlm_mldrift_program_cache.bin     (21MB)
+/data/user/0/com.localyze/files/models/
+â”œâ”€â”€ gemma-4-E4B-it.litertlm                     (3.65GB â€” generic, working on GPU)
+â”œâ”€â”€ gemma-4-E4B-it.litertlm.audio_adapter.xnnpack_cache  (15MB)
+â”œâ”€â”€ gemma-4-E4B-it.litertlm.audio_encoder.xnnpack_cache  (91MB)
+â”œâ”€â”€ gemma-4-E4B-it.litertlm.vision_adapter.xnnpack_cache  (8MB)
+â”œâ”€â”€ gemma-4-E4B-it.litertlm_*.bin                (152MB â€” weight cache)
+â””â”€â”€ gemma-4-E4B-it.litertlm_mldrift_program_cache.bin     (21MB)
 ```
 
 **NPU model (NOT on device, on PC only):**
-- `gemma-4-E2B-it_qualcomm_qcs8275.litertlm` (3.29GB) — requires NPU backend, cannot run on GPU
+- `gemma-4-E2B-it_qualcomm_qcs8275.litertlm` (3.29GB) â€” requires NPU backend, cannot run on GPU
 
 ---
 
@@ -351,17 +351,17 @@ cd /c/Users/avina/Downloads/ai7
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 # Launch
-adb shell am start -n com.localassistant/.MainActivity
+adb shell am start -n com.localyze/.MainActivity
 
 # View logs
-adb logcat -d --pid=$(adb shell pidof com.localassistant) | grep -E "GemmaInference|ChatViewModel|MainNavigation"
+adb logcat -d --pid=$(adb shell pidof com.localyze) | grep -E "GemmaInference|ChatViewModel|MainNavigation"
 
 # Force stop
-adb shell am force-stop com.localassistant
+adb shell am force-stop com.localyze
 
 # Check DB files
-MSYS_NO_PATHCONV=1 adb shell "run-as com.localassistant ls -la databases/"
+MSYS_NO_PATHCONV=1 adb shell "run-as com.localyze ls -la databases/"
 
 # Check model files
-MSYS_NO_PATHCONV=1 adb shell "run-as com.localassistant ls -la files/models/"
+MSYS_NO_PATHCONV=1 adb shell "run-as com.localyze ls -la files/models/"
 ```

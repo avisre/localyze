@@ -1,8 +1,8 @@
-# Localyze Feature Verification and Roadmap
+﻿# Localyze Feature Verification and Roadmap
 
 Last updated: 2026-04-21
 
-Localyze is the only user-facing brand name for this app. Previous visible names have been replaced in app strings, notifications, onboarding, chat, settings, exports, and the launcher assets. Internal package names such as `com.localassistant` are still unchanged because changing the Android package ID is a separate release migration decision.
+Localyze is the only brand name for this app. The app id, namespace, source package, app class, theme name, notifications, onboarding, chat, settings, exports, and launcher assets now use Localyze branding.
 
 ## Verification Baseline
 
@@ -13,7 +13,7 @@ Device tested:
 | Device | OnePlus NE2211 |
 | Android | 16, API 36 |
 | Serial | a5523839 |
-| App id | com.localassistant |
+| App id | com.localyze |
 | App version | 1.0, versionCode 1 |
 | Min SDK | 28 |
 | Target SDK | 35 |
@@ -26,15 +26,15 @@ Automated checks:
 | Unit tests | PASS | `./gradlew.bat testDebugUnitTest` |
 | Connected device instrumentation | PASS | `./gradlew.bat connectedDebugAndroidTest`, 61 tests on NE2211 |
 | Install on phone | PASS | `adb install -r app/build/outputs/apk/debug/app-debug.apk` |
-| Cold launch on phone | PASS | `adb shell am start -W -n com.localassistant/.MainActivity`, status OK, total time 799 ms |
+| Cold launch on phone | PASS | `adb shell am start -W -n com.localyze/.MainActivity`, status OK, total time 813 ms |
 | UI text dump | BLOCKED | Phone is PIN locked, so `uiautomator` only returned the keyguard hierarchy |
 
 ## Current Feature Status
 
 | Feature | Status | What is verified | Release note |
 | --- | --- | --- | --- |
-| Localyze branding | PASS | Visible string scan found no previous public brand names in app source | Internal package/class names remain stable for Android compatibility |
-| App logo | PASS | Launcher foreground, launcher background, notification icon, and in-app mark use the green Localyze-style mark | Exact PNG import can be added later if the vector approximation is not enough |
+| Localyze branding | PASS | Visible string scan found no previous public brand names in app source | Package id is now `com.localyze` |
+| App logo | PASS | The supplied Localyze PNG is included as `localyze_logo_full.png`; launcher/header use a cropped mark from the same image | The old vector approximation is no longer the primary in-app mark |
 | One model only | PASS | `ModelRepository` exposes only Gemma 4 E4B for production download/load paths | This keeps the MVP simple and aligned with the privacy pitch |
 | App install and launch | PASS | Debug APK installs and cold launches on the connected OnePlus | Full visual UI verification needs the phone unlocked |
 | Chat persistence | PASS | Instrumentation tests create conversations, save messages, delete messages, update titles, and verify conversation isolation | This supports ChatGPT/Claude-style saved chats at the data layer |
@@ -112,7 +112,7 @@ Important release status:
 
 Console checklist:
 
-1. Create or open the Localyze app in Play Console with package `com.localassistant`.
+1. Create or open the Localyze app in Play Console with package `com.localyze`.
 2. Add `testers-community@googlegroups.com` to the closed testing track testers.
 3. Upload the signed release AAB to the closed testing track.
 4. Create subscription `localyze_premium_annual` with a one-year base plan at USD 79.

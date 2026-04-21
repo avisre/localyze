@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-"""Ask the LocalAssistant model 10 questions and capture screenshots of responses."""
+﻿#!/usr/bin/env python3
+"""Ask the Localyze model 10 questions and capture screenshots of responses."""
 
 import subprocess
 import time
