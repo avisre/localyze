@@ -1,0 +1,47 @@
+# Gradle / Android build output
+.gradle/
+.kotlin/
+**/build/
+**/.cxx/
+**/captures/
+**/.externalNativeBuild/
+*.apk
+*.aab
+*.ap_
+
+# Local IDE and machine state
+.idea/
+.vscode/
+.playwright-mcp/
+local.properties
+
+# Signing and secrets
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+
+# Large local model artifacts
+*.litertlm
+*.gguf
+*.tflite
+*.onnx
+*.safetensors
+*.bin
+
+# Logs and local diagnostics
+*.log
+logs/
+/app_logs.txt
+
+# Device/emulator databases and dumps
+*.sqlite
+*.db
+*.raw
+device-local-assistant-db*
+
+# Generated screenshots and UI dumps kept in the workspace during testing
+/screenshots/
+/*.png
+/*.xml
