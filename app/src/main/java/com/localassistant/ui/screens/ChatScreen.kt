@@ -23,8 +23,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,16 +46,27 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -105,7 +119,10 @@ import com.localassistant.ui.components.AssistantMessageBubble
 import com.localassistant.ui.components.AudioRecorderButton
 import com.localassistant.ui.components.AudioWaveform
 import com.localassistant.ui.components.HandleToolConfirmation
-import com.localassistant.ui.components.RobotMascot
+import com.localassistant.ui.components.ReferenceHeader
+import com.localassistant.ui.components.ReferenceQuickActionCard
+import com.localassistant.ui.components.ReferenceSectionTitle
+import com.localassistant.ui.components.StatusChip
 import com.localassistant.ui.components.ThinkingBubble
 import com.localassistant.ui.components.ToolIndicator
 import com.localassistant.ui.components.UserMessageBubble
@@ -136,6 +153,7 @@ import java.util.Locale
 fun ChatScreen(
     onNewConversation: () -> Unit = {},
     onOpenDrawer: () -> Unit = {},
+    onOpenAttachments: () -> Unit = {},
     sharedText: String? = null,
     sharedImageUris: List<String> = emptyList(),
     onSharedContentConsumed: () -> Unit = {},
@@ -364,16 +382,7 @@ fun ChatScreen(
     var actionMenuMessageIndex by remember { mutableStateOf(-1) }
     var showEditMessageDialog by remember { mutableStateOf(false) }
 
-    // Mascot size animation
     val hasMessages = uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()
-    val mascotSize by animateDpAsState(
-        targetValue = if (hasMessages) 72.dp else 132.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "mascot_size"
-    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -407,80 +416,79 @@ fun ChatScreen(
                     }
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Open conversations",
-                            tint = OnBackground
-                        )
+                ReferenceHeader(
+                    title = "Localyze",
+                    subtitle = if (uiState.isStreaming || uiState.isThinking) "On-device thinking" else "On-device",
+                    actions = {
+                        IconButton(onClick = { /* Privacy status is shown in the chips below. */ }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Security,
+                                contentDescription = "Privacy status",
+                                tint = TextSecondary
+                            )
+                        }
+                        IconButton(onClick = onOpenDrawer) {
+                            Icon(
+                                imageVector = Icons.Outlined.History,
+                                contentDescription = "Open conversations",
+                                tint = TextSecondary
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                viewModel.createNewConversation()
+                                onNewConversation()
+                            },
+                            enabled = !uiState.isStreaming
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = "New conversation",
+                                tint = if (uiState.isStreaming) TextSecondary else OnBackground
+                            )
+                        }
                     }
+                )
 
-                    Text(
-                        text = uiState.currentConversationTitle,
-                        color = OnBackground,
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    IconButton(
-                        onClick = {
+                // Message list
+                if (!hasMessages) {
+                    ChatHomeContent(
+                        inputText = inputText,
+                        onInputTextChange = { inputText = it },
+                        isStreaming = uiState.isStreaming,
+                        isInputValid = isInputValid,
+                        recordingState = recordingState,
+                        allowWebSearch = uiState.allowWebSearch,
+                        voiceAmplitudes = voiceAmplitudes,
+                        onAttachImage = { imagePickerLauncher.launch("image/*") },
+                        onStartRecording = {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                                == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                viewModel.startAudioRecording()
+                            } else {
+                                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                        },
+                        onStopRecording = { viewModel.stopAudioRecording() },
+                        onCancelRecording = { viewModel.cancelAudioRecording() },
+                        onSend = {
+                            if (inputText.isNotBlank()) {
+                                viewModel.sendMessage(inputText.trim())
+                                inputText = ""
+                            }
+                        },
+                        onStopGeneration = { viewModel.stopGeneration() },
+                        onPrompt = { prompt -> viewModel.sendMessage(prompt) },
+                        onNewChat = {
                             viewModel.createNewConversation()
                             onNewConversation()
                         },
-                        enabled = !uiState.isStreaming
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "New conversation",
-                            tint = if (uiState.isStreaming) TextSecondary else OnBackground
-                        )
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (hasMessages) Modifier.height(16.dp) else Modifier.weight(1f)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    ) {
-                        if (!hasMessages) {
-                            RobotMascot(
-                                isThinking = uiState.isStreaming || uiState.isThinking,
-                                modifier = Modifier.size(mascotSize)
-                            )
-                        }
-                        if (!hasMessages && !uiState.isStreaming) {
-                            Spacer(modifier = Modifier.height(18.dp))
-                            Text(
-                                text = "What can I help with?",
-                                color = OnBackground,
-                                style = MaterialTheme.typography.headlineSmall,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-
-                // Message list
-                if (hasMessages) {
+                        onOpenAttachments = onOpenAttachments,
+                        onOpenConversations = onOpenDrawer,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -624,38 +632,35 @@ fun ChatScreen(
                     }
                 }
 
-                // Bottom input bar
-                if (!uiState.allowWebSearch) {
-                    WebSearchNotice(onEnable = { viewModel.enableWebSearch() })
+                if (hasMessages) {
+                    ChatComposer(
+                        inputText = inputText,
+                        onInputTextChange = { inputText = it },
+                        isStreaming = uiState.isStreaming,
+                        isInputValid = isInputValid,
+                        recordingState = recordingState,
+                        voiceAmplitudes = voiceAmplitudes,
+                        onAttachImage = { imagePickerLauncher.launch("image/*") },
+                        onStartRecording = {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                                == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                viewModel.startAudioRecording()
+                            } else {
+                                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                        },
+                        onStopRecording = { viewModel.stopAudioRecording() },
+                        onCancelRecording = { viewModel.cancelAudioRecording() },
+                        onSend = {
+                            if (inputText.isNotBlank()) {
+                                viewModel.sendMessage(inputText.trim())
+                                inputText = ""
+                            }
+                        },
+                        onStopGeneration = { viewModel.stopGeneration() }
+                    )
                 }
-
-                ChatComposer(
-                    inputText = inputText,
-                    onInputTextChange = { inputText = it },
-                    isStreaming = uiState.isStreaming,
-                    isInputValid = isInputValid,
-                    recordingState = recordingState,
-                    voiceAmplitudes = voiceAmplitudes,
-                    onAttachImage = { imagePickerLauncher.launch("image/*") },
-                    onStartRecording = {
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                            == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            viewModel.startAudioRecording()
-                        } else {
-                            audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                        }
-                    },
-                    onStopRecording = { viewModel.stopAudioRecording() },
-                    onCancelRecording = { viewModel.cancelAudioRecording() },
-                    onSend = {
-                        if (inputText.isNotBlank()) {
-                            viewModel.sendMessage(inputText.trim())
-                            inputText = ""
-                        }
-                    },
-                    onStopGeneration = { viewModel.stopGeneration() }
-                )
             }
 
         }
@@ -805,6 +810,375 @@ private fun WebSearchNotice(
 }
 
 @Composable
+private fun ChatHomeContent(
+    inputText: String,
+    onInputTextChange: (String) -> Unit,
+    isStreaming: Boolean,
+    isInputValid: Boolean,
+    recordingState: AudioRecordingState,
+    allowWebSearch: Boolean,
+    voiceAmplitudes: List<Float>,
+    onAttachImage: () -> Unit,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onCancelRecording: () -> Unit,
+    onSend: () -> Unit,
+    onStopGeneration: () -> Unit,
+    onPrompt: (String) -> Unit,
+    onNewChat: () -> Unit,
+    onOpenAttachments: () -> Unit,
+    onOpenConversations: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 18.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StatusChip(text = "On-device", selected = true)
+            StatusChip(text = "Gemma 4 E4B")
+            StatusChip(text = "Private by default")
+            StatusChip(text = "No cloud chat")
+        }
+
+        PrivacyReadyCard(modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp))
+
+        GreetingBlock(modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp))
+
+        HomePromptCard(
+            inputText = inputText,
+            onInputTextChange = onInputTextChange,
+            isStreaming = isStreaming,
+            isInputValid = isInputValid,
+            recordingState = recordingState,
+            voiceAmplitudes = voiceAmplitudes,
+            onAttachImage = onAttachImage,
+            onStartRecording = onStartRecording,
+            onStopRecording = onStopRecording,
+            onCancelRecording = onCancelRecording,
+            onSend = onSend,
+            onStopGeneration = onStopGeneration,
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+        )
+
+        ReferenceSectionTitle(title = "Quick actions")
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ReferenceQuickActionCard(
+                    icon = Icons.Outlined.History,
+                    title = "New chat",
+                    modifier = Modifier.weight(1f),
+                    onClick = onNewChat
+                )
+                ReferenceQuickActionCard(
+                    icon = Icons.Outlined.Description,
+                    title = "Add text file",
+                    modifier = Modifier.weight(1f),
+                    onClick = onOpenAttachments
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ReferenceQuickActionCard(
+                    icon = Icons.Outlined.EditNote,
+                    title = "What do you remember?",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onPrompt("What do you remember about me?") }
+                )
+                ReferenceQuickActionCard(
+                    icon = Icons.Outlined.Security,
+                    title = "View memory",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onPrompt("Show me what is saved in memory and how I can manage it.") }
+                )
+            }
+        }
+
+        ReferenceSectionTitle(
+            title = "Recent conversations",
+            trailing = "See all",
+            onTrailingClick = onOpenConversations,
+            modifier = Modifier.padding(top = 10.dp)
+        )
+        Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+            RecentConversationPreviewRow(
+                icon = Icons.Outlined.StarBorder,
+                title = "Start a focused chat",
+                subtitle = "Ask locally with Gemma",
+                onClick = { onPrompt("Let's start a focused chat.") }
+            )
+            RecentConversationPreviewRow(
+                icon = Icons.Outlined.Image,
+                title = "Analyze an image",
+                subtitle = "Attach a picture and ask",
+                onClick = onAttachImage
+            )
+            RecentConversationPreviewRow(
+                icon = Icons.Outlined.History,
+                title = "Open saved chats",
+                subtitle = "Browse, resume, archive",
+                onClick = onOpenConversations
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrivacyReadyCard(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = Primary.copy(alpha = 0.08f),
+        border = BorderStroke(1.dp, Primary.copy(alpha = 0.16f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "AI runs on your device",
+                    color = OnBackground,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "Gemma 4 E4B is loaded and ready.",
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Surface(
+                modifier = Modifier.size(30.dp),
+                shape = CircleShape,
+                color = Primary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Outlined.Security,
+                        contentDescription = null,
+                        tint = OnPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GreetingBlock(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "Hi! I'm Localyze.",
+            color = OnBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+        )
+        Text(
+            text = "How can I help you today?",
+            color = TextSecondary,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 6.dp)
+        )
+    }
+}
+
+@Composable
+private fun HomePromptCard(
+    inputText: String,
+    onInputTextChange: (String) -> Unit,
+    isStreaming: Boolean,
+    isInputValid: Boolean,
+    recordingState: AudioRecordingState,
+    voiceAmplitudes: List<Float>,
+    onAttachImage: () -> Unit,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onCancelRecording: () -> Unit,
+    onSend: () -> Unit,
+    onStopGeneration: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val showVoiceStrip = recordingState is AudioRecordingState.Recording ||
+            recordingState is AudioRecordingState.Ready ||
+            recordingState is AudioRecordingState.Error
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 142.dp),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, SurfaceVariant),
+        shadowElevation = 0.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            AnimatedVisibility(
+                visible = showVoiceStrip,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                VoiceInputStrip(
+                    recordingState = recordingState,
+                    amplitudes = voiceAmplitudes,
+                    onCancel = onCancelRecording,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            TextField(
+                value = inputText,
+                onValueChange = onInputTextChange,
+                placeholder = {
+                    Text(
+                        text = "Message Localyze...",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 76.dp, max = 144.dp)
+                    .testTag("chatInput"),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = OnBackground),
+                minLines = 2,
+                maxLines = 6,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    cursorColor = Primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                enabled = !isStreaming
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onAttachImage,
+                    enabled = !isStreaming,
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AttachFile,
+                        contentDescription = "Attach image",
+                        tint = if (isStreaming) TextSecondary else TextSecondary
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                AudioRecorderButton(
+                    recordingState = recordingState,
+                    onStartRecording = onStartRecording,
+                    onStopRecording = onStopRecording,
+                    onCancelRecording = onCancelRecording
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                FloatingActionButton(
+                    onClick = {
+                        if (isStreaming) {
+                            onStopGeneration()
+                        } else if (isInputValid) {
+                            onSend()
+                        }
+                    },
+                    modifier = Modifier.size(44.dp),
+                    containerColor = if (isStreaming || isInputValid) Primary else SurfaceVariant,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = if (isStreaming) Icons.Filled.Stop else Icons.AutoMirrored.Filled.Send,
+                        contentDescription = if (isStreaming) "Stop generation" else "Send message",
+                        tint = if (isStreaming || isInputValid) OnPrimary else TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentConversationPreviewRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        color = Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(38.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = Color.White,
+                border = BorderStroke(1.dp, SurfaceVariant)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = OnBackground,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = subtitle,
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = TextSecondary,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
+}
+
+@Composable
 private fun ChatComposer(
     inputText: String,
     onInputTextChange: (String) -> Unit,
@@ -878,7 +1252,7 @@ private fun ChatComposer(
                         onValueChange = onInputTextChange,
                         placeholder = {
                             Text(
-                                text = "Ask anything...",
+                                text = "Message Localyze...",
                                 color = TextSecondary,
                                 style = MaterialTheme.typography.bodyLarge
                             )

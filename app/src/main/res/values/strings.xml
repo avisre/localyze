@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LocalAssistant</string>
+    <string name="app_name">Localyze</string>
     <string name="chat_label">Chat</string>
-    <string name="capabilities_label">Capabilities</string>
+    <string name="capabilities_label">Library</string>
     <string name="settings_label">Settings</string>
-    <string name="onboarding_title">Welcome to LocalAssistant</string>
+    <string name="onboarding_title">Welcome to Localyze</string>
     <string name="onboarding_subtitle">Your private, on-device AI assistant</string>
     <string name="new_chat">New Chat</string>
     <string name="send_message">Send message</string>
-    <string name="type_a_message">Type a message…</string>
+    <string name="type_a_message">Message Localyze...</string>
     <string name="no_conversations">No conversations yet</string>
     <string name="delete_conversation">Delete conversation</string>
     <string name="pin_conversation">Pin conversation</string>
-    <string name="model_loading">Loading AI model…</string>
+    <string name="model_loading">Loading AI model...</string>
     <string name="model_not_loaded">AI model not loaded</string>
     <string name="permission_required">Permission required</string>
     <string name="camera_permission_rationale">Camera access is needed for visual AI features</string>

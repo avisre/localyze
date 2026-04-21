@@ -134,7 +134,7 @@ class ModelLoadingService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Local Assistant")
+            .setContentTitle("Localyze")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)

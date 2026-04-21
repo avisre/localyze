@@ -69,7 +69,7 @@ class ModelDownloadService : Service() {
 
     private fun createNotification(contentText: String): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Local Assistant")
+            .setContentTitle("Localyze")
             .setContentText(contentText)
             .setSmallIcon(com.localassistant.R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)

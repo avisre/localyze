@@ -185,24 +185,38 @@ class TestingGuideInstrumentationTest {
         val modelsDir = File(context.filesDir, "models")
         val tempFile = File(modelsDir, "model_download.tmp")
         tempFile.delete()
+        context.getSharedPreferences("model_download_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
 
         assertFalse("Should not be able to resume without temp file",
             modelRepository.canResumeDownload())
     }
 
     @Test
-    fun test3b_partialDownload_canResume() = runBlocking {
-        // Create a partial temp file
-        val modelsDir = File(context.filesDir, "models")
-        modelsDir.mkdirs()
-        val tempFile = File(modelsDir, "model_download.tmp")
-        tempFile.writeBytes(ByteArray(1000)) // Simulate partial download
+    fun test3b_partialDownload_canResume() {
+        runBlocking {
+            // Create a partial temp file
+            val modelsDir = File(context.filesDir, "models")
+            modelsDir.mkdirs()
+            val tempFile = File(modelsDir, "model_download.tmp")
+            tempFile.writeBytes(ByteArray(1000)) // Simulate partial download
+            val prefs = context.getSharedPreferences("model_download_prefs", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString("download_url", ModelRepository.MODEL_URL)
+                .putLong("downloaded_bytes", tempFile.length())
+                .putLong("total_bytes", ModelRepository.MODEL_SIZE_BYTES)
+                .commit()
 
-        assertTrue("Should be able to resume with temp file",
-            modelRepository.canResumeDownload())
-
-        // Clean up
-        tempFile.delete()
+            try {
+                assertTrue("Should be able to resume with temp file and saved metadata",
+                    modelRepository.canResumeDownload())
+            } finally {
+                tempFile.delete()
+                prefs.edit().clear().commit()
+            }
+        }
     }
 
     @Test

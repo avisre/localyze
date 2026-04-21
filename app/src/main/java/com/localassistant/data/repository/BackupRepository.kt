@@ -65,7 +65,7 @@ class BackupRepository @Inject constructor(
     suspend fun importEncrypted(encodedBackup: String, passphrase: String): Int {
         require(passphrase.length >= 6) { "Use the same passphrase used for export." }
         val trimmed = encodedBackup.trim()
-        require(trimmed.startsWith(PREFIX)) { "This does not look like a Local Assistant backup." }
+        require(trimmed.startsWith(PREFIX)) { "This does not look like a Localyze backup." }
         val envelopeText = String(Base64.decode(trimmed.removePrefix(PREFIX), Base64.NO_WRAP), Charsets.UTF_8)
         val envelope = JSONObject(envelopeText)
         val plain = decrypt(

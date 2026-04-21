@@ -176,7 +176,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
 
             // Title
             Text(
-                text = "Local Assistant",
+                text = "Localyze",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp

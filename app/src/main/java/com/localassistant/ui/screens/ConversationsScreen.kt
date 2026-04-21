@@ -18,8 +18,13 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,10 +35,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.localassistant.domain.models.Conversation
+import com.localassistant.ui.components.ReferenceHeader
 import com.localassistant.ui.theme.*
 import com.localassistant.ui.viewmodels.ConversationFilter
 import com.localassistant.ui.viewmodels.ConversationsViewModel
@@ -44,6 +51,7 @@ import java.util.*
 @Composable
 fun ConversationsScreen(
     onBack: () -> Unit,
+    showBack: Boolean = true,
     onNavigateToChat: (Long) -> Unit,
     onCreateNewChat: () -> Unit,
     viewModel: ConversationsViewModel = hiltViewModel()
@@ -65,17 +73,11 @@ fun ConversationsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Conversations",
-                        fontFamily = Nunito,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = OnBackground
-                    )
-                },
-                navigationIcon = {
+            ReferenceHeader(
+                title = "Library",
+                subtitle = null,
+                actions = {
+                    if (showBack) {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -83,43 +85,50 @@ fun ConversationsScreen(
                             tint = OnBackground
                         )
                     }
-                },
-                actions = {
+                    }
+                    IconButton(onClick = { viewModel.updateSearchQuery(uiState.searchQuery) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search conversations",
+                            tint = TextSecondary
+                        )
+                    }
                     if (uiState.conversations.isNotEmpty()) {
-                        TextButton(
+                        IconButton(
                             onClick = {
                                 if (selectedCount > 0) viewModel.clearSelection() else viewModel.showClearAllConfirmDialog()
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
+                            }
                         ) {
-                            Text(
-                                text = if (selectedCount > 0) "Cancel" else "Clear All",
-                                fontFamily = Nunito,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = if (selectedCount > 0) "Cancel selection" else "Library actions",
+                                tint = TextSecondary
                             )
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Background
-                )
+                }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onCreateNewChat,
                 containerColor = Primary,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "New conversation",
-                    tint = OnPrimary
-                )
-            }
+                shape = RoundedCornerShape(16.dp),
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = OnPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        text = "New chat",
+                        color = OnPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Background
@@ -131,6 +140,13 @@ fun ConversationsScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Search bar
+            LibrarySummaryRow(
+                conversations = uiState.conversations.size,
+                pinned = uiState.conversations.count { it.isPinned },
+                archived = uiState.conversations.count { it.isArchived },
+                modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
+            )
+
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
@@ -161,6 +177,13 @@ fun ConversationsScreen(
                                 tint = TextSecondary
                             )
                         }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.FilterList,
+                            contentDescription = "Filter",
+                            tint = TextSecondary,
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
                     }
                 },
                 singleLine = true,
@@ -183,16 +206,17 @@ fun ConversationsScreen(
                 onFolderChange = { viewModel.updateFolderFilter(it) }
             )
 
-            // Conversation count
             val totalCount = pinnedConversations.size + unpinnedConversations.size
-            Text(
-                text = if (selectedCount > 0) "$selectedCount selected" else "$totalCount conversations",
-                fontFamily = Nunito,
-                fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
-                color = TextSecondary,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            if (selectedCount > 0) {
+                Text(
+                    text = "$selectedCount selected",
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
             if (selectedCount > 0) {
                 BulkActionRow(
@@ -394,6 +418,88 @@ fun ConversationsScreen(
 }
 
 @Composable
+private fun LibrarySummaryRow(
+    conversations: Int,
+    pinned: Int,
+    archived: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LibrarySummaryCard(
+            icon = Icons.Outlined.ChatBubbleOutline,
+            title = "Conversations",
+            value = conversations.toString(),
+            selected = true,
+            modifier = Modifier.weight(1f)
+        )
+        LibrarySummaryCard(
+            icon = Icons.Outlined.StarBorder,
+            title = "Pinned",
+            value = pinned.toString(),
+            modifier = Modifier.weight(1f)
+        )
+        LibrarySummaryCard(
+            icon = Icons.Outlined.Archive,
+            title = "Archived",
+            value = archived.toString(),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun LibrarySummaryCard(
+    icon: ImageVector,
+    title: String,
+    value: String,
+    selected: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.height(62.dp),
+        color = if (selected) Primary.copy(alpha = 0.08f) else Surface,
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (selected) Primary.copy(alpha = 0.18f) else SurfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Primary,
+                modifier = Modifier.size(21.dp)
+            )
+            Column {
+                Text(
+                    text = title,
+                    color = OnBackground,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = value,
+                    color = TextSecondary,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun ConversationFilters(
     selectedFilter: ConversationFilter,
     folders: List<String>,
@@ -498,21 +604,21 @@ private fun ConversationItem(
                 onLongClick = onSelectionToggle
             ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Primary.copy(alpha = 0.16f) else Surface
+            containerColor = if (isSelected) Primary.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent
         ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 10.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon based on capability mode
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(34.dp)
                     .clip(CircleShape)
                     .background(Primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
@@ -527,7 +633,14 @@ private fun ConversationItem(
                         "communication" -> "@"
                         else -> "💬"
                     },
-                    fontSize = 20.sp
+                    fontSize = 1.sp,
+                    color = androidx.compose.ui.graphics.Color.Transparent
+                )
+                Icon(
+                    imageVector = Icons.Outlined.ChatBubbleOutline,
+                    contentDescription = null,
+                    tint = Primary,
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
@@ -581,13 +694,24 @@ private fun ConversationItem(
                 )
             }
             if (conversation.isFavorite) {
-                Text("Fav", color = Primary, fontSize = 12.sp, modifier = Modifier.padding(start = 6.dp))
+                Icon(
+                    imageVector = Icons.Outlined.StarBorder,
+                    contentDescription = "Favorite",
+                    tint = Primary,
+                    modifier = Modifier
+                        .padding(start = 6.dp)
+                        .size(19.dp)
+                )
             }
             if (conversation.isArchived) {
                 Text("Archived", color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(start = 6.dp))
             }
-            TextButton(onClick = { showMenu = true }) {
-                Text("More")
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "Conversation actions",
+                    tint = TextSecondary
+                )
             }
         }
     }

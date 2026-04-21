@@ -59,7 +59,7 @@ class WebSearchTool @Inject constructor(
         return try {
             val request = Request.Builder()
                 .url(url)
-                .header("User-Agent", "LocalAssistant/1.0")
+                .header("User-Agent", "Localyze/1.0")
                 .build()
 
             val response = okHttpClient.newCall(request).execute()

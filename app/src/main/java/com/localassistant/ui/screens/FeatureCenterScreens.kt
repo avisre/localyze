@@ -512,5 +512,5 @@ private fun shareDraft(context: Context, text: String) {
 private fun copyText(context: Context, text: String) {
     if (text.isBlank()) return
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(ClipData.newPlainText("Local Assistant", text))
+    clipboard.setPrimaryClip(ClipData.newPlainText("Localyze", text))
 }

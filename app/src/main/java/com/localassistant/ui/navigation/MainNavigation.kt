@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Grid4x4
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -62,6 +62,8 @@ import com.localassistant.ui.screens.SettingsScreen
 import com.localassistant.ui.screens.TasksScreen
 import com.localassistant.ui.screens.ToolCenterScreen
 import com.localassistant.ui.theme.Background
+import com.localassistant.ui.theme.Primary
+import com.localassistant.ui.theme.Surface
 import com.localassistant.ui.viewmodels.CapabilitiesViewModel
 
 sealed class BottomNavItem(
@@ -70,13 +72,13 @@ sealed class BottomNavItem(
     val label: String
 ) {
     data object Chat : BottomNavItem("chat", Icons.Outlined.ChatBubbleOutline, "Chat")
-    data object Capabilities : BottomNavItem("capabilities", Icons.Outlined.Grid4x4, "Capabilities")
-    data object Settings : BottomNavItem("settings", Icons.Outlined.Person, "Settings")
+    data object Library : BottomNavItem("conversations", Icons.Outlined.Folder, "Library")
+    data object Settings : BottomNavItem("settings", Icons.Outlined.Settings, "Settings")
 }
 
 val bottomNavItems = listOf(
     BottomNavItem.Chat,
-    BottomNavItem.Capabilities,
+    BottomNavItem.Library,
     BottomNavItem.Settings
 )
 
@@ -125,7 +127,7 @@ fun MainNavigation(
 
     // Bottom bar visibility: hidden during onboarding and while the keyboard is open.
     val showBottomBarBase = currentDestination?.route?.startsWith("chat") == true ||
-            currentDestination?.route in listOf("capabilities", "settings")
+            currentDestination?.route in listOf("conversations", "settings")
     val showBottomBar = showBottomBarBase && !isKeyboardVisible
 
     Scaffold(
@@ -133,7 +135,7 @@ fun MainNavigation(
             if (showBottomBar) {
                 NavigationBar(
                     modifier = Modifier.fillMaxWidth(),
-                    containerColor = Background,
+                    containerColor = Surface,
                     tonalElevation = 0.dp
                 ) {
                     bottomNavItems.forEach { item ->
@@ -143,29 +145,11 @@ fun MainNavigation(
 
                         NavigationBarItem(
                             icon = {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = item.label,
-                                        modifier = Modifier.size(24.dp),
-                                        tint = if (selected) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        }
-                                    )
-                                    if (selected) {
-                                        Box(
-                                            modifier = Modifier
-                                                .width(32.dp)
-                                                .height(3.dp)
-                                                .clip(RoundedCornerShape(2.dp))
-                                                .background(MaterialTheme.colorScheme.primary)
-                                        )
-                                    }
-                                }
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    modifier = Modifier.size(23.dp)
+                                )
                             },
                             label = {
                                 Text(
@@ -189,7 +173,11 @@ fun MainNavigation(
                                 }
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Background
+                                selectedIconColor = Primary,
+                                selectedTextColor = Primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = Primary.copy(alpha = 0.12f)
                             )
                         )
                     }
@@ -235,6 +223,9 @@ fun MainNavigation(
                         onOpenDrawer = {
                             navController.navigate("conversations")
                         },
+                        onOpenAttachments = {
+                            navController.navigate("attachments")
+                        },
                         sharedText = sharedText,
                         sharedImageUris = sharedImageUris,
                         onSharedContentConsumed = onSharedContentConsumed
@@ -266,6 +257,27 @@ fun MainNavigation(
                     CapabilitiesScreen(
                         onCapabilitySelected = { mode ->
                             capabilitiesViewModel.selectCapability(mode)
+                        },
+                        onOpenTasks = {
+                            navController.navigate("tasks")
+                        },
+                        onOpenAttachments = {
+                            navController.navigate("attachments")
+                        },
+                        onOpenReplies = {
+                            navController.navigate("reply_assistant")
+                        },
+                        onOpenToolCenter = {
+                            navController.navigate("tool_center")
+                        },
+                        onOpenSettings = {
+                            navController.navigate("settings") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
                 }
@@ -318,6 +330,7 @@ fun MainNavigation(
             composable("conversations") {
                 ConversationsScreen(
                     onBack = { navController.popBackStack() },
+                    showBack = false,
                     onNavigateToChat = { conversationId ->
                         navController.navigate("chat?conversationId=$conversationId") {
                             popUpTo(navController.graph.findStartDestination().id) {

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LocalAssistant"
+rootProject.name = "Localyze"
 include(":app")

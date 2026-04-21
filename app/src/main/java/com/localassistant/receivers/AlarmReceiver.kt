@@ -22,7 +22,7 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action != AlarmTool.ACTION_ALARM_TRIGGER) return
 
         val message = intent.getStringExtra(AlarmTool.EXTRA_ALARM_MESSAGE)
-            ?: "Local Assistant reminder"
+            ?: "Localyze reminder"
         val alarmId = intent.getIntExtra(AlarmTool.EXTRA_ALARM_ID, 0)
         val repeat = intent.getStringExtra(AlarmTool.EXTRA_REPEAT) ?: "none"
         val triggerTime = intent.getLongExtra(AlarmTool.EXTRA_TRIGGER_TIME, System.currentTimeMillis())
@@ -49,7 +49,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Local Assistant reminder")
+            .setContentTitle("Localyze reminder")
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setContentIntent(launchIntent)
@@ -106,7 +106,7 @@ class AlarmReceiver : BroadcastReceiver() {
             "Reminders",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Reminder notifications created by Local Assistant"
+            description = "Reminder notifications created by Localyze"
         }
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)

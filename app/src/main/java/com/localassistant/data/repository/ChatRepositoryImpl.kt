@@ -175,7 +175,7 @@ class ChatRepositoryImpl @Inject constructor(
             conversationDao.getConversationsByIds(selectedIds.toList())
         }
         return buildString {
-            appendLine("# Local Assistant Conversation Export")
+            appendLine("# Localyze Conversation Export")
             appendLine()
             appendLine("> Conversations: ${conversations.size}")
             appendLine("> Exported: ${System.currentTimeMillis()}")

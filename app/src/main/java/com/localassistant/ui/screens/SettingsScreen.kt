@@ -28,6 +28,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -35,6 +36,30 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.Backup
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.ImportExport
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.PhoneAndroid
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.VolumeUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +77,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.localassistant.domain.models.Memory
+import com.localassistant.ui.components.AssistantMark
+import com.localassistant.ui.components.ReferenceDivider
+import com.localassistant.ui.components.ReferenceHeader
+import com.localassistant.ui.components.ReferenceSettingsGroup
+import com.localassistant.ui.components.ReferenceSettingsRow
 import com.localassistant.ui.components.SettingsChevronRow
 import com.localassistant.ui.components.SettingsToggleRow
 import com.localassistant.ui.theme.Background
@@ -104,6 +134,56 @@ fun SettingsScreen(
     var showPermissionsDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
 
+    fun isGranted(permission: String): Boolean {
+        return permission.isBlank() ||
+                ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    val filesPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        @Suppress("DEPRECATION")
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+    val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.POST_NOTIFICATIONS
+    } else {
+        ""
+    }
+    val filesStatus = if (isGranted(filesPermission)) "Allowed" else "Ask"
+    val microphoneStatus = if (isGranted(Manifest.permission.RECORD_AUDIO)) "Allowed" else "Ask"
+    val notificationStatus = if (isGranted(notificationPermission)) "Allowed" else "Ask"
+
+    SettingsReferenceContent(
+        uiState = uiState,
+        filesStatus = filesStatus,
+        microphoneStatus = microphoneStatus,
+        notificationStatus = notificationStatus,
+        onOpenModelInfo = { showModelInfoDialog = true },
+        onDeleteModel = { viewModel.showDeleteModelDialog() },
+        onOpenPermissions = { showPermissionsDialog = true },
+        onOpenAbout = { showAboutDialog = true },
+        onToggleMemory = { viewModel.toggleMemorySection() },
+        onSearchQueryChange = { viewModel.updateMemorySearchQuery(it) },
+        onDeleteMemory = { viewModel.deleteMemory(it) },
+        onEditMemory = { memory, content, keywords -> viewModel.updateMemory(memory, content, keywords) },
+        onRefreshTransparency = { viewModel.refreshMemoryTransparencyText() },
+        onClearMemories = { viewModel.showClearMemoriesDialog() },
+        onToggleWebSearch = { viewModel.toggleAllowWebSearch() },
+        onToggleThinking = { viewModel.toggleThinkingMode() },
+        onToggleStreamTokens = { viewModel.toggleStreamTokens() },
+        onToggleVoiceAutoPlay = { viewModel.toggleVoiceAutoPlay() },
+        onToggleDarkMode = { viewModel.toggleDarkMode() },
+        onToggleCellularDownload = { viewModel.toggleAllowCellularDownload() },
+        onNavigateToDebugTools = onNavigateToDebugTools,
+        onNavigateToConversations = onNavigateToConversations,
+        onNavigateToToolCenter = onNavigateToToolCenter,
+        onNavigateToAttachments = onNavigateToAttachments,
+        onNavigateToPerformance = onNavigateToPerformance,
+        onNavigateToBackups = onNavigateToBackups
+    )
+
+    if (false) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -264,6 +344,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
     }
+    }
 
     // ── Dialogs ─────────────────────────────────────────────────────────────
 
@@ -311,6 +392,232 @@ fun SettingsScreen(
 // ── Avatar Section ──────────────────────────────────────────────────────────
 
 @Composable
+private fun SettingsReferenceContent(
+    uiState: SettingsUiState,
+    filesStatus: String,
+    microphoneStatus: String,
+    notificationStatus: String,
+    onOpenModelInfo: () -> Unit,
+    onDeleteModel: () -> Unit,
+    onOpenPermissions: () -> Unit,
+    onOpenAbout: () -> Unit,
+    onToggleMemory: () -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    onDeleteMemory: (Long) -> Unit,
+    onEditMemory: (Memory, String, String) -> Unit,
+    onRefreshTransparency: () -> Unit,
+    onClearMemories: () -> Unit,
+    onToggleWebSearch: () -> Unit,
+    onToggleThinking: () -> Unit,
+    onToggleStreamTokens: () -> Unit,
+    onToggleVoiceAutoPlay: () -> Unit,
+    onToggleDarkMode: () -> Unit,
+    onToggleCellularDownload: () -> Unit,
+    onNavigateToDebugTools: () -> Unit,
+    onNavigateToConversations: () -> Unit,
+    onNavigateToToolCenter: () -> Unit,
+    onNavigateToAttachments: () -> Unit,
+    onNavigateToPerformance: () -> Unit,
+    onNavigateToBackups: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 22.dp)
+    ) {
+        ReferenceHeader(
+            title = "Settings",
+            subtitle = "Privacy, subscription, and local data."
+        )
+
+        ReferenceSettingsGroup(title = "AI & Model") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.PhoneAndroid,
+                title = "Model",
+                subtitle = uiState.modelInfo.modelName,
+                value = if (uiState.modelInfo.isDownloaded) "Installed" else "Missing",
+                onClick = onOpenModelInfo
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Delete,
+                title = "Delete model",
+                subtitle = "Free up storage by removing the local model",
+                danger = true,
+                onClick = onDeleteModel
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Memory (Opt-In)") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Memory,
+                title = "Memory",
+                subtitle = "${uiState.memoryCount} saved items",
+                value = if (uiState.isMemorySectionExpanded) "On" else "Off",
+                onClick = onToggleMemory
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.AccountCircle,
+                title = "What do you remember about me?",
+                subtitle = "View saved memories",
+                onClick = onToggleMemory
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Storage,
+                title = "Manage memories",
+                subtitle = "Review, edit, and delete",
+                onClick = onToggleMemory
+            )
+        }
+
+        if (uiState.isMemorySectionExpanded) {
+            MemorySection(
+                uiState = uiState,
+                onSearchQueryChange = onSearchQueryChange,
+                onDeleteMemory = onDeleteMemory,
+                onEditMemory = onEditMemory,
+                onRefreshTransparency = onRefreshTransparency,
+                onClearAll = onClearMemories
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Data & Privacy") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Delete,
+                title = "Delete all chats",
+                subtitle = "Open Library to remove conversations",
+                danger = true,
+                onClick = onNavigateToConversations
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Storage,
+                title = "What is stored locally?",
+                subtitle = "See what data stays on your device",
+                onClick = onOpenAbout
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Security,
+                title = "Privacy promise",
+                subtitle = "No chats are sent to our servers",
+                value = "Local AI",
+                onClick = onOpenAbout
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Backup & Export") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.ImportExport,
+                title = "Export conversations",
+                subtitle = "Save conversations as a file",
+                onClick = onNavigateToBackups
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Backup,
+                title = "Encrypted backup",
+                subtitle = "Back up your data securely",
+                onClick = onNavigateToBackups
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Backup,
+                title = "Restore from backup",
+                subtitle = "Restore your conversations and data",
+                onClick = onNavigateToBackups
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Subscription") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Bolt,
+                title = "Localyze Premium",
+                subtitle = "Private on-device AI",
+                value = "$79.00 / year",
+                showChevron = false
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Backup,
+                title = "Restore purchase",
+                subtitle = "Recover your subscription",
+                onClick = onOpenAbout
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Settings,
+                title = "Manage subscription",
+                subtitle = "Billing is handled by Google Play",
+                onClick = onOpenAbout
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Assistant") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Settings,
+                title = "Thinking mode",
+                subtitle = "Show reasoning traces",
+                checked = uiState.thinkingMode,
+                onCheckedChange = { onToggleThinking() },
+                showChevron = false
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Bolt,
+                title = "Stream tokens",
+                subtitle = "Show responses while generating",
+                checked = uiState.streamTokens,
+                onCheckedChange = { onToggleStreamTokens() },
+                showChevron = false
+            )
+        }
+
+        ReferenceSettingsGroup(title = "Support & Safety") {
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Image,
+                title = "Report / Flag response",
+                subtitle = "Help improve safety",
+                danger = true,
+                onClick = onOpenAbout
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Folder,
+                title = "Files & media",
+                subtitle = "Permission status: $filesStatus",
+                onClick = onOpenPermissions
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Mic,
+                title = "Microphone",
+                subtitle = "Permission status: $microphoneStatus",
+                onClick = onOpenPermissions
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.BugReport,
+                title = "Performance",
+                subtitle = "Model speed, RAM, crashes",
+                onClick = onNavigateToPerformance
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Info,
+                title = "About",
+                subtitle = "Version 1.0.0",
+                onClick = onOpenAbout
+            )
+        }
+    }
+}
+
+@Composable
 private fun AvatarSection(
     onVersionTaps: () -> Unit = {}
 ) {
@@ -341,7 +648,7 @@ private fun AvatarSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Local Assistant",
+            text = "Localyze",
             fontFamily = Nunito,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
@@ -416,7 +723,14 @@ private fun MemorySection(
                 )
             },
             leadingIcon = {
+                if (false) {
                 Text(text = "🔍", fontSize = 18.sp)
+                }
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = null,
+                    tint = TextSecondary
+                )
             },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -570,9 +884,17 @@ private fun MemoryItem(
                 onClick = onDelete,
                 modifier = Modifier.size(32.dp)
             ) {
+                if (false) {
                 Text(
                     text = "🗑️",
                     fontSize = 16.sp
+                )
+                }
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete memory",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -900,7 +1222,22 @@ private fun PermissionsDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
+                            if (false) {
                             Text(text = entry.icon, fontSize = 18.sp)
+                            }
+                            Icon(
+                                imageVector = when (entry.name) {
+                                    "Camera" -> Icons.Outlined.Image
+                                    "Contacts" -> Icons.Outlined.AccountCircle
+                                    "Calendar" -> Icons.Outlined.History
+                                    "Microphone" -> Icons.Outlined.Mic
+                                    "Notifications" -> Icons.Outlined.NotificationsNone
+                                    else -> Icons.Outlined.Folder
+                                },
+                                contentDescription = null,
+                                tint = Primary,
+                                modifier = Modifier.size(18.dp)
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = entry.name,
@@ -913,7 +1250,7 @@ private fun PermissionsDialog(
 
                         if (isGranted) {
                             Text(
-                                text = "✓ Granted",
+                                text = "Granted",
                                 fontFamily = Nunito,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp,
@@ -921,7 +1258,7 @@ private fun PermissionsDialog(
                             )
                         } else {
                             Text(
-                                text = "✗ Denied",
+                                text = "Denied",
                                 fontFamily = Nunito,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp,
@@ -973,7 +1310,7 @@ private fun AboutDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "About Local Assistant",
+                text = "About Localyze",
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -993,7 +1330,7 @@ private fun AboutDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "A private, on-device AI assistant powered by Google's Gemma 4 E4B model. All processing happens locally — your data never leaves your device.",
+                    text = "A private, on-device AI assistant powered by Google's Gemma 4 E4B model. All processing happens locally, and your data stays on your device.",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
@@ -1004,7 +1341,7 @@ private fun AboutDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Built with ❤️ for privacy",
+                    text = "Built for privacy",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
