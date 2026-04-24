@@ -26,6 +26,7 @@ class SettingsDataStore @Inject constructor(
         val KEY_STREAM_TOKENS = booleanPreferencesKey("stream_tokens")
         val KEY_VOICE_AUTO_PLAY = booleanPreferencesKey("voice_auto_play")
         val KEY_ALLOW_WEB_SEARCH = booleanPreferencesKey("allow_web_search")
+        val KEY_MEMORY_ENABLED = booleanPreferencesKey("memory_enabled")
         val KEY_PROACTIVE_ASSISTANT = booleanPreferencesKey("proactive_assistant")
         val KEY_TASK_FOLLOWUPS = booleanPreferencesKey("task_followups")
         val KEY_DAILY_SUMMARY = booleanPreferencesKey("daily_summary")
@@ -35,10 +36,11 @@ class SettingsDataStore @Inject constructor(
     }
 
     val darkMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_DARK_MODE] ?: false }
-    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: true }
+    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: false }
     val streamTokens: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_STREAM_TOKENS] ?: true }
     val voiceAutoPlay: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_VOICE_AUTO_PLAY] ?: false }
     val allowWebSearch: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_ALLOW_WEB_SEARCH] ?: false }
+    val memoryEnabled: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_MEMORY_ENABLED] ?: false }
     val proactiveAssistant: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_PROACTIVE_ASSISTANT] ?: false }
     val taskFollowups: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_TASK_FOLLOWUPS] ?: false }
     val dailySummary: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_DAILY_SUMMARY] ?: false }
@@ -58,6 +60,9 @@ class SettingsDataStore @Inject constructor(
     }
     suspend fun setAllowWebSearch(value: Boolean) {
         context.settingsDataStore.edit { it[KEY_ALLOW_WEB_SEARCH] = value }
+    }
+    suspend fun setMemoryEnabled(value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_MEMORY_ENABLED] = value }
     }
     suspend fun setProactiveAssistant(value: Boolean) {
         context.settingsDataStore.edit { it[KEY_PROACTIVE_ASSISTANT] = value }

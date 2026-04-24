@@ -136,10 +136,10 @@ class ChatRepositoryImpl @Inject constructor(
         sb.appendLine()
         for (message in messages) {
             val roleLabel = when (message.role) {
-                MessageRole.USER -> "ðŸ‘¤ User"
-                MessageRole.ASSISTANT -> "ðŸ¤– Assistant"
-                MessageRole.SYSTEM -> "âš™ï¸ System"
-                MessageRole.TOOL -> "ðŸ”§ Tool"
+                MessageRole.USER -> "\uD83D\uDC64 User"
+                MessageRole.ASSISTANT -> "\uD83E\uDD16 Assistant"
+                MessageRole.SYSTEM -> "\u2699\uFE0F System"
+                MessageRole.TOOL -> "\uD83D\uDD27 Tool"
             }
             sb.appendLine("### $roleLabel")
             sb.appendLine()

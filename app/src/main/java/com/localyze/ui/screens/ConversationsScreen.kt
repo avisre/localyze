@@ -22,10 +22,16 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Assessment
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.Terminal
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -242,7 +248,7 @@ fun ConversationsScreen(
                     // Pinned section
                     if (pinnedConversations.isNotEmpty()) {
                         item {
-                            SectionHeader(title = "ðŸ“Œ Pinned")
+                            SectionHeader(title = "\uD83D\uDCCC Pinned")
                         }
                         items(
                             items = pinnedConversations,
@@ -277,7 +283,7 @@ fun ConversationsScreen(
                             if (pinnedConversations.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
-                            SectionHeader(title = "ðŸ’¬ Recent")
+                            SectionHeader(title = "\uD83D\uDCAC Recent")
                         }
                         items(
                             items = unpinnedConversations,
@@ -623,22 +629,18 @@ private fun ConversationItem(
                     .background(Primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = if (isSelected) "OK" else when (conversation.capabilityMode) {
-                        "see" -> "ðŸ‘ï¸"
-                        "write" -> "âœï¸"
-                        "brainstorm" -> "ðŸ’¡"
-                        "code" -> "ðŸ’»"
-                        "data" -> "ðŸ“Š"
-                        "communication" -> "@"
-                        else -> "ðŸ’¬"
-                    },
-                    fontSize = 1.sp,
-                    color = androidx.compose.ui.graphics.Color.Transparent
-                )
+                val modeIcon = when (conversation.capabilityMode) {
+                    "see" -> Icons.Outlined.Visibility
+                    "write" -> Icons.Outlined.Edit
+                    "brainstorm" -> Icons.Outlined.Lightbulb
+                    "code" -> Icons.Outlined.Terminal
+                    "data" -> Icons.Outlined.Assessment
+                    "communication" -> Icons.Outlined.Email
+                    else -> Icons.Outlined.ChatBubbleOutline
+                }
                 Icon(
-                    imageVector = Icons.Outlined.ChatBubbleOutline,
-                    contentDescription = null,
+                    imageVector = modeIcon,
+                    contentDescription = conversation.capabilityMode,
                     tint = Primary,
                     modifier = Modifier.size(19.dp)
                 )
@@ -674,7 +676,7 @@ private fun ConversationItem(
 
                     if (conversation.messageCount > 0) {
                         Text(
-                            text = " â€¢ ${conversation.messageCount} messages",
+                            text = " \u2022 ${conversation.messageCount} messages",
                             fontFamily = Nunito,
                             fontWeight = FontWeight.Normal,
                             fontSize = 12.sp,

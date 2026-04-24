@@ -104,7 +104,7 @@ class AudioInputProcessor @Inject constructor(
 
         // Validate buffer size
         if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-            _recordingState.value = AudioRecordingState.Error("AudioRecord buffer size error â€” device may not support 16kHz PCM recording")
+            _recordingState.value = AudioRecordingState.Error("AudioRecord buffer size error - device may not support 16kHz PCM recording")
             throw IllegalStateException("AudioRecord buffer size error")
         }
 
@@ -124,7 +124,7 @@ class AudioInputProcessor @Inject constructor(
 
         if (record.state != AudioRecord.STATE_INITIALIZED) {
             record.release()
-            _recordingState.value = AudioRecordingState.Error("AudioRecord failed to initialize â€” state: ${record.state}")
+            _recordingState.value = AudioRecordingState.Error("AudioRecord failed to initialize - state: ${record.state}")
             throw IllegalStateException("AudioRecord failed to initialize")
         }
 

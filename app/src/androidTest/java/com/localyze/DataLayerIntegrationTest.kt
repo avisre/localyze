@@ -1,6 +1,8 @@
 ﻿package com.localyze
 
 import android.content.Context
+import android.content.ContextWrapper
+import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.localyze.ai.ModelLoadState
@@ -16,6 +18,7 @@ import com.localyze.domain.models.MessageRole
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -32,6 +35,8 @@ import java.io.File
 class DataLayerIntegrationTest {
 
     private lateinit var context: Context
+    private lateinit var modelFilesRoot: File
+    private lateinit var db: AppDatabase
     private lateinit var modelRepository: ModelRepository
     private lateinit var chatRepository: ChatRepositoryImpl
     private lateinit var memoryRepository: MemoryRepositoryImpl
@@ -39,9 +44,16 @@ class DataLayerIntegrationTest {
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
+        modelFilesRoot = File(context.cacheDir, "model-repository-test-${System.nanoTime()}")
+            .also { it.mkdirs() }
+        val modelContext = object : ContextWrapper(context) {
+            override fun getFilesDir(): File = modelFilesRoot
+        }
         val okHttpClient = OkHttpClient.Builder().build()
-        modelRepository = ModelRepository(context, okHttpClient)
-        val db = AppDatabase.getInstance(context)
+        modelRepository = ModelRepository(modelContext, okHttpClient)
+        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
         chatRepository = ChatRepositoryImpl(
             conversationDao = db.conversationDao(),
             messageDao = db.messageDao(),
@@ -50,11 +62,17 @@ class DataLayerIntegrationTest {
         memoryRepository = MemoryRepositoryImpl(memoryDao = db.memoryDao())
     }
 
+    @After
+    fun tearDown() {
+        db.close()
+        modelFilesRoot.deleteRecursively()
+    }
+
     // â”€â”€â”€ Model Repository Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @Test
     fun testModelDirExists() {
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         modelsDir.mkdirs()
         assertTrue("Models directory should exist", modelsDir.exists())
     }
@@ -62,14 +80,14 @@ class DataLayerIntegrationTest {
     @Test
     fun testIsModelDownloadedReturnsFalseWhenNoModel() {
         // Clean up any existing model file
-        val modelFile = File(context.filesDir, "models/gemma-4-E4B-it.litertlm")
+        val modelFile = File(modelFilesRoot, "models/gemma-4-E4B-it.litertlm")
         if (modelFile.exists()) modelFile.delete()
         assertFalse("Model should not be downloaded", modelRepository.isModelDownloaded())
     }
 
     @Test
     fun testIsModelDownloadedReturnsTrueWithPlaceholderFile() {
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         modelsDir.mkdirs()
         val modelFile = File(modelsDir, "gemma-4-E4B-it.litertlm")
         modelFile.writeText("placeholder")
@@ -111,7 +129,7 @@ class DataLayerIntegrationTest {
 
     @Test
     fun testDeleteModelWhenFileExists() {
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         modelsDir.mkdirs()
         val modelFile = File(modelsDir, "gemma-4-E4B-it.litertlm")
         modelFile.writeText("test")

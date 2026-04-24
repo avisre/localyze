@@ -47,7 +47,7 @@ class ModelLoadingService : Service() {
                 Log.d(TAG, "Service already running, skip")
                 return
             }
-            Log.d(TAG, "Starting foreground service â€” protecting model process from OOM kill")
+            Log.d(TAG, "Starting foreground service - protecting model process from OOM kill")
             val intent = Intent(context, ModelLoadingService::class.java)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -64,7 +64,7 @@ class ModelLoadingService : Service() {
          * Stop the foreground service when the model is released.
          */
         fun stop(context: Context) {
-            Log.d(TAG, "Stopping foreground service â€” model released")
+            Log.d(TAG, "Stopping foreground service - model released")
             val intent = Intent(context, ModelLoadingService::class.java)
             context.stopService(intent)
         }
@@ -95,7 +95,7 @@ class ModelLoadingService : Service() {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        Log.d(TAG, "Service onCreate â€” promoting process to foreground priority")
+        Log.d(TAG, "Service onCreate - promoting process to foreground priority")
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification(notificationText))
     }
@@ -108,7 +108,7 @@ class ModelLoadingService : Service() {
             notificationText = intent.getStringExtra(EXTRA_TEXT) ?: notificationText
         }
 
-        Log.d(TAG, "Service onStartCommand â€” $notificationText")
+        Log.d(TAG, "Service onStartCommand - $notificationText")
 
         // Must call startForeground on every onStartCommand for Android 12+
         val notification = buildNotification(notificationText)
@@ -122,7 +122,7 @@ class ModelLoadingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
-        Log.d(TAG, "Service onDestroy â€” foreground protection removed")
+        Log.d(TAG, "Service onDestroy - foreground protection removed")
     }
 
     private fun buildNotification(text: String): Notification {

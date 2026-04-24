@@ -1,6 +1,8 @@
 ﻿package com.localyze
 
 import android.content.Context
+import android.content.ContextWrapper
+import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.localyze.data.local.AppDatabase
@@ -21,6 +23,7 @@ import com.localyze.utils.InputValidator
 import com.localyze.utils.ValidationResult
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -37,6 +40,8 @@ import java.io.File
 class TestingGuideInstrumentationTest {
 
     private lateinit var context: Context
+    private lateinit var modelFilesRoot: File
+    private lateinit var db: AppDatabase
     private lateinit var modelRepository: ModelRepository
     private lateinit var chatRepository: ChatRepositoryImpl
     private lateinit var memoryRepository: MemoryRepositoryImpl
@@ -44,15 +49,28 @@ class TestingGuideInstrumentationTest {
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
+        modelFilesRoot = File(context.cacheDir, "model-repository-test-${System.nanoTime()}")
+            .also { it.mkdirs() }
+        val modelContext = object : ContextWrapper(context) {
+            override fun getFilesDir(): File = modelFilesRoot
+        }
         val okHttpClient = OkHttpClient.Builder().build()
-        modelRepository = ModelRepository(context, okHttpClient)
-        val db = AppDatabase.getInstance(context)
+        modelRepository = ModelRepository(modelContext, okHttpClient)
+        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
         chatRepository = ChatRepositoryImpl(
             conversationDao = db.conversationDao(),
             messageDao = db.messageDao(),
             appDatabase = db
         )
         memoryRepository = MemoryRepositoryImpl(memoryDao = db.memoryDao())
+    }
+
+    @After
+    fun tearDown() {
+        db.close()
+        modelFilesRoot.deleteRecursively()
     }
 
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -182,7 +200,7 @@ class TestingGuideInstrumentationTest {
     @Test
     fun test3a_noPartialDownload_cannotResume() {
         // Clean up temp file
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         val tempFile = File(modelsDir, "model_download.tmp")
         tempFile.delete()
         context.getSharedPreferences("model_download_prefs", Context.MODE_PRIVATE)
@@ -198,7 +216,7 @@ class TestingGuideInstrumentationTest {
     fun test3b_partialDownload_canResume() {
         runBlocking {
             // Create a partial temp file
-            val modelsDir = File(context.filesDir, "models")
+            val modelsDir = File(modelFilesRoot, "models")
             modelsDir.mkdirs()
             val tempFile = File(modelsDir, "model_download.tmp")
             tempFile.writeBytes(ByteArray(1000)) // Simulate partial download
@@ -222,7 +240,7 @@ class TestingGuideInstrumentationTest {
     @Test
     fun test3c_clearIncompleteDownload_removesTempFile() {
         // Create temp file
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         modelsDir.mkdirs()
         val tempFile = File(modelsDir, "model_download.tmp")
         tempFile.writeBytes(ByteArray(500))
@@ -236,7 +254,7 @@ class TestingGuideInstrumentationTest {
 
     @Test
     fun test3d_deleteModel_cleansUp() {
-        val modelsDir = File(context.filesDir, "models")
+        val modelsDir = File(modelFilesRoot, "models")
         modelsDir.mkdirs()
         val modelFile = File(modelsDir, ModelRepository.MODEL_FILENAME)
         modelFile.writeText("test")
@@ -349,7 +367,6 @@ class TestingGuideInstrumentationTest {
     @Test
     fun test6b_databaseVersionIs3() = runBlocking {
         // Verify the database is at version 3
-        val db = AppDatabase.getInstance(context)
         // Room stores version internally; verify it's open and functional
         assertNotNull("Database should be accessible", db)
 

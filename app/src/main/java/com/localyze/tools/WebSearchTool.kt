@@ -21,7 +21,7 @@ class WebSearchTool @Inject constructor(
 ) : Tool {
 
     override val name = "web_search"
-    override val description = "Search the web using DuckDuckGo Instant Answer API. Only available when web search is enabled in settings."
+    override val description = "Search the web using DuckDuckGo Instant Answer API for current, recent, live, or explicitly requested web information. Do not use for stable general-knowledge explanations. Only available when web search is enabled in settings."
 
     // â”€â”€ Schema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 

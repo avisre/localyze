@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.screens
+package com.localyze.ui.screens
 
 import android.Manifest
 import android.content.ClipData
@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -25,6 +26,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
@@ -39,11 +41,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -99,10 +103,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -135,7 +146,10 @@ import com.localyze.ui.theme.Primary
 import com.localyze.ui.theme.Secondary
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
+import com.localyze.ui.viewmodels.ChatUiState
 import com.localyze.ui.viewmodels.ChatViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -199,8 +213,6 @@ fun ChatScreen(
     var inputText by remember { mutableStateOf("") }
     val isInputValid = inputText.isNotBlank()
 
-    // Message list scroll state
-    val listState = rememberLazyListState()
     val isRecording = recordingState is AudioRecordingState.Recording
     var voiceAmplitudes by remember { mutableStateOf(emptyList<Float>()) }
 
@@ -214,29 +226,31 @@ fun ChatScreen(
         }
     }
 
+    // Image permission launcher
     LaunchedEffect(sharedText, sharedImageUris, uiState.isStreaming) {
         if (uiState.isStreaming) return@LaunchedEffect
 
         val hasSharedText = !sharedText.isNullOrBlank()
-        val firstImageUri = sharedImageUris.firstOrNull()
-        if (!hasSharedText && firstImageUri == null) return@LaunchedEffect
+        if (!hasSharedText && sharedImageUris.isEmpty()) return@LaunchedEffect
 
-        if (firstImageUri != null) {
-            try {
-                val bitmap = loadBitmapFromUri(context, Uri.parse(firstImageUri))
-                viewModel.sendImageMessage(
-                    text = sharedText.orEmpty().ifBlank { "Describe this image" },
-                    imageBitmap = bitmap
-                )
-                onSharedContentConsumed()
-            } catch (e: Exception) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "Failed to load shared image: ${e.message}",
-                        duration = SnackbarDuration.Short
+        if (sharedImageUris.isNotEmpty()) {
+            for (imageUriStr in sharedImageUris) {
+                try {
+                    val bitmap = loadBitmapFromUri(context, Uri.parse(imageUriStr))
+                    viewModel.sendImageMessage(
+                        text = sharedText.orEmpty().ifBlank { "Describe this image" },
+                        imageBitmap = bitmap
                     )
+                } catch (e: Exception) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Failed to load shared image: ${e.message}",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
             }
+            onSharedContentConsumed()
         } else if (hasSharedText) {
             viewModel.sendMessage(sharedText!!.trim())
             onSharedContentConsumed()
@@ -276,25 +290,6 @@ fun ChatScreen(
                 null,
                 "assistant-${lastAssistantMessage.id}"
             )
-        }
-    }
-
-    // Track whether user has scrolled up (to show scroll-to-bottom FAB)
-    val isScrolledUp by remember {
-        derivedStateOf {
-            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            val totalItems = listState.layoutInfo.totalItemsCount
-            lastVisibleIndex < totalItems - 2
-        }
-    }
-
-    // Auto-scroll to bottom when new messages arrive or streaming text changes
-    LaunchedEffect(uiState.messages.size, uiState.streamingText) {
-        if (uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()) {
-            val totalItems = listState.layoutInfo.totalItemsCount
-            if (totalItems > 0) {
-                listState.animateScrollToItem(totalItems - 1)
-            }
         }
     }
 
@@ -489,147 +484,27 @@ fun ChatScreen(
                         modifier = Modifier.weight(1f)
                     )
                 } else {
-                    Box(
+                    ChatMessageList(
+                        uiState = uiState,
+                        expandedThinking = expandedThinking,
+                        onToggleThinking = viewModel::toggleThinkingExpanded,
+                        onCopyMessage = { content ->
+                            copyToClipboard(context, content)
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Copied to clipboard",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        },
+                        onLongClickMessage = { index ->
+                            actionMenuMessageIndex = index
+                            showActionMenu = true
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
-                    ) {
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            // Render persisted messages
-                            itemsIndexed(
-                                items = uiState.messages,
-                                key = { index, message -> message.id }
-                            ) { index, message ->
-                                when (message.role) {
-                                    MessageRole.USER -> {
-                                        SwipeableMessageItem(
-                                            onSwipeLeft = {
-                                                copyToClipboard(context, message.content)
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Copied to clipboard",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
-                                            },
-                                            onLongClick = {
-                                                actionMenuMessageIndex = index
-                                                showActionMenu = true
-                                            }
-                                        ) {
-                                            UserMessageBubble(
-                                                message = message.content,
-                                                timestamp = message.timestamp
-                                            )
-                                        }
-                                    }
-
-                                    MessageRole.ASSISTANT -> {
-                                        // Show thinking bubble above assistant message if present
-                                        if (!message.thinkingContent.isNullOrBlank()) {
-                                            ThinkingBubble(
-                                                thinkingContent = message.thinkingContent,
-                                                isExpanded = expandedThinking.contains(index),
-                                                onToggle = { viewModel.toggleThinkingExpanded(index) }
-                                            )
-                                        }
-
-                                        SwipeableMessageItem(
-                                            onSwipeLeft = {
-                                                copyToClipboard(context, message.content)
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Copied to clipboard",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
-                                            },
-                                            onLongClick = {
-                                                actionMenuMessageIndex = index
-                                                showActionMenu = true
-                                            }
-                                        ) {
-                                            AssistantMessageBubble(
-                                                message = message.content,
-                                                timestamp = message.timestamp,
-                                                isStreaming = false
-                                            )
-                                        }
-                                    }
-
-                                    MessageRole.TOOL -> {
-                                        // Tool result messages are shown as ToolIndicator
-                                        ToolIndicator(
-                                            toolName = message.toolName ?: "Unknown",
-                                            isExecuting = false
-                                        )
-                                    }
-
-                                    MessageRole.SYSTEM -> {
-                                        // System messages are not displayed in the chat UI
-                                    }
-                                }
-                            }
-
-                            // Active tool call indicators
-                            items(uiState.activeToolCalls.size) { index ->
-                                val toolCall = uiState.activeToolCalls[index]
-                                ToolIndicator(
-                                    toolName = toolCall.toolName,
-                                    isExecuting = toolCall.isExecuting
-                                )
-                            }
-
-                            // Streaming text (in-progress assistant response)
-                            if (uiState.streamingText.isNotEmpty()) {
-                                item(key = "streaming") {
-                                    // Show thinking bubble if currently thinking
-                                    if (uiState.thinkingText.isNotEmpty()) {
-                                        ThinkingBubble(
-                                            thinkingContent = uiState.thinkingText,
-                                            isExpanded = expandedThinking.contains(-1),
-                                            onToggle = { viewModel.toggleThinkingExpanded(-1) }
-                                        )
-                                    }
-                                    AssistantMessageBubble(
-                                        message = uiState.streamingText,
-                                        timestamp = System.currentTimeMillis(),
-                                        isStreaming = true
-                                    )
-                                }
-                            }
-                        }
-
-                        // Scroll-to-bottom FAB
-                        if (isScrolledUp && (uiState.isStreaming || uiState.messages.isNotEmpty())) {
-                            SmallFloatingActionButton(
-                                onClick = {
-                                    scope.launch {
-                                        val totalItems = listState.layoutInfo.totalItemsCount
-                                        if (totalItems > 0) {
-                                            listState.animateScrollToItem(totalItems - 1)
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(end = 16.dp, bottom = 8.dp),
-                                containerColor = Primary
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = "Scroll to bottom",
-                                    tint = OnPrimary
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
 
                 if (hasMessages) {
@@ -658,7 +533,8 @@ fun ChatScreen(
                                 inputText = ""
                             }
                         },
-                        onStopGeneration = { viewModel.stopGeneration() }
+                        onStopGeneration = { viewModel.stopGeneration() },
+                        modifier = Modifier.imePadding()
                     )
                 }
             }
@@ -781,6 +657,264 @@ fun ChatScreen(
 }
 
 // Helper composables
+
+@Composable
+fun ChatMessageList(
+    uiState: ChatUiState,
+    expandedThinking: Set<Int>,
+    onToggleThinking: (Int) -> Unit,
+    onCopyMessage: (String) -> Unit,
+    onLongClickMessage: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
+) {
+    val scope = rememberCoroutineScope()
+    val hasDisplayItems = uiState.messages.isNotEmpty() ||
+            uiState.streamingText.isNotEmpty() ||
+            uiState.activeToolCalls.isNotEmpty()
+    var followOutput by rememberSaveable(uiState.currentConversationId) { mutableStateOf(true) }
+    val atBottomState = remember(listState) {
+        derivedStateOf {
+            if (!hasDisplayItems) return@derivedStateOf true
+            ChatScrollPolicy.isAtBottom(listState.toChatListViewportSnapshot())
+        }
+    }
+    val isScrolledUp by remember(hasDisplayItems, atBottomState) {
+        derivedStateOf {
+            hasDisplayItems && !atBottomState.value
+        }
+    }
+
+    LaunchedEffect(uiState.currentConversationId) {
+        followOutput = true
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { atBottomState.value }
+            .distinctUntilChanged()
+            .collect { isAtBottom ->
+                if (isAtBottom) {
+                    followOutput = true
+                }
+            }
+    }
+
+    // A. Snap to bottom on structural changes (new messages, tool calls, followOutput restored).
+    // We intentionally do NOT key on streamingText.length because that restarts this effect
+    // on every token, causing scroll fighting and preventing the list from keeping up with
+    // a growing last item.
+    LaunchedEffect(
+        uiState.currentConversationId,
+        uiState.messages.size,
+        uiState.activeToolCalls.size,
+        followOutput
+    ) {
+        if (!hasDisplayItems || !followOutput || listState.isScrollInProgress) {
+            return@LaunchedEffect
+        }
+
+        // Compute anchor index from uiState so we don't depend on layout timing.
+        val bottomAnchorIndex = uiState.messages.size +
+            uiState.activeToolCalls.size +
+            if (uiState.streamingText.isNotEmpty()) 1 else 0
+        if (bottomAnchorIndex >= 0) {
+            listState.requestScrollToItem(bottomAnchorIndex)
+        }
+    }
+
+    // B. Follow growing streaming content without fighting user scroll.
+    // Reacts to layout changes (e.g., last item growing) and scrolls by the exact
+    // overshoot amount so the bottom anchor stays in view.
+    LaunchedEffect(listState, uiState.isStreaming, followOutput, uiState.currentConversationId) {
+        if (!followOutput || !uiState.isStreaming) return@LaunchedEffect
+        snapshotFlow { Triple(listState.layoutInfo, listState.isScrollInProgress, listState.canScrollForward) }
+            .collect { (layoutInfo, isScrolling, canScrollForward) ->
+                if (!followOutput || !uiState.isStreaming) return@collect
+                if (isScrolling) return@collect
+                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
+                if (lastVisible != null) {
+                    val overshoot = (lastVisible.offset + lastVisible.size) - layoutInfo.viewportEndOffset
+                    if (overshoot > 1) {
+                        listState.scrollBy(overshoot.toFloat())
+                    } else if (canScrollForward) {
+                        // The last visible item fits, but there are more items just below
+                        // (e.g., the tiny bottom anchor). Nudge a bit more to bring them in.
+                        listState.scrollBy(100f)
+                    }
+                }
+            }
+    }
+
+    val userScrollConnection = remember(listState) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (source == NestedScrollSource.UserInput) {
+                    // If user drags up (available.y > 0) while at bottom,
+                    // they are intentionally leaving the bottom; stop following immediately.
+                    if (available.y > 0 && atBottomState.value) {
+                        followOutput = false
+                    }
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (source == NestedScrollSource.UserInput) {
+                    followOutput = atBottomState.value
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+    Box(modifier = modifier) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(userScrollConnection)
+                .testTag(ChatScrollPolicy.MESSAGE_LIST_TAG)
+                .padding(bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            itemsIndexed(
+                items = uiState.messages,
+                key = { index, message ->
+                    if (message.id > 0L) {
+                        "message-${message.id}"
+                    } else {
+                        "message-${message.role}-${message.timestamp}-$index"
+                    }
+                }
+            ) { index, message ->
+                when (message.role) {
+                    MessageRole.USER -> {
+                        SwipeableMessageItem(
+                            onSwipeLeft = { onCopyMessage(message.content) },
+                            onLongClick = { onLongClickMessage(index) }
+                        ) {
+                            UserMessageBubble(
+                                message = message.content,
+                                timestamp = message.timestamp,
+                                imageUris = message.imageUris
+                            )
+                        }
+                    }
+
+                    MessageRole.ASSISTANT -> {
+                        if (!message.thinkingContent.isNullOrBlank()) {
+                            ThinkingBubble(
+                                thinkingContent = message.thinkingContent,
+                                isExpanded = expandedThinking.contains(index),
+                                onToggle = { onToggleThinking(index) }
+                            )
+                        }
+
+                        SwipeableMessageItem(
+                            onSwipeLeft = { onCopyMessage(message.content) },
+                            onLongClick = { onLongClickMessage(index) }
+                        ) {
+                            AssistantMessageBubble(
+                                message = message.content,
+                                timestamp = message.timestamp,
+                                isStreaming = false
+                            )
+                        }
+                    }
+
+                    MessageRole.TOOL -> {
+                        ToolIndicator(
+                            toolName = message.toolName ?: "Unknown",
+                            isExecuting = false
+                        )
+                    }
+
+                    MessageRole.SYSTEM -> Unit
+                }
+            }
+
+            itemsIndexed(
+                items = uiState.activeToolCalls,
+                key = { index, toolCall -> "tool-${toolCall.toolName}-$index" }
+            ) { _, toolCall ->
+                ToolIndicator(
+                    toolName = toolCall.toolName,
+                    isExecuting = toolCall.isExecuting
+                )
+            }
+
+            if (uiState.streamingText.isNotEmpty()) {
+                item(key = "streaming-assistant") {
+                    if (uiState.thinkingText.isNotEmpty()) {
+                        ThinkingBubble(
+                            thinkingContent = uiState.thinkingText,
+                            isExpanded = expandedThinking.contains(-1),
+                            onToggle = { onToggleThinking(-1) }
+                        )
+                    }
+                    AssistantMessageBubble(
+                        message = uiState.streamingText,
+                        timestamp = System.currentTimeMillis(),
+                        isStreaming = true,
+                        modifier = Modifier.testTag("streamingAssistantMessage")
+                    )
+                }
+            }
+
+            item(key = ChatScrollPolicy.BOTTOM_ANCHOR_KEY) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .testTag(ChatScrollPolicy.BOTTOM_ANCHOR_TAG)
+                )
+            }
+        }
+
+        if (isScrolledUp) {
+            SmallFloatingActionButton(
+                onClick = {
+                    followOutput = true
+                    val bottomAnchorIndex = uiState.messages.size +
+                        uiState.activeToolCalls.size +
+                        if (uiState.streamingText.isNotEmpty()) 1 else 0
+                    if (bottomAnchorIndex >= 0) {
+                        listState.requestScrollToItem(bottomAnchorIndex)
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 8.dp),
+                containerColor = Primary
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "Scroll to bottom",
+                    tint = OnPrimary
+                )
+            }
+        }
+    }
+}
+
+private fun LazyListState.toChatListViewportSnapshot(): ChatListViewportSnapshot {
+    val layoutInfo = layoutInfo
+    val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+    return ChatListViewportSnapshot(
+        totalItemsCount = layoutInfo.totalItemsCount,
+        lastVisibleItemIndex = lastVisibleItem?.index,
+        lastVisibleItemBottom = lastVisibleItem?.let { it.offset + it.size },
+        viewportEndOffset = layoutInfo.viewportEndOffset,
+        canScrollForward = canScrollForward
+    )
+}
 
 /**
  * Small inline prompt that makes the web-search permission state visible.
@@ -1446,12 +1580,43 @@ private fun SwipeableMessageItem(
 // Utility functions
 
 private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap {
+    // First decode bounds only to get dimensions
+    val options = BitmapFactory.Options().apply {
+        inJustDecodeBounds = true
+    }
+    context.contentResolver.openInputStream(uri)?.use { stream ->
+        BitmapFactory.decodeStream(stream, null, options)
+    }
+
+    // Calculate inSampleSize to downscale to max 1024x1024
+    val maxDimension = 1024
+    var inSampleSize = 1
+    if (options.outHeight > maxDimension || options.outWidth > maxDimension) {
+        val halfHeight = options.outHeight / 2
+        val halfWidth = options.outWidth / 2
+        while ((halfHeight / inSampleSize) >= maxDimension && (halfWidth / inSampleSize) >= maxDimension) {
+            inSampleSize *= 2
+        }
+    }
+
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         val source = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(source)
+        ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+            decoder.isMutableRequired = true
+            if (inSampleSize > 1) {
+                val targetWidth = options.outWidth / inSampleSize
+                val targetHeight = options.outHeight / inSampleSize
+                decoder.setTargetSize(targetWidth, targetHeight)
+            }
+        }
     } else {
         @Suppress("DEPRECATION")
-        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        val decodeOptions = BitmapFactory.Options().apply {
+            this.inSampleSize = inSampleSize
+        }
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            BitmapFactory.decodeStream(stream, null, decodeOptions)
+        } ?: throw IllegalArgumentException("Could not open input stream for URI: $uri")
     }
 }
 

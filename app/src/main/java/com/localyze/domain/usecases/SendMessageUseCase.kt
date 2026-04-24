@@ -1,11 +1,13 @@
 ﻿package com.localyze.domain.usecases
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.localyze.ai.ContextWindowManager
 import com.localyze.ai.GemmaInferenceEngine
 import com.localyze.ai.InferenceToken
 import com.localyze.ai.MockGemmaEngine
 import com.localyze.ai.SystemPromptBuilder
+import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.ChatRepository
 import com.localyze.data.repository.MemoryRepository
 import com.localyze.domain.models.Message
@@ -13,6 +15,7 @@ import com.localyze.domain.models.MessageRole
 import com.localyze.domain.models.ToolCall
 import com.localyze.domain.models.ToolResult
 import com.localyze.tools.ToolDispatcher
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -21,6 +24,8 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -41,6 +46,7 @@ import javax.inject.Named
  *    engine.resetConversation() to clear the KV cache.
  */
 class SendMessageUseCase @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val gemmaInferenceEngine: GemmaInferenceEngine,
     private val mockEngine: MockGemmaEngine,
     @Named("useMockEngine") private val useMockEngine: Boolean,
@@ -48,7 +54,8 @@ class SendMessageUseCase @Inject constructor(
     private val systemPromptBuilder: SystemPromptBuilder,
     private val toolDispatcher: ToolDispatcher,
     private val chatRepository: ChatRepository,
-    private val memoryRepository: MemoryRepository
+    private val memoryRepository: MemoryRepository,
+    private val settingsDataStore: SettingsDataStore
 ) {
 
     companion object {
@@ -113,10 +120,13 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
+        // Save bitmap to cache directory and store path in imageUris
+        val imagePath = saveBitmapToCache(imageBitmap)
         val userMsg = Message(
             conversationId = conversationId,
             role = MessageRole.USER,
             content = userMessage.ifBlank { "Describe this image" },
+            imageUris = imagePath?.let { listOf(it) } ?: emptyList(),
             timestamp = System.currentTimeMillis()
         )
         chatRepository.saveMessage(userMsg)
@@ -124,18 +134,14 @@ class SendMessageUseCase @Inject constructor(
         val fullTextBuilder = StringBuilder()
         val thinkingTextBuilder = StringBuilder()
 
-        // Gallery pattern: We do NOT explicitly reset the conversation here.
-        // The ensureConversation() inside generateResponseWithImage() will detect
-        // supportImage=true and auto-reset if the current conversation doesn't
-        // support images. This preserves multi-turn context for image conversations.
-
-        // For the real engine, we just send the message directly â€”
-        // no context window building needed, Conversation handles history
+        // Image analysis uses a short-lived multimodal Session in the real engine.
+        // Conversation remains text-only in LiteRT-LM 0.10, so after the image
+        // turn is saved we rebuild text conversation context from the database.
         val tokenFlow = if (useMockEngine) {
             isMockActive = true
             val messages = getConversationMessages(conversationId)
             val systemPrompt = systemPromptBuilder.buildSystemPrompt(capabilityMode, enableThinking)
-            val memories = memoryRepository.getAllMemories()
+            val memories = getPromptMemories()
             val contextMessages = contextWindowManager.buildContextWindow(
                 messages = messages, systemPrompt = systemPrompt, memories = memories
             )
@@ -146,6 +152,7 @@ class SendMessageUseCase @Inject constructor(
             )
         }
 
+        var generationError: String? = null
         try {
             tokenFlow.collect { token ->
                 when (token) {
@@ -164,12 +171,24 @@ class SendMessageUseCase @Inject constructor(
                         emit(ChatResponseEvent.ToolCallCompleted(toolCall.name, result.result))
                     }
                     is InferenceToken.EndOfStream -> { }
-                    is InferenceToken.Error -> emit(ChatResponseEvent.Error(token.message))
+                    is InferenceToken.Error -> {
+                        generationError = token.message
+                        emit(ChatResponseEvent.Error(token.message))
+                    }
                 }
             }
         } catch (e: CancellationException) { throw e }
         catch (e: Exception) {
             emit(ChatResponseEvent.Error(e.message ?: "Generation failed"))
+            return@flow
+        }
+
+        if (generationError != null) {
+            return@flow
+        }
+
+        if (fullTextBuilder.isBlank()) {
+            emit(ChatResponseEvent.Error("Image analysis did not return a response. Please try again."))
             return@flow
         }
 
@@ -182,6 +201,13 @@ class SendMessageUseCase @Inject constructor(
         )
         chatRepository.saveMessage(assistantMsg)
         autoGenerateTitle(conversationId, fullTextBuilder.toString())
+
+        if (!useMockEngine) {
+            gemmaInferenceEngine.setRestoredConversationContext(
+                buildRestoredConversationContext(conversationId)
+            )
+            gemmaInferenceEngine.resetConversation(capabilityMode, enableThinking)
+        }
 
         emit(ChatResponseEvent.Completed(
             fullText = fullTextBuilder.toString(),
@@ -198,7 +224,7 @@ class SendMessageUseCase @Inject constructor(
         val userMsg = Message(
             conversationId = conversationId,
             role = MessageRole.USER,
-            content = "ðŸŽ¤ Voice message",
+            content = "\uD83C\uDFA4 Voice message",
             timestamp = System.currentTimeMillis()
         )
         chatRepository.saveMessage(userMsg)
@@ -216,7 +242,7 @@ class SendMessageUseCase @Inject constructor(
             isMockActive = true
             val messages = getConversationMessages(conversationId)
             val systemPrompt = systemPromptBuilder.buildSystemPrompt(capabilityMode, enableThinking)
-            val memories = memoryRepository.getAllMemories()
+            val memories = getPromptMemories()
             val contextMessages = contextWindowManager.buildContextWindow(
                 messages = messages, systemPrompt = systemPrompt, memories = memories
             )
@@ -343,7 +369,7 @@ class SendMessageUseCase @Inject constructor(
                 // Mock: build full context window from DB
                 val messages = getConversationMessages(conversationId)
                 val systemPrompt = systemPromptBuilder.buildSystemPrompt(capabilityMode, enableThinking)
-                val memories = memoryRepository.getAllMemories()
+                val memories = getPromptMemories()
 
                 val contextMessages = if (pendingToolResults != null) {
                     val toolMessages = pendingToolResults!!.map { result ->
@@ -496,6 +522,13 @@ class SendMessageUseCase @Inject constructor(
         return chatRepository.getMessagesForConversation(conversationId).first()
     }
 
+    private suspend fun getPromptMemories() =
+        if (settingsDataStore.memoryEnabled.first()) {
+            memoryRepository.getAllMemories()
+        } else {
+            emptyList()
+        }
+
     private suspend fun buildRestoredConversationContext(conversationId: Long): String? {
         val recent = chatRepository.getRecentMessages(conversationId, 12)
             .asReversed()
@@ -510,6 +543,22 @@ class SendMessageUseCase @Inject constructor(
                 else -> "Message"
             }
             "$role: ${message.content.take(800)}"
+        }
+    }
+
+    private fun saveBitmapToCache(bitmap: Bitmap): String? {
+        return try {
+            val cacheDir = File(context.cacheDir, "shared_images").apply {
+                if (!exists()) mkdirs()
+            }
+            val fileName = "img_${System.currentTimeMillis()}.png"
+            val file = File(cacheDir, fileName)
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            file.absolutePath
+        } catch (e: Exception) {
+            null
         }
     }
 

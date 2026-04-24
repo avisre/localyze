@@ -29,7 +29,7 @@ data class ChatUiState(
     /** Active capability mode (chat, see, write, brainstorm, code, data). */
     val capabilityMode: String = "chat",
     /** Whether thinking/trace mode is enabled. */
-    val enableThinking: Boolean = true,
+    val enableThinking: Boolean = false,
     /** Whether partial tokens should be shown while the model is generating. */
     val streamTokens: Boolean = true,
     /** Whether completed assistant responses should be read aloud. */

@@ -69,7 +69,9 @@ class SpeechToTextProcessor @Inject constructor(
         get() = _recordingState.value is AudioRecordingState.Recording
 
     suspend fun startListening() = withContext(Dispatchers.Main.immediate) {
+        android.util.Log.d("SpeechToTextProcessor", "startListening() called, currentState=${_recordingState.value}")
         if (isListening) {
+            android.util.Log.d("SpeechToTextProcessor", "Already listening, throwing")
             throw IllegalStateException("Voice input is already listening")
         }
 
@@ -93,13 +95,21 @@ class SpeechToTextProcessor @Inject constructor(
         startedAtMs = System.currentTimeMillis()
         recognitionResult = CompletableDeferred()
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-            setRecognitionListener(createRecognitionListener())
-            startListening(createRecognizerIntent())
+        try {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+                setRecognitionListener(createRecognitionListener())
+                startListening(createRecognizerIntent())
+            }
+            android.util.Log.d("SpeechToTextProcessor", "SpeechRecognizer started successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("SpeechToTextProcessor", "SpeechRecognizer failed to start", e)
+            showErrorThenReset("Speech recognizer failed: ${e.message}")
+            throw e
         }
 
         _amplitudeFlow.value = 0f
         _recordingState.value = AudioRecordingState.Recording(elapsedSeconds = 0f, amplitude = 0f)
+        android.util.Log.d("SpeechToTextProcessor", "State set to Recording")
         startElapsedTicker()
     }
 
@@ -185,6 +195,7 @@ class SpeechToTextProcessor @Inject constructor(
             }
 
             override fun onError(error: Int) {
+                android.util.Log.d("SpeechToTextProcessor", "onError called: error=$error, message=${speechErrorMessage(error)}")
                 val partial = latestPartialTranscript.trim()
                 if (stoppedByUser && partial.isNotBlank()) {
                     completeWithTranscript(partial, showReady = true)
@@ -198,6 +209,7 @@ class SpeechToTextProcessor @Inject constructor(
             }
 
             override fun onResults(results: Bundle?) {
+                android.util.Log.d("SpeechToTextProcessor", "onResults called: transcript='${bestTranscript(results)}'")
                 completeWithTranscript(bestTranscript(results), showReady = stoppedByUser)
             }
 
@@ -231,6 +243,7 @@ class SpeechToTextProcessor @Inject constructor(
     }
 
     private fun showReadyThenReset(transcript: String) {
+        android.util.Log.d("SpeechToTextProcessor", "showReadyThenReset called")
         val elapsedMs = (System.currentTimeMillis() - startedAtMs).coerceAtLeast(0L)
         _amplitudeFlow.value = 0f
         _recordingState.value = AudioRecordingState.Ready(
@@ -265,6 +278,7 @@ class SpeechToTextProcessor @Inject constructor(
     }
 
     private fun showErrorThenReset(message: String) {
+        android.util.Log.d("SpeechToTextProcessor", "showErrorThenReset called: message=$message")
         _amplitudeFlow.value = 0f
         _recordingState.value = AudioRecordingState.Error(message)
         resetToIdleSoon()
@@ -274,6 +288,7 @@ class SpeechToTextProcessor @Inject constructor(
         resetJob?.cancel()
         resetJob = scope.launch {
             delay(STATE_RESET_DELAY_MS)
+            android.util.Log.d("SpeechToTextProcessor", "resetToIdleSoon fired, setting state to Idle")
             _recordingState.value = AudioRecordingState.Idle
         }
     }

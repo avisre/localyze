@@ -12,6 +12,7 @@
 # Local IDE and machine state
 .idea/
 .vscode/
+.playwright-cli/
 .playwright-mcp/
 local.properties
 
@@ -21,6 +22,11 @@ local.properties
 *.p12
 *.pem
 *.key
+*.keystore.backup*
+.local-release-secrets.ps1
+local-release-secrets.ps1
+upload-key-info.txt
+.env
 
 # Large local model artifacts
 *.litertlm
@@ -34,6 +40,12 @@ local.properties
 *.log
 logs/
 /app_logs.txt
+
+# Node / browser automation dependencies and generated artifacts
+node_modules/
+/package-lock.json
+/dist/
+/output/
 
 # Device/emulator databases and dumps
 *.sqlite

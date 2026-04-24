@@ -1,10 +1,12 @@
 ﻿package com.localyze.ui.viewmodels
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localyze.ai.GemmaInferenceEngine
+import com.localyze.data.billing.PlayBillingRepository
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.MemoryRepositoryImpl
 import com.localyze.data.repository.ModelRepository
@@ -28,6 +30,7 @@ class SettingsViewModel @Inject constructor(
     private val gemmaInferenceEngine: GemmaInferenceEngine,
     private val manageMemoryUseCase: ManageMemoryUseCase,
     private val settingsDataStore: SettingsDataStore,
+    private val playBillingRepository: PlayBillingRepository,
     @ApplicationContext private val appContext: Context,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -44,7 +47,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsDataStore.streamTokens.collect { _uiState.update { s -> s.copy(streamTokens = it) } } }
         viewModelScope.launch { settingsDataStore.voiceAutoPlay.collect { _uiState.update { s -> s.copy(voiceAutoPlay = it) } } }
         viewModelScope.launch { settingsDataStore.allowWebSearch.collect { _uiState.update { s -> s.copy(allowWebSearch = it) } } }
+        viewModelScope.launch { settingsDataStore.memoryEnabled.collect { _uiState.update { s -> s.copy(memoryEnabled = it) } } }
         viewModelScope.launch { settingsDataStore.allowCellularDownload.collect { _uiState.update { s -> s.copy(allowCellularDownload = it) } } }
+        viewModelScope.launch {
+            playBillingRepository.state.collect { premiumState ->
+                _uiState.update { s -> s.copy(premiumSubscription = premiumState) }
+            }
+        }
 
         viewModelScope.launch {
             memoriesFlow.collect { memories ->
@@ -86,10 +95,28 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(allowWebSearch = newValue) }
     }
 
+    fun toggleMemoryEnabled() {
+        val newValue = !_uiState.value.memoryEnabled
+        viewModelScope.launch { settingsDataStore.setMemoryEnabled(newValue) }
+        _uiState.update { it.copy(memoryEnabled = newValue) }
+    }
+
     fun toggleAllowCellularDownload() {
         val newValue = !_uiState.value.allowCellularDownload
         viewModelScope.launch { settingsDataStore.setAllowCellularDownload(newValue) }
         _uiState.update { it.copy(allowCellularDownload = newValue) }
+    }
+
+    fun launchPremiumPurchase(activity: Activity) {
+        playBillingRepository.launchPremiumPurchase(activity)
+    }
+
+    fun restorePremiumPurchase() {
+        playBillingRepository.restorePurchases()
+    }
+
+    fun refreshPremiumSubscription() {
+        playBillingRepository.refresh()
     }
 
     fun searchMemories(query: String) {
@@ -141,6 +168,10 @@ class SettingsViewModel @Inject constructor(
 
     fun toggleMemorySection() {
         _uiState.update { it.copy(isMemorySectionExpanded = !_uiState.value.isMemorySectionExpanded) }
+    }
+
+    fun showMemorySection() {
+        _uiState.update { it.copy(isMemorySectionExpanded = true) }
     }
 
     fun updateMemorySearchQuery(query: String) {

@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -7,12 +7,21 @@
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val releaseKeystorePassword = providers.gradleProperty("LOCALYZE_KEYSTORE_PASSWORD")
-    .orElse(providers.environmentVariable("LOCALYZE_KEYSTORE_PASSWORD"))
+val releaseKeystorePassword = providers.environmentVariable("LOCALYZE_KEYSTORE_PASSWORD")
+    .orElse(providers.gradleProperty("LOCALYZE_KEYSTORE_PASSWORD"))
     .orNull
-val releaseKeyPassword = providers.gradleProperty("LOCALYZE_KEY_PASSWORD")
-    .orElse(providers.environmentVariable("LOCALYZE_KEY_PASSWORD"))
+val releaseKeyPassword = providers.environmentVariable("LOCALYZE_KEY_PASSWORD")
+    .orElse(providers.gradleProperty("LOCALYZE_KEY_PASSWORD"))
     .orNull
+val releaseKeystoreFile = providers.environmentVariable("LOCALYZE_KEYSTORE_FILE")
+    .orElse(providers.gradleProperty("LOCALYZE_KEYSTORE_FILE"))
+    .map { file(it) }
+    .orNull ?: file("../localyze-release.keystore")
+val premiumSubscriptionProductId = providers.gradleProperty("LOCALYZE_PREMIUM_SUBSCRIPTION_PRODUCT_ID")
+    .orElse("localyze_premium_yearly")
+    .get()
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
 
 android {
     namespace = "com.localyze"
@@ -22,8 +31,8 @@ android {
         applicationId = "com.localyze"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+            versionCode = 4
+            versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,7 +42,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../localyze-release.keystore")
+            storeFile = releaseKeystoreFile
             storePassword = releaseKeystorePassword
             keyAlias = "localyze"
             keyPassword = releaseKeyPassword
@@ -50,6 +59,7 @@ android {
             isDebuggable = false
             buildConfigField("Boolean", "USE_MOCK_ENGINE", "false")
             buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
+            buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
         }
         debug {
             isMinifyEnabled = false
@@ -60,6 +70,7 @@ android {
             // Set to false to download real model (3.65 GB)
             // Set to true for test download (small tokenizer.json file)
             buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
+            buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
         }
     }
 
@@ -130,14 +141,11 @@ dependencies {
     // include separate qnn-runtime or qnn-litert-delegate deps.
     implementation("com.google.ai.edge.litertlm:litertlm-android:0.10.0")
 
-    // Camera
-    implementation("androidx.camera:camera-camera2:1.4.2")
-    implementation("androidx.camera:camera-lifecycle:1.4.2")
-    implementation("androidx.camera:camera-view:1.4.2")
-    implementation("androidx.camera:camera-core:1.4.2")
-
     // Work Manager
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // Google Play Billing for Localyze Premium subscriptions.
+    implementation("com.android.billingclient:billing-ktx:8.3.0")
 
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -151,6 +159,8 @@ dependencies {
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.test:runner:1.6.2")

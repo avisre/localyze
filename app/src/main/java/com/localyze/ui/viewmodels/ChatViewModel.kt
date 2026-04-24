@@ -17,6 +17,7 @@ import com.localyze.tools.ToolDispatcher
 import com.localyze.utils.InputValidator
 import com.localyze.utils.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +42,7 @@ class ChatViewModel @Inject constructor(
 
     companion object {
         const val CONVERSATION_ID_KEY = "conversationId"
+        const val GENERATION_TIMEOUT_MS = 180_000L
     }
 
     private val _uiState = MutableStateFlow(ChatUiState())
@@ -93,7 +95,14 @@ class ChatViewModel @Inject constructor(
         }
         viewModelScope.launch {
             settingsDataStore.allowWebSearch.collect { enabled ->
+                val previous = _uiState.value.allowWebSearch
                 _uiState.update { it.copy(allowWebSearch = enabled) }
+                if (previous != enabled && !_uiState.value.isStreaming) {
+                    resetEngineForCurrentConversation(
+                        _uiState.value.capabilityMode,
+                        _uiState.value.enableThinking
+                    )
+                }
             }
         }
     }
@@ -192,9 +201,10 @@ class ChatViewModel @Inject constructor(
         _uiState.update { s -> s.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", activeToolCalls = emptyList(), showMascot = false, error = null) }
         generationJob = viewModelScope.launch {
             try {
-                kotlinx.coroutines.withTimeout(60000) { // 60 second overall timeout
+                kotlinx.coroutines.withTimeout(GENERATION_TIMEOUT_MS) {
                     sendMessageUseCase.sendMessage(conversationId = conversationId, userMessage = text, capabilityMode = _uiState.value.capabilityMode, enableThinking = _uiState.value.enableThinking)
                         .catch { e ->
+                            if (e is CancellationException) throw e
                             android.util.Log.e("ChatViewModel", "Error in sendMessage flow", e)
                             _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Generation error: " + e.message) }
                         }
@@ -207,6 +217,9 @@ class ChatViewModel @Inject constructor(
                 android.util.Log.e("ChatViewModel", "Message generation timed out", e)
                 performanceMonitor.recordError("Generation timed out", timeout = true)
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "The model took too long to respond. Please try again.") }
+            } catch (e: CancellationException) {
+                android.util.Log.d("ChatViewModel", "Message generation cancelled")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, activeToolCalls = emptyList()) }
             } catch (e: Exception) {
                 android.util.Log.e("ChatViewModel", "Unexpected error during message generation", e)
                 performanceMonitor.recordError(e.message ?: "Generation error")
@@ -249,9 +262,56 @@ class ChatViewModel @Inject constructor(
         performanceMonitor.startResponse()
         _uiState.update { s -> s.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", activeToolCalls = emptyList(), showMascot = false, error = null) }
         generationJob = viewModelScope.launch {
-            sendMessageUseCase.sendMessageWithImage(conversationId = id, userMessage = text, imageBitmap = bitmap, capabilityMode = _uiState.value.capabilityMode, enableThinking = _uiState.value.enableThinking)
-                .catch { e -> _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Image generation error: " + e.message) } }
-                .collect { event -> handleResponseEvent(event) }
+            try {
+                kotlinx.coroutines.withTimeout(GENERATION_TIMEOUT_MS) {
+                    sendMessageUseCase.sendMessageWithImage(
+                        conversationId = id,
+                        userMessage = text,
+                        imageBitmap = bitmap,
+                        capabilityMode = _uiState.value.capabilityMode,
+                        enableThinking = _uiState.value.enableThinking
+                    )
+                        .catch { e ->
+                            if (e is CancellationException) throw e
+                            android.util.Log.e("ChatViewModel", "Error in image message flow", e)
+                            performanceMonitor.recordError(e.message ?: "Image generation error")
+                            _uiState.update { s ->
+                                s.copy(
+                                    isStreaming = false,
+                                    isThinking = false,
+                                    error = "Image generation error: " + e.message
+                                )
+                            }
+                        }
+                        .collect { event ->
+                            android.util.Log.d("ChatViewModel", "Received image event: ${event.javaClass.simpleName}")
+                            handleResponseEvent(event)
+                        }
+                }
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                android.util.Log.e("ChatViewModel", "Image generation timed out", e)
+                performanceMonitor.recordError("Image generation timed out", timeout = true)
+                _uiState.update { s ->
+                    s.copy(
+                        isStreaming = false,
+                        isThinking = false,
+                        error = "The image analysis took too long. Please try again."
+                    )
+                }
+            } catch (e: CancellationException) {
+                android.util.Log.d("ChatViewModel", "Image generation cancelled")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, activeToolCalls = emptyList()) }
+            } catch (e: Exception) {
+                android.util.Log.e("ChatViewModel", "Unexpected error during image generation", e)
+                performanceMonitor.recordError(e.message ?: "Image generation error")
+                _uiState.update { s ->
+                    s.copy(
+                        isStreaming = false,
+                        isThinking = false,
+                        error = "Image generation error: ${e.message}"
+                    )
+                }
+            }
         }
     }
 
@@ -283,9 +343,17 @@ class ChatViewModel @Inject constructor(
         performanceMonitor.startResponse()
         _uiState.update { s -> s.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", activeToolCalls = emptyList(), showMascot = false, error = null) }
         generationJob = viewModelScope.launch {
-            sendMessageUseCase.sendMessageWithAudio(conversationId = id, audioBytes = audioBytes, capabilityMode = _uiState.value.capabilityMode, enableThinking = _uiState.value.enableThinking)
-                .catch { e -> _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Audio generation error: " + e.message) } }
-                .collect { event -> handleResponseEvent(event) }
+            try {
+                sendMessageUseCase.sendMessageWithAudio(conversationId = id, audioBytes = audioBytes, capabilityMode = _uiState.value.capabilityMode, enableThinking = _uiState.value.enableThinking)
+                    .catch { e ->
+                        if (e is CancellationException) throw e
+                        _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Audio generation error: " + e.message) }
+                    }
+                    .collect { event -> handleResponseEvent(event) }
+            } catch (e: CancellationException) {
+                android.util.Log.d("ChatViewModel", "Audio generation cancelled")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, activeToolCalls = emptyList()) }
+            }
         }
     }
 
@@ -399,9 +467,17 @@ class ChatViewModel @Inject constructor(
         if (convId <= 0L) return
         _uiState.update { it.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", activeToolCalls = emptyList(), error = null) }
         generationJob = viewModelScope.launch {
-            sendMessageUseCase.regenerateLastResponse(conversationId = convId, capabilityMode = state.capabilityMode, enableThinking = state.enableThinking)
-                .catch { e -> _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Regeneration error: " + e.message) } }
-                .collect { event -> handleResponseEvent(event) }
+            try {
+                sendMessageUseCase.regenerateLastResponse(conversationId = convId, capabilityMode = state.capabilityMode, enableThinking = state.enableThinking)
+                    .catch { e ->
+                        if (e is CancellationException) throw e
+                        _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, error = "Regeneration error: " + e.message) }
+                    }
+                    .collect { event -> handleResponseEvent(event) }
+            } catch (e: CancellationException) {
+                android.util.Log.d("ChatViewModel", "Regeneration cancelled")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, activeToolCalls = emptyList()) }
+            }
         }
     }
 

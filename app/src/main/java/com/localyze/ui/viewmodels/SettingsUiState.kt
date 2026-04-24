@@ -1,13 +1,15 @@
 ﻿package com.localyze.ui.viewmodels
 
 import com.localyze.domain.models.Memory
+import com.localyze.data.billing.PremiumSubscriptionState
 
 data class SettingsUiState(
     val darkMode: Boolean = false,
-    val thinkingMode: Boolean = true,
+    val thinkingMode: Boolean = false,
     val streamTokens: Boolean = true,
     val voiceAutoPlay: Boolean = false,
     val allowWebSearch: Boolean = false,
+    val memoryEnabled: Boolean = false,
     val allowCellularDownload: Boolean = false,
     val memoryCount: Int = 0,
     val memories: List<Memory> = emptyList(),
@@ -18,7 +20,8 @@ data class SettingsUiState(
     val searchResults: List<Memory> = emptyList(),
     val memoryTransparencyText: String = "",
     val showDeleteModelDialog: Boolean = false,
-    val showClearMemoriesDialog: Boolean = false
+    val showClearMemoriesDialog: Boolean = false,
+    val premiumSubscription: PremiumSubscriptionState = PremiumSubscriptionState()
 )
 
 data class ModelInfo(

@@ -70,20 +70,17 @@ class ConversationsViewModel @Inject constructor(
         }
     }
 
-    fun createConversation(capabilityMode: String = "chat", title: String = "New Chat"): Long {
-        var newId = -1L
-        viewModelScope.launch {
-            try {
-                val conversation = chatRepository.createConversation(capabilityMode)
-                if (title != "New Chat") {
-                    chatRepository.updateConversation(conversation.copy(title = title))
-                }
-                newId = conversation.id
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+    suspend fun createConversation(capabilityMode: String = "chat", title: String = "New Chat"): Long {
+        return try {
+            val conversation = chatRepository.createConversation(capabilityMode)
+            if (title != "New Chat") {
+                chatRepository.updateConversation(conversation.copy(title = title))
             }
+            conversation.id
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message) }
+            -1L
         }
-        return newId
     }
 
     fun updateConversation(conversation: Conversation) {

@@ -212,7 +212,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
 
             // Feature cards
             FeatureCard(
-                emoji = "ðŸ”’",
+                emoji = "\uD83D\uDD12",
                 title = "Private by Design",
                 description = "Your data never leaves your device"
             )
@@ -220,7 +220,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
 
             FeatureCard(
-                emoji = "âš¡",
+                emoji = "\u26A1",
                 title = "Lightning Fast",
                 description = "No internet needed for AI responses"
             )
@@ -228,7 +228,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
 
             FeatureCard(
-                emoji = "ðŸ§ ",
+                emoji = "\uD83E\uDDE0",
                 title = "Gemma 4 E4B",
                 description = "Google's latest on-device AI model"
             )
@@ -286,9 +286,9 @@ private fun FeatureCard(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(12.dp),
                 color = when (emoji) {
-                    "ðŸ”’" -> PastelBlue
-                    "âš¡" -> PastelOrange
-                    "ðŸ§ " -> PastelPurple
+                    "\uD83D\uDD12" -> PastelBlue
+                    "\u26A1" -> PastelOrange
+                    "\uD83E\uDDE0" -> PastelPurple
                     else -> PastelGreen
                 }
             ) {

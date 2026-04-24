@@ -3,21 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <queries>
@@ -84,11 +77,6 @@
         </activity>
 
         <service
-            android:name=".data.repository.ModelDownloadService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
-
-        <service
             android:name=".services.NotificationReplyListenerService"
             android:exported="true"
             android:label="Localyze Reply Drafts"
@@ -105,12 +93,6 @@
                 <action android:name="com.localyze.ALARM_TRIGGER" />
             </intent-filter>
         </receiver>
-
-    <!-- Foreground service that protects GPU model loading from memory manager kills -->
-    <service
-            android:name=".ai.ModelLoadingService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
     </application>
 
 </manifest>

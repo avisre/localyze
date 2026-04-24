@@ -140,7 +140,7 @@ class AlarmTool @Inject constructor(
                             put("trigger_time", formatMillis(triggerTime))
                             put("repeat", repeat)
                             put("exact", false)
-                            put("warning", "Exact alarms not permitted. Using inexact alarm â€” may fire slightly later than requested time.")
+                            put("warning", "Exact alarms not permitted. Using inexact alarm - may fire slightly later than requested time.")
                         }.toString()
                     }
                 }

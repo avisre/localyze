@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
+import com.localyze.data.local.SettingsDataStore
 import com.localyze.domain.models.Message as DomainMessage
 import com.localyze.domain.models.MessageRole
 import com.localyze.domain.models.ToolCall
@@ -32,11 +33,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.concurrent.CancellationException
@@ -44,6 +48,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+internal fun shouldExposeToolToModel(
+    toolName: String,
+    allowWebSearch: Boolean,
+    memoryEnabled: Boolean
+): Boolean {
+    if (toolName == "web_search" && !allowWebSearch) return false
+    if (toolName == "memory" && !memoryEnabled) return false
+    return true
+}
 
 /**
  * Inference engine using the LiteRT-LM Kotlin API with native NPU support.
@@ -53,13 +67,13 @@ import kotlin.coroutines.resumeWithException
  * Gemma 4 E4B on Snapdragon devices without OOM kills.
  *
  * KEY DESIGN DECISIONS (matching AI Edge Gallery):
- * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * ──────────────────────────────────────────────────────────────────────────
  * 1. Engine + Conversation are long-lived singletons
  *    - Engine: created once when model loads, lives for entire app session
  *    - Conversation: created once, REUSED across all messages in a chat session
  *    - Conversation is only reset when explicitly requested (new chat, mode change)
  *    - This is critical: Conversation maintains the KV cache and token history
- *      internally â€” recreating it each message breaks multi-turn conversations
+ *      internally — recreating it each message breaks multi-turn conversations
  *
  * 2. We NEVER inject message history into Conversation
  *    - LiteRT-LM tracks conversation history automatically as you call
@@ -70,7 +84,7 @@ import kotlin.coroutines.resumeWithException
  *    - Gallery's pattern: conversation.sendMessageAsync(Contents, MessageCallback, extraContext)
  *    - This is the correct streaming API for LiteRT-LM
  *
- * 4. Backend selection: NPU â†’ GPU â†’ CPU with automatic fallback
+ * 4. Backend selection: NPU → GPU → CPU with automatic fallback
  *    - When NPU is active, SamplerConfig must be null (DSP handles sampling)
  *    - Separate visionBackend and audioBackend for multimodal
  *
@@ -82,7 +96,8 @@ import kotlin.coroutines.resumeWithException
 class GemmaInferenceEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val systemPromptBuilder: SystemPromptBuilder,
-    private val toolRegistry: ToolRegistry
+    private val toolRegistry: ToolRegistry,
+    private val settingsDataStore: SettingsDataStore
 ) {
 
     companion object {
@@ -91,17 +106,19 @@ class GemmaInferenceEngine @Inject constructor(
         private const val DEFAULT_TOP_K = 40
         private const val DEFAULT_TEMPERATURE = 0.7f
         private const val DEFAULT_TOP_P = 0.95f
+        private const val MAX_IMAGE_INPUT_SIDE = 1024
+        private const val ENGINE_READY_TIMEOUT_MS = 180_000L
 
-        /** Sample rate for audio recording â€” 16kHz mono PCM 16-bit (Gallery pattern). */
+        /** Sample rate for audio recording — 16kHz mono PCM 16-bit (Gallery pattern). */
         const val SAMPLE_RATE = 16000
 
         /**
          * Determine the best model file for this device.
          *
          * LiteRT-LM models come in variants optimized for specific hardware:
-         * - Generic (gemma-4-E4B-it.litertlm) â€” works on CPU/GPU, no NPU optimization
+         * - Generic (gemma-4-E4B-it.litertlm) — works on CPU/GPU, no NPU optimization
          * - Qualcomm NPU (gemma-e2b-npu.litertlm / gemma-4-E2B-it_qualcomm_qcs8275.litertlm)
-         *   â€” pre-compiled for Hexagon DSP on Snapdragon devices
+         *   — pre-compiled for Hexagon DSP on Snapdragon devices
          *
          * NPU-optimized models are ~3x faster and use ~50% less RAM
          * because compute runs on the Hexagon DSP instead of the app heap.
@@ -109,9 +126,9 @@ class GemmaInferenceEngine @Inject constructor(
          * We look for NPU models first; if none found, fall back to generic.
          */
 /**
-     * Detect if a model file is NPU-optimized (Qualcomm SoC variant).
-     * NPU models have _qualcomm or _npu in the filename.
-     */
+      * Detect if a model file is NPU-optimized (Qualcomm SoC variant).
+      * NPU models have _qualcomm or _npu in the filename.
+      */
     }
 
     private val _modelLoadState = MutableStateFlow<ModelLoadState>(ModelLoadState.NotLoaded)
@@ -137,13 +154,13 @@ class GemmaInferenceEngine @Inject constructor(
     fun isModelLoaded(): Boolean = _modelLoadState.value is ModelLoadState.Loaded
     fun getActiveBackend(): String = activeBackendType
 
-    // â”€â”€ Engine & Conversation (Gallery pattern: long-lived singletons) â”€â”€â”€â”€
+    // ── Engine & Conversation (Gallery pattern: long-lived singletons) ────
 
-    /** The LiteRT-LM engine â€” created once, lives for entire app lifetime. */
+    /** The LiteRT-LM engine — created once, lives for entire app lifetime. */
     @Volatile private var engine: Engine? = null
 
     /**
-     * The active Conversation â€” reused across messages.
+     * The active Conversation — reused across messages.
      * Only reset when explicitly requested (new chat, mode change).
      * This is CRITICAL: the Conversation maintains the KV cache and
      * tracks message history internally. Do NOT recreate per message.
@@ -153,10 +170,10 @@ class GemmaInferenceEngine @Inject constructor(
     /** Which backend is currently active. */
     @Volatile private var activeBackendType: String = "none"
 
-    /** The Backend object used â€” needed for SamplerConfig decision. */
+    /** The Backend object used — needed for SamplerConfig decision. */
     @Volatile private var activeBackend: Backend = Backend.CPU()
 
-    /** Current system instruction and capability mode â€” tracked for reset. */
+    /** Current system instruction and capability mode — tracked for reset. */
     @Volatile private var currentSystemInstruction: Contents? = null
     @Volatile private var currentCapabilityMode: String = "chat"
     @Volatile private var currentEnableThinking: Boolean = false
@@ -165,7 +182,7 @@ class GemmaInferenceEngine @Inject constructor(
     @Volatile private var restoredConversationContext: String? = null
 
     /**
-     * Initialize the engine, trying NPU â†’ GPU â†’ CPU in order.
+     * Initialize the engine, trying NPU → GPU → CPU in order.
      *
      * Matches AI Edge Gallery's LlmChatModelHelper.initialize() exactly.
      */
@@ -200,15 +217,15 @@ class GemmaInferenceEngine @Inject constructor(
                 Log.w(TAG, "Could not set ADSP_LIBRARY_PATH: ${e.message}")
             }
 
-            // Try backends in priority order: NPU â†’ GPU â†’ CPU
+            // Try backends in priority order: NPU → GPU → CPU
             //
-            // âš ï¸ IMPORTANT: Backend.NPU() with Engine.initialize() can trigger a
+            // ⚠️ IMPORTANT: Backend.NPU() with Engine.initialize() can trigger a
             // native SIGABRT in liblitertlm_jni.so (Issue #774, #5159). This
-            // kills the entire process â€” we CANNOT catch it in Kotlin.
+            // kills the entire process — we CANNOT catch it in Kotlin.
             //
             // WORKAROUND: We try GPU first (which always works), and only
             // attempt NPU if the user explicitly requests it. The NPU model
-            // files are backwards-compatible â€” they run fine on GPU too.
+            // files are backwards-compatible — they run fine on GPU too.
             //
             // TODO: Once LiteRT-LM Kotlin API NPU support stabilizes
             // (see github.com/google-ai-edge/LiteRT-LM/issues/774),
@@ -252,7 +269,7 @@ class GemmaInferenceEngine @Inject constructor(
                     activeBackend = backend
                     activeBackendType = name
                     loaded = true
-                    Log.d(TAG, "âœ“ $name backend initialized successfully!")
+                    Log.d(TAG, "✓ $name backend initialized successfully!")
                     break
                 } catch (e: Exception) {
                     Log.w(TAG, "$name backend failed: ${e.message}", e)
@@ -264,10 +281,6 @@ class GemmaInferenceEngine @Inject constructor(
                 _modelLoadState.value = ModelLoadState.Error("All Gemma 4 E4B backends (GPU, CPU) failed")
                 throw ModelLoadException("All model backends failed")
             }
-
-            // Start foreground service for the model's entire lifetime
-            ModelLoadingService.start(context)
-            ModelLoadingService.updateNotification(context, "Gemma 4 E4B â€¢ $activeBackendType")
 
             _modelLoadState.value = ModelLoadState.Loaded
             Log.d(TAG, "Model init complete! Backend: $activeBackendType")
@@ -341,15 +354,7 @@ class GemmaInferenceEngine @Inject constructor(
         val toolProviders = buildToolProviders()
 
         // Gallery pattern: SamplerConfig null on NPU
-        val samplerConfig = if (activeBackend is Backend.NPU) {
-            null
-        } else {
-            SamplerConfig(
-                topK = topK,
-                topP = topP.toDouble(),
-                temperature = temperature.toDouble()
-            )
-        }
+        val samplerConfig = samplerConfigForActiveBackend()
 
         // Gallery pattern: optionally enable constrained decoding
         ExperimentalFlags.enableConversationConstrainedDecoding = false
@@ -441,27 +446,15 @@ class GemmaInferenceEngine @Inject constructor(
     ): Flow<InferenceToken> = callbackFlow {
         Log.d(TAG, "generateResponse called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
 
-        if (engine == null || _modelLoadState.value !is ModelLoadState.Loaded) {
-            // Try lazy initialization
-            if (_modelLoadState.value !is ModelLoadState.Loading) {
-                Log.d(TAG, "Engine not initialized, attempting lazy initialization...")
-                try {
-                    initialize()
-                    Log.d(TAG, "Lazy initialization completed")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Lazy initialization failed", e)
-                }
+        if (!awaitEngineReadyForInference()) {
+            Log.w(TAG, "Engine unavailable after waiting, using text fallback")
+            val msg = messages.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
+            for (chunk in generateContextualFallback(msg, capabilityMode).chunked(2)) {
+                trySend(InferenceToken.TextToken(chunk))
             }
-            if (engine == null) {
-                Log.w(TAG, "Engine still null after initialization attempt, using fallback")
-                val msg = messages.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
-                for (chunk in generateContextualFallback(msg, capabilityMode).chunked(2)) {
-                    trySend(InferenceToken.TextToken(chunk))
-                }
-                trySend(InferenceToken.EndOfStream)
-                close()
-                return@callbackFlow
-            }
+            trySend(InferenceToken.EndOfStream)
+            close()
+            return@callbackFlow
         }
 
         var responseReceived = false
@@ -479,12 +472,10 @@ class GemmaInferenceEngine @Inject constructor(
             val conv = ensureConversation(capabilityMode, enableThinking)
             Log.d(TAG, "Conversation ready: ${conv.hashCode()}")
 
-            // Extract the last user message â€” Gallery pattern: only send the latest input
+            // Extract the last user message — Gallery pattern: only send the latest input
             // The Conversation already has all previous messages tracked internally
             val lastUserMessage = messages.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
             Log.d(TAG, "Sending message to model: '${lastUserMessage.take(50)}...'")
-
-            ModelLoadingService.updateNotification(context, "Generating on $activeBackendType...")
 
             // Gallery pattern: sendMessageAsync with MessageCallback
             conv.sendMessageAsync(
@@ -573,7 +564,6 @@ class GemmaInferenceEngine @Inject constructor(
             trySend(InferenceToken.EndOfStream)
             close()
         } finally {
-            ModelLoadingService.updateNotification(context, "Gemma 4 E4B â€¢ $activeBackendType")
         }
 
         // Keep the callbackFlow open until explicitly closed or cancelled
@@ -586,7 +576,10 @@ class GemmaInferenceEngine @Inject constructor(
 
     /**
      * Generate a response with an image input.
-     * Gallery pattern: include Content.ImageBytes in the Contents.
+     *
+     * Gallery pattern: include Content.ImageBytes in the Contents and send
+     * through Conversation. Session.generateContentStream requires a separately
+     * preprocessed image tensor and fails on normal PNG/JPEG bytes.
      */
     fun generateResponseWithImage(
         messages: List<DomainMessage>,
@@ -595,31 +588,41 @@ class GemmaInferenceEngine @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<InferenceToken> = callbackFlow {
-        if (engine == null) {
-            val msg = messages.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
-            for (chunk in generateContextualFallback(msg, capabilityMode).chunked(2)) {
-                trySend(InferenceToken.TextToken(chunk))
-            }
+        Log.d(TAG, "generateResponseWithImage called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
+
+        if (!awaitEngineReadyForInference()) {
+            Log.w(TAG, "Engine unavailable after waiting; cannot analyze image")
+            trySend(InferenceToken.Error("The model is still loading or unavailable. Please try the image again."))
             trySend(InferenceToken.EndOfStream)
             close()
             return@callbackFlow
         }
 
+        var responseReceived = false
+        val timeoutJob = launch(Dispatchers.Default) {
+            delay(30000) // 30 second timeout
+            if (!responseReceived) {
+                Log.e(TAG, "Response timeout - no callback received within 30 seconds")
+                trySend(InferenceToken.Error("The model is not responding. Please try again or restart the app."))
+                trySend(InferenceToken.EndOfStream)
+                close()
+            }
+        }
+
         try {
             val conv = ensureConversation(capabilityMode, enableThinking, supportImage = true)
-
-            // Convert Bitmap to PNG ByteArray (Gallery pattern)
-            val stream = ByteArrayOutputStream()
-            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val imageBytes = stream.toByteArray()
+            Log.d(TAG, "Conversation ready for image: ${conv.hashCode()}")
 
             val lastUserMessage = prompt.ifBlank {
                 messages.lastOrNull { it.role == MessageRole.USER }?.content ?: "Describe this image"
             }
+            val imageBytes = encodeImageForVision(imageBitmap)
 
-            ModelLoadingService.updateNotification(context, "Generating on $activeBackendType [image]...")
+            Log.d(
+                TAG,
+                "Sending image to conversation: promptChars=${lastUserMessage.length}, imageBytes=${imageBytes.size}"
+            )
 
-            // Gallery pattern: Image content first, then text
             conv.sendMessageAsync(
                 Contents.of(
                     Content.ImageBytes(imageBytes),
@@ -627,6 +630,9 @@ class GemmaInferenceEngine @Inject constructor(
                 ),
                 object : MessageCallback {
                     override fun onMessage(message: LiteRtMessage) {
+                        responseReceived = true
+                        Log.d(TAG, "Image onMessage callback received")
+
                         val thinkingContent = message.channels["thought"]
                         if (thinkingContent != null && enableThinking) {
                             for (chunk in thinkingContent.chunked(3)) {
@@ -634,11 +640,34 @@ class GemmaInferenceEngine @Inject constructor(
                             }
                         }
 
-                        val textContent = message.contents.contents
+                        val toolCalls = message.toolCalls
+                        for (tc in toolCalls) {
+                            val domainToolCall = ToolCall(
+                                name = tc.name,
+                                arguments = kotlinx.serialization.json.JsonObject(
+                                    tc.arguments.mapValues { (_, v) ->
+                                        when (v) {
+                                            is String -> kotlinx.serialization.json.JsonPrimitive(v)
+                                            is Int -> kotlinx.serialization.json.JsonPrimitive(v)
+                                            is Double -> kotlinx.serialization.json.JsonPrimitive(v)
+                                            is Boolean -> kotlinx.serialization.json.JsonPrimitive(v)
+                                            else -> kotlinx.serialization.json.JsonPrimitive(v.toString())
+                                        }
+                                    }
+                                ),
+                                callId = ""
+                            )
+                            trySend(InferenceToken.ToolCallToken(domainToolCall))
+                        }
+
+                        val contentText = message.contents.contents
                             .filterIsInstance<Content.Text>()
                             .joinToString("") { it.text }
+                        val textContent = contentText.ifBlank { message.toString() }
 
-                        if (textContent.isNotBlank()) {
+                        Log.d(TAG, "Received image text content: '${textContent.take(100)}...'")
+
+                        if (textContent.isNotBlank() && toolCalls.isEmpty()) {
                             for (chunk in textContent.chunked(2)) {
                                 trySend(InferenceToken.TextToken(chunk))
                             }
@@ -646,28 +675,45 @@ class GemmaInferenceEngine @Inject constructor(
                     }
 
                     override fun onDone() {
+                        responseReceived = true
+                        Log.d(TAG, "Image onDone callback received")
+                        timeoutJob.cancel()
                         trySend(InferenceToken.EndOfStream)
                         close()
                     }
 
                     override fun onError(throwable: Throwable) {
+                        responseReceived = true
+                        timeoutJob.cancel()
                         if (throwable is CancellationException) {
+                            Log.i(TAG, "Generation cancelled by user")
                             trySend(InferenceToken.EndOfStream)
                         } else {
+                            Log.e(TAG, "LiteRT-LM error during image inference", throwable)
                             trySend(InferenceToken.Error("Image inference error: ${throwable.message}"))
                         }
                         close()
                     }
                 },
-                emptyMap()
             )
+        } catch (e: LiteRtLmJniException) {
+            timeoutJob.cancel()
+            Log.e(TAG, "LiteRT-LM JNI error during image inference", e)
+            trySend(InferenceToken.Error("Image inference error: ${e.message}"))
+            trySend(InferenceToken.EndOfStream)
+            close()
         } catch (e: Exception) {
+            timeoutJob.cancel()
             Log.e(TAG, "Image inference failed", e)
             trySend(InferenceToken.Error("Image inference failed: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
             close()
         } finally {
-            ModelLoadingService.updateNotification(context, "Gemma 4 E4B â€¢ $activeBackendType")
+        }
+
+        awaitClose {
+            Log.d(TAG, "callbackFlow closing, cancelling timeout job")
+            timeoutJob.cancel()
         }
     }.flowOn(Dispatchers.Default)
 
@@ -704,8 +750,6 @@ class GemmaInferenceEngine @Inject constructor(
             val lastUserMessage = prompt.ifBlank {
                 messages.lastOrNull { it.role == MessageRole.USER }?.content ?: "Transcribe and respond to this audio"
             }
-
-            ModelLoadingService.updateNotification(context, "Generating on $activeBackendType [audio]...")
 
             // Gallery pattern: wrap raw PCM in WAV header before sending to model.
             // LiteRT-LM's Content.AudioBytes expects WAV format, not raw PCM.
@@ -761,20 +805,31 @@ class GemmaInferenceEngine @Inject constructor(
             trySend(InferenceToken.EndOfStream)
             close()
         } finally {
-            ModelLoadingService.updateNotification(context, "Gemma 4 E4B â€¢ $activeBackendType")
         }
     }.flowOn(Dispatchers.Default)
 
-    // â”€â”€ Tool Providers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Tool Providers ──────────────────────────────────────────────────────
 
     /**
      * Build LiteRT-LM ToolProviders from our app's ToolRegistry.
      *
      * This uses LiteRT-LM's native tool() function to create ToolProviders
-     * that the model can call natively â€” matching the Gallery's approach.
+     * that the model can call natively — matching the Gallery's approach.
      */
     private fun buildToolProviders(): List<ToolProvider> {
+        val toolSettings = runCatching {
+            runBlocking {
+                settingsDataStore.allowWebSearch.first() to settingsDataStore.memoryEnabled.first()
+            }
+        }.getOrDefault(false to false)
         val appTools = toolRegistry.getAllTools()
+            .filter { tool ->
+                shouldExposeToolToModel(
+                    toolName = tool.name,
+                    allowWebSearch = toolSettings.first,
+                    memoryEnabled = toolSettings.second
+                )
+            }
         if (appTools.isEmpty()) return emptyList()
 
         return appTools.map { appTool ->
@@ -804,7 +859,7 @@ class GemmaInferenceEngine @Inject constructor(
         }
     }
 
-    // â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Lifecycle ───────────────────────────────────────────────────────────
 
     fun release() {
         try { conversation?.close() } catch (_: Exception) { }
@@ -814,23 +869,84 @@ class GemmaInferenceEngine @Inject constructor(
         activeBackendType = "none"
         activeBackend = Backend.CPU()
         _modelLoadState.value = ModelLoadState.NotLoaded
-        ModelLoadingService.stop(context)
     }
 
-    // â”€â”€ Fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Fallback ────────────────────────────────────────────────────────────
 
     private fun generateContextualFallback(userMessage: String, capabilityMode: String): String {
         return when (capabilityMode) {
             "code" -> "I'd be happy to help with code! However, the AI model is currently loading. Please try again in a moment."
-            "see" -> "I can see you've shared something visual. The AI model is loading â€” please retry shortly."
+            "see" -> "I can see you've shared something visual. The AI model is loading — please retry shortly."
             "write" -> "I'd love to help with writing! The AI model is still initializing. Please try again in a moment."
-            "brainstorm" -> "Great ideas start with a conversation! The AI model is loading â€” give it a moment and try again."
+            "brainstorm" -> "Great ideas start with a conversation! The AI model is loading — give it a moment and try again."
             "data" -> "I can help analyze data once the AI model finishes loading. Please try again shortly."
             else -> "Hi! I'm your on-device AI assistant. The model is currently loading. Please try sending your message again in a moment."
         }
     }
 
-    // â”€â”€ WAV Header Utility (matching Gallery's ChatMessageAudioClip.genByteArrayForWav()) â”€â”€
+    private fun samplerConfigForActiveBackend(): SamplerConfig? {
+        return if (activeBackend is Backend.NPU) {
+            null
+        } else {
+            SamplerConfig(
+                topK = topK,
+                topP = topP.toDouble(),
+                temperature = temperature.toDouble()
+            )
+        }
+    }
+
+    private suspend fun awaitEngineReadyForInference(): Boolean {
+        if (engine != null && _modelLoadState.value is ModelLoadState.Loaded) {
+            return true
+        }
+
+        if (_modelLoadState.value !is ModelLoadState.Loading) {
+            Log.d(TAG, "Engine not initialized, attempting lazy initialization...")
+            try {
+                initialize()
+                Log.d(TAG, "Lazy initialization completed")
+            } catch (e: Exception) {
+                Log.e(TAG, "Lazy initialization failed", e)
+            }
+        }
+
+        if (engine != null && _modelLoadState.value is ModelLoadState.Loaded) {
+            return true
+        }
+
+        if (_modelLoadState.value is ModelLoadState.Loading) {
+            Log.d(TAG, "Waiting for in-flight model initialization before inference...")
+            val finalState = withTimeoutOrNull(ENGINE_READY_TIMEOUT_MS) {
+                _modelLoadState.first { it !is ModelLoadState.Loading }
+            }
+            Log.d(TAG, "Model initialization wait finished with state=$finalState, engine=${engine != null}")
+        }
+
+        return engine != null && _modelLoadState.value is ModelLoadState.Loaded
+    }
+
+    private fun encodeImageForVision(bitmap: Bitmap): ByteArray {
+        val maxSide = maxOf(bitmap.width, bitmap.height)
+        val source = if (maxSide > MAX_IMAGE_INPUT_SIDE) {
+            val scale = MAX_IMAGE_INPUT_SIDE.toFloat() / maxSide.toFloat()
+            Bitmap.createScaledBitmap(
+                bitmap,
+                (bitmap.width * scale).toInt().coerceAtLeast(1),
+                (bitmap.height * scale).toInt().coerceAtLeast(1),
+                true
+            )
+        } else {
+            bitmap
+        }
+
+        val stream = ByteArrayOutputStream()
+        source.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        if (source !== bitmap) source.recycle()
+        return stream.toByteArray()
+    }
+
+    // ── WAV Header Utility (matching Gallery's ChatMessageAudioClip.genByteArrayForWav()) ──
 
     /**
      * Wraps raw PCM 16-bit mono audio data in a WAV file header.

@@ -3,7 +3,7 @@
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.localyze.ai.GemmaInferenceEngine
+import com.localyze.ai.ModelInitializer
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.DownloadProgress
 import com.localyze.data.repository.ModelRepository
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val modelRepository: ModelRepository,
-    private val gemmaInferenceEngine: GemmaInferenceEngine,
+    private val modelInitializer: ModelInitializer,
     private val settingsDataStore: SettingsDataStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -166,11 +166,9 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Retries the download from scratch.
+     * Retries the download and resumes any preserved partial file.
      */
     fun retryDownload() {
-        // Clean up any partial downloads
-        modelRepository.deleteModel()
         startDownload()
     }
 
@@ -189,7 +187,7 @@ class OnboardingViewModel @Inject constructor(
                 }
                 android.util.Log.d("OnboardingVM", "Starting real model initialization...")
                 _uiState.value = OnboardingUiState.CheckingModel(isChecking = true)
-                gemmaInferenceEngine.initialize()
+                modelInitializer.initialize()
                 android.util.Log.d("OnboardingVM", "Model initialization SUCCESS")
                 _uiState.value = OnboardingUiState.ReadyToChat
             } catch (e: Exception) {

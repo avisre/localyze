@@ -72,7 +72,7 @@ fun DebugToolTesterScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "ðŸ”§ Debug Tool Tester",
+                        text = "\uD83D\uDD27 Debug Tool Tester",
                         fontWeight = FontWeight.Bold,
                         color = OnBackground
                     )

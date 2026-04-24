@@ -1,6 +1,8 @@
 ﻿package com.localyze.di
 
 import com.localyze.ai.GemmaInferenceEngine
+import com.localyze.ai.GemmaModelInitializer
+import com.localyze.ai.ModelInitializer
 import com.localyze.ai.MockGemmaEngine
 import dagger.Module
 import dagger.Provides
@@ -34,4 +36,8 @@ object AIModule {
     @Provides
     @Singleton
     fun provideMockEngine(): MockGemmaEngine = MockGemmaEngine()
+
+    @Provides
+    @Singleton
+    fun provideModelInitializer(initializer: GemmaModelInitializer): ModelInitializer = initializer
 }

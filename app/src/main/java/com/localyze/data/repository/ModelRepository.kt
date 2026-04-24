@@ -176,14 +176,15 @@ class ModelRepository @Inject constructor(
 
         // Check for resumable download
         var startByte = 0L
-        if (resume && canResumeDownload()) {
+        val canResumeExistingDownload = resume && canResumeDownload()
+        if (canResumeExistingDownload) {
             val (downloaded, total) = getResumableDownloadProgress()
             if (downloaded < total) {
                 startByte = downloaded
                 android.util.Log.d(TAG, "Resuming download from byte $startByte")
                 emit(DownloadProgress.Resuming(startByte, total))
             }
-        } else if (!resume && tempFile.exists()) {
+        } else if (shouldDeleteStaleTempFile(resume, canResumeExistingDownload, tempFile.exists())) {
             tempFile.delete()
             clearDownloadProgress()
         }
@@ -370,15 +371,25 @@ class ModelRepository @Inject constructor(
             throw e
         } catch (e: java.net.SocketTimeoutException) {
             // Keep temp file for resume
+            savePartialDownloadProgress(downloadUrl, totalSizeHint)
             emit(DownloadProgress.Error("Connection timed out. Download will resume when possible.", true))
         } catch (e: java.net.UnknownHostException) {
             // Keep temp file for resume
+            savePartialDownloadProgress(downloadUrl, totalSizeHint)
             emit(DownloadProgress.Error("Could not connect to server. Download will resume when connection is restored.", true))
         } catch (e: Exception) {
             // For other errors, keep temp file for potential resume
+            savePartialDownloadProgress(downloadUrl, totalSizeHint)
             emit(DownloadProgress.Error("Download failed: ${e.message ?: "Unknown error"}. Progress saved for resume.", true))
         }
     }.flowOn(Dispatchers.IO)
+
+    private fun savePartialDownloadProgress(downloadUrl: String, totalSizeHint: Long) {
+        val bytesDownloaded = tempFile.length()
+        if (bytesDownloaded > 0L && bytesDownloaded < totalSizeHint) {
+            saveDownloadProgress(downloadUrl, bytesDownloaded, totalSizeHint)
+        }
+    }
 
     private suspend fun verifySha256(
         file: File,

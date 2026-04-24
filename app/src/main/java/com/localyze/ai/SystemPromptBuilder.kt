@@ -6,6 +6,15 @@ import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
+internal val KNOWLEDGE_AND_TOOL_INSTRUCTION = """
+    Answer stable general-knowledge, educational, coding, writing, and reasoning questions
+    from your own model knowledge. Do not refuse these requests because web search is disabled.
+    Use web_search only when the user explicitly asks you to search the web or when the
+    answer requires current, recent, live, location-specific, price, schedule, or news data.
+    If web_search is unavailable, mention that limitation only for requests that truly need
+    current web data, then offer what you can answer from on-device knowledge.
+""".trimIndent()
+
 /**
  * Builds system prompts for the Gemma 4 E4B model based on the active
  * capability mode, thinking mode, registered tools, and user memories.
@@ -115,6 +124,8 @@ class SystemPromptBuilder @Inject constructor(
 
         // 1. Select the base prompt for the capability mode
         sb.appendLine(selectModePrompt(capabilityMode))
+        sb.appendLine()
+        sb.appendLine(KNOWLEDGE_AND_TOOL_INSTRUCTION)
         sb.appendLine()
 
         // 2. Append thinking instruction if enabled

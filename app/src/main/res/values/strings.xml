@@ -15,10 +15,8 @@
     <string name="model_loading">Loading AI model...</string>
     <string name="model_not_loaded">AI model not loaded</string>
     <string name="permission_required">Permission required</string>
-    <string name="camera_permission_rationale">Camera access is needed for visual AI features</string>
     <string name="contacts_permission_rationale">Contacts access is needed for the contacts tool</string>
     <string name="calendar_permission_rationale">Calendar access is needed for the calendar tool</string>
     <string name="audio_permission_rationale">Microphone access is needed for voice input</string>
     <string name="notification_permission_rationale">Notifications are needed for background task updates</string>
-    <string name="storage_permission_rationale">Storage access is needed to read images and files</string>
 </resources>

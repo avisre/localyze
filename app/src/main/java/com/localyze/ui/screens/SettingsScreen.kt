@@ -1,7 +1,12 @@
 ﻿package com.localyze.ui.screens
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,9 +78,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.localyze.BuildConfig
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.localyze.data.billing.BillingConstants
 import com.localyze.domain.models.Memory
 import com.localyze.ui.components.AssistantMark
 import com.localyze.ui.components.ReferenceDivider
@@ -139,36 +146,40 @@ fun SettingsScreen(
                 ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    val filesPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_IMAGES
-    } else {
-        @Suppress("DEPRECATION")
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
     val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.POST_NOTIFICATIONS
     } else {
         ""
     }
-    val filesStatus = if (isGranted(filesPermission)) "Allowed" else "Ask"
     val microphoneStatus = if (isGranted(Manifest.permission.RECORD_AUDIO)) "Allowed" else "Ask"
     val notificationStatus = if (isGranted(notificationPermission)) "Allowed" else "Ask"
 
     SettingsReferenceContent(
         uiState = uiState,
-        filesStatus = filesStatus,
         microphoneStatus = microphoneStatus,
         notificationStatus = notificationStatus,
         onOpenModelInfo = { showModelInfoDialog = true },
         onDeleteModel = { viewModel.showDeleteModelDialog() },
         onOpenPermissions = { showPermissionsDialog = true },
         onOpenAbout = { showAboutDialog = true },
-        onToggleMemory = { viewModel.toggleMemorySection() },
+        onBuyPremium = {
+            context.findActivity()?.let { activity ->
+                viewModel.launchPremiumPurchase(activity)
+            } ?: viewModel.refreshPremiumSubscription()
+        },
+        onRestorePurchase = { viewModel.restorePremiumPurchase() },
+        onManageSubscription = { openPlaySubscriptionCenter(context) },
         onSearchQueryChange = { viewModel.updateMemorySearchQuery(it) },
         onDeleteMemory = { viewModel.deleteMemory(it) },
         onEditMemory = { memory, content, keywords -> viewModel.updateMemory(memory, content, keywords) },
         onRefreshTransparency = { viewModel.refreshMemoryTransparencyText() },
         onClearMemories = { viewModel.showClearMemoriesDialog() },
+        onToggleMemoryEnabled = { viewModel.toggleMemoryEnabled() },
+        onReviewMemories = {
+            viewModel.refreshMemoryTransparencyText()
+            viewModel.showMemorySection()
+        },
+        onManageMemories = { viewModel.showMemorySection() },
         onToggleWebSearch = { viewModel.toggleAllowWebSearch() },
         onToggleThinking = { viewModel.toggleThinkingMode() },
         onToggleStreamTokens = { viewModel.toggleStreamTokens() },
@@ -183,168 +194,6 @@ fun SettingsScreen(
         onNavigateToBackups = onNavigateToBackups
     )
 
-    if (false) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        // â”€â”€ Avatar & App Identity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        Spacer(modifier = Modifier.height(16.dp))
-
-        AvatarSection(onVersionTaps = onNavigateToDebugTools)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // â”€â”€ Toggle Rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        SettingsToggleRow(
-            icon = "ðŸŒ™",
-            title = "Dark mode",
-            subtitle = "Use dark theme",
-            checked = uiState.darkMode,
-            onCheckedChange = { viewModel.toggleDarkMode() }
-        )
-
-        SettingsToggleRow(
-            icon = "ðŸ§ ",
-            title = "Thinking mode",
-            subtitle = "Show AI reasoning traces",
-            checked = uiState.thinkingMode,
-            onCheckedChange = { viewModel.toggleThinkingMode() }
-        )
-
-        SettingsToggleRow(
-            icon = "âš¡",
-            title = "Stream tokens",
-            subtitle = "Display tokens as they generate",
-            checked = uiState.streamTokens,
-            onCheckedChange = { viewModel.toggleStreamTokens() }
-        )
-
-        SettingsToggleRow(
-            icon = "ðŸ”Š",
-            title = "Voice auto-play",
-            subtitle = "Automatically read AI responses aloud",
-            checked = uiState.voiceAutoPlay,
-            onCheckedChange = { viewModel.toggleVoiceAutoPlay() }
-        )
-
-        SettingsToggleRow(
-            icon = "ðŸŒ",
-            title = "Allow web search",
-            subtitle = "Enable DuckDuckGo search tool",
-            checked = uiState.allowWebSearch,
-            onCheckedChange = { viewModel.toggleAllowWebSearch() }
-        )
-
-        SettingsToggleRow(
-            icon = "ðŸ“¶",
-            title = "Allow cellular download",
-            subtitle = "Download model over mobile data (uses ~3.6GB)",
-            checked = uiState.allowCellularDownload,
-            onCheckedChange = { viewModel.toggleAllowCellularDownload() }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // â”€â”€ Chevron Rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        SettingsChevronRow(
-            icon = "ðŸ“‹",
-            title = "Tasks",
-            subtitle = "Manage your to-do list",
-            onClick = onNavigateToTasks
-        )
-
-        SettingsChevronRow(
-            icon = "ðŸ’¬",
-            title = "Conversations",
-            subtitle = "Archive, favorite, folders, bulk actions",
-            onClick = onNavigateToConversations
-        )
-
-        SettingsChevronRow(
-            icon = "OK",
-            title = "Tool approval center",
-            subtitle = "Review permissions, risk, and history",
-            onClick = onNavigateToToolCenter
-        )
-
-        SettingsChevronRow(
-            icon = "+",
-            title = "Attachments",
-            subtitle = "Save and search files later",
-            onClick = onNavigateToAttachments
-        )
-
-        SettingsChevronRow(
-            icon = "@",
-            title = "Reply assistant",
-            subtitle = "Draft replies for texts and email",
-            onClick = onNavigateToReplies
-        )
-
-        SettingsChevronRow(
-            icon = "%",
-            title = "Performance",
-            subtitle = "Model, RAM, storage, speed, errors",
-            onClick = onNavigateToPerformance
-        )
-
-        SettingsChevronRow(
-            icon = "#",
-            title = "Backups",
-            subtitle = "Encrypted local backup and restore",
-            onClick = onNavigateToBackups
-        )
-
-        SettingsChevronRow(
-            icon = "!",
-            title = "Proactive assistant",
-            subtitle = "Reminders, follow-ups, summaries",
-            onClick = onNavigateToProactive
-        )
-
-        SettingsChevronRow(
-            icon = "ðŸ“±",
-            title = "Model info",
-            onClick = { showModelInfoDialog = true }
-        )
-
-        SettingsChevronRow(
-            icon = "ðŸ’¾",
-            title = "Memory & context",
-            onClick = { viewModel.toggleMemorySection() }
-        )
-
-        SettingsChevronRow(
-            icon = "ðŸ”‘",
-            title = "Permissions",
-            onClick = { showPermissionsDialog = true }
-        )
-
-        SettingsChevronRow(
-            icon = "â„¹ï¸",
-            title = "About",
-            onClick = { showAboutDialog = true }
-        )
-
-        // â”€â”€ Memory & Context Section (expandable) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        if (uiState.isMemorySectionExpanded) {
-            MemorySection(
-                uiState = uiState,
-                onSearchQueryChange = { viewModel.updateMemorySearchQuery(it) },
-                onDeleteMemory = { viewModel.deleteMemory(it) },
-                onEditMemory = { memory, content, keywords -> viewModel.updateMemory(memory, content, keywords) },
-                onRefreshTransparency = { viewModel.refreshMemoryTransparencyText() },
-                onClearAll = { viewModel.showClearMemoriesDialog() }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-    }
-    }
 
     // â”€â”€ Dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -394,19 +243,23 @@ fun SettingsScreen(
 @Composable
 private fun SettingsReferenceContent(
     uiState: SettingsUiState,
-    filesStatus: String,
     microphoneStatus: String,
     notificationStatus: String,
     onOpenModelInfo: () -> Unit,
     onDeleteModel: () -> Unit,
     onOpenPermissions: () -> Unit,
     onOpenAbout: () -> Unit,
-    onToggleMemory: () -> Unit,
+    onBuyPremium: () -> Unit,
+    onRestorePurchase: () -> Unit,
+    onManageSubscription: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onDeleteMemory: (Long) -> Unit,
     onEditMemory: (Memory, String, String) -> Unit,
     onRefreshTransparency: () -> Unit,
     onClearMemories: () -> Unit,
+    onToggleMemoryEnabled: () -> Unit,
+    onReviewMemories: () -> Unit,
+    onManageMemories: () -> Unit,
     onToggleWebSearch: () -> Unit,
     onToggleThinking: () -> Unit,
     onToggleStreamTokens: () -> Unit,
@@ -454,23 +307,27 @@ private fun SettingsReferenceContent(
             ReferenceSettingsRow(
                 icon = Icons.Outlined.Memory,
                 title = "Memory",
-                subtitle = "${uiState.memoryCount} saved items",
-                value = if (uiState.isMemorySectionExpanded) "On" else "Off",
-                onClick = onToggleMemory
+                subtitle = if (uiState.memoryEnabled) {
+                    "${uiState.memoryCount} saved items"
+                } else {
+                    "${uiState.memoryCount} saved items, assistant access off"
+                },
+                value = if (uiState.memoryEnabled) "On" else "Off",
+                onClick = onToggleMemoryEnabled
             )
             ReferenceDivider()
             ReferenceSettingsRow(
                 icon = Icons.Outlined.AccountCircle,
                 title = "What do you remember about me?",
                 subtitle = "View saved memories",
-                onClick = onToggleMemory
+                onClick = onReviewMemories
             )
             ReferenceDivider()
             ReferenceSettingsRow(
                 icon = Icons.Outlined.Storage,
                 title = "Manage memories",
                 subtitle = "Review, edit, and delete",
-                onClick = onToggleMemory
+                onClick = onManageMemories
             )
         }
 
@@ -533,27 +390,34 @@ private fun SettingsReferenceContent(
             )
         }
 
+        val premium = uiState.premiumSubscription
         ReferenceSettingsGroup(title = "Subscription") {
             ReferenceSettingsRow(
                 icon = Icons.Outlined.Bolt,
-                title = "Localyze Premium",
-                subtitle = "Private on-device AI",
-                value = "$79.00 / year",
-                showChevron = false
+                title = premium.title,
+                subtitle = premium.errorMessage ?: premium.statusMessage,
+                value = premium.displayValue,
+                showChevron = premium.canPurchase || premium.isPremiumActive || premium.isPending,
+                onClick = when {
+                    premium.canPurchase -> onBuyPremium
+                    premium.isPremiumActive || premium.isPending -> onManageSubscription
+                    else -> null
+                }
             )
             ReferenceDivider()
             ReferenceSettingsRow(
-                icon = Icons.Outlined.Backup,
+                icon = Icons.Outlined.History,
                 title = "Restore purchase",
-                subtitle = "Recover your subscription",
-                onClick = onOpenAbout
+                subtitle = "Recover from Google Play",
+                value = if (premium.isLoading) "Checking" else null,
+                onClick = onRestorePurchase
             )
             ReferenceDivider()
             ReferenceSettingsRow(
                 icon = Icons.Outlined.Settings,
                 title = "Manage subscription",
                 subtitle = "Billing is handled by Google Play",
-                onClick = onOpenAbout
+                onClick = onManageSubscription
             )
         }
 
@@ -587,13 +451,6 @@ private fun SettingsReferenceContent(
             )
             ReferenceDivider()
             ReferenceSettingsRow(
-                icon = Icons.Outlined.Folder,
-                title = "Files & media",
-                subtitle = "Permission status: $filesStatus",
-                onClick = onOpenPermissions
-            )
-            ReferenceDivider()
-            ReferenceSettingsRow(
                 icon = Icons.Outlined.Mic,
                 title = "Microphone",
                 subtitle = "Permission status: $microphoneStatus",
@@ -610,7 +467,7 @@ private fun SettingsReferenceContent(
             ReferenceSettingsRow(
                 icon = Icons.Outlined.Info,
                 title = "About",
-                subtitle = "Version 1.0.0",
+                subtitle = "Version ${BuildConfig.VERSION_NAME}",
                 onClick = onOpenAbout
             )
         }
@@ -723,9 +580,6 @@ private fun MemorySection(
                 )
             },
             leadingIcon = {
-                if (false) {
-                Text(text = "ðŸ”", fontSize = 18.sp)
-                }
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
@@ -884,12 +738,6 @@ private fun MemoryItem(
                 onClick = onDelete,
                 modifier = Modifier.size(32.dp)
             ) {
-                if (false) {
-                Text(
-                    text = "ðŸ—‘ï¸",
-                    fontSize = 16.sp
-                )
-                }
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Delete memory",
@@ -1175,12 +1023,10 @@ private fun PermissionsDialog(
 
     val permissionEntries = remember {
         listOf(
-            PermissionEntry("Camera", Manifest.permission.CAMERA, "ðŸ“·"),
-            PermissionEntry("Contacts", Manifest.permission.READ_CONTACTS, "ðŸ‘¥"),
-            PermissionEntry("Calendar", Manifest.permission.READ_CALENDAR, "ðŸ“…"),
-            PermissionEntry("Microphone", Manifest.permission.RECORD_AUDIO, "ðŸŽ¤"),
-            PermissionEntry("Notifications", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else "", "ðŸ””"),
-            PermissionEntry("Storage", Manifest.permission.READ_MEDIA_IMAGES, "ðŸ“")
+            PermissionEntry("Contacts", Manifest.permission.READ_CONTACTS, "\uD83D\uDC65"),
+            PermissionEntry("Calendar", Manifest.permission.READ_CALENDAR, "\uD83D\uDCC5"),
+            PermissionEntry("Microphone", Manifest.permission.RECORD_AUDIO, "\uD83C\uDFA4"),
+            PermissionEntry("Notifications", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else "", "\uD83D\uDD14")
         )
     }
 
@@ -1227,7 +1073,6 @@ private fun PermissionsDialog(
                             }
                             Icon(
                                 imageVector = when (entry.name) {
-                                    "Camera" -> Icons.Outlined.Image
                                     "Contacts" -> Icons.Outlined.AccountCircle
                                     "Calendar" -> Icons.Outlined.History
                                     "Microphone" -> Icons.Outlined.Mic
@@ -1320,7 +1165,7 @@ private fun AboutDialog(
         text = {
             Column {
                 Text(
-                    text = "Version 1.0.0",
+                    text = "Version ${BuildConfig.VERSION_NAME}",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
@@ -1361,4 +1206,25 @@ private fun AboutDialog(
         },
         containerColor = SurfaceColor
     )
+}
+
+private fun Context.findActivity(): Activity? {
+    var current: Context? = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return current as? Activity
+}
+
+private fun openPlaySubscriptionCenter(context: Context) {
+    val uri = Uri.parse(
+        "https://play.google.com/store/account/subscriptions" +
+                "?sku=${Uri.encode(BillingConstants.PREMIUM_SUBSCRIPTION_PRODUCT_ID)}" +
+                "&package=${Uri.encode(context.packageName)}"
+    )
+    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    runCatching { context.startActivity(intent) }
 }

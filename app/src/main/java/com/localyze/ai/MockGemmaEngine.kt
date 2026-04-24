@@ -49,13 +49,13 @@ class MockGemmaEngine @Inject constructor() {
 
     private val fakeResponses = listOf(
         // 1. Plain text answer
-        "Hello! I'm your local AI assistant. All my processing happens right here on your device â€” no data ever leaves your phone. How can I help you today?",
+        "Hello! I'm your local AI assistant. All my processing happens right here on your device - no data ever leaves your phone. How can I help you today?",
 
         // 2. Code block
         "Here's a simple Python example:\n\n```python\ndef greet(name):\n    \"\"\"Say hello to someone.\"\"\"\n    return f\"Hello, {name}! Welcome!\"\n\nif __name__ == \"__main__\":\n    print(greet(\"World\"))\n```\n\nThis defines a function that takes a name and returns a greeting string.",
 
         // 3. Numbered list
-        "Here are some tips for staying productive:\n\n1. **Start with your hardest task** â€” tackle it when your energy is highest\n2. **Use the Pomodoro technique** â€” 25 minutes focused, 5 minutes break\n3. **Minimize distractions** â€” put your phone on Do Not Disturb\n4. **Batch similar tasks** â€” group emails, calls, and admin together\n5. **Take real breaks** â€” step away from the screen and move your body",
+        "Here are some tips for staying productive:\n\n1. **Start with your hardest task** - tackle it when your energy is highest\n2. **Use the Pomodoro technique** - 25 minutes focused, 5 minutes break\n3. **Minimize distractions** - put your phone on Do Not Disturb\n4. **Batch similar tasks** - group emails, calls, and admin together\n5. **Take real breaks** - step away from the screen and move your body",
 
         // 4. Thinking-mode response
         "That's an interesting question. Let me think through this step by step.\n\n---\n\nAfter considering the options, I'd recommend starting with the simplest approach and iterating from there. The key insight is that premature optimization often leads to overcomplicated solutions that are harder to maintain.",
