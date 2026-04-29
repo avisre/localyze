@@ -1,7 +1,10 @@
 package com.localyze.tools
 
 import com.localyze.data.local.SettingsDataStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -37,10 +40,15 @@ class WebSearchTool @Inject constructor(
             "search is enabled in settings."
 
     private val searchClient = okHttpClient.newBuilder()
-        .callTimeout(20, TimeUnit.SECONDS)
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(20, TimeUnit.SECONDS)
+        .callTimeout(9, TimeUnit.SECONDS)
+        .connectTimeout(7, TimeUnit.SECONDS)
+        .readTimeout(9, TimeUnit.SECONDS)
         .build()
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     override fun getParameterSchema(): JsonObject = buildJsonObject {
         put("type", "object")
@@ -79,23 +87,17 @@ class WebSearchTool @Inject constructor(
         val plannedQueries = normalizeWebSearchQueries(normalizedQuery)
 
         return try {
+            withContext(Dispatchers.IO) {
             val results = mutableListOf<SearchResult>()
+            val searchedProviders = linkedSetOf<String>()
             for (plannedQuery in plannedQueries) {
                 val encodedQuery = URLEncoder.encode(plannedQuery, "UTF-8")
-                if (results.isEmpty()) {
-                    results += safeSearch { searchInstantAnswer(encodedQuery, maxResults) }
-                }
-                if (results.size < maxResults) {
-                    results += safeSearch { searchDuckDuckGoHtml(encodedQuery, maxResults - results.size) }
-                }
-                if (results.size < maxResults) {
-                    results += safeSearch { searchDuckDuckGoLite(encodedQuery, maxResults - results.size) }
-                }
-                if (results.size < maxResults) {
-                    results += safeSearch { searchBingHtml(encodedQuery, maxResults - results.size) }
-                }
-                if (results.size < maxResults) {
-                    results += safeSearch { searchGoogleNewsRss(encodedQuery, maxResults - results.size) }
+                for (provider in providersFor(plannedQuery)) {
+                    if (results.size >= maxResults) break
+                    searchedProviders += provider.displayName
+                    results += safeSearch {
+                        provider.search(encodedQuery, maxResults - results.size)
+                    }
                 }
                 if (results.distinctBy { it.url.ifBlank { it.title } }.size >= maxResults) {
                     break
@@ -107,8 +109,10 @@ class WebSearchTool @Inject constructor(
                     .distinctBy { it.url.ifBlank { it.title } }
                     .take(maxResults),
                 query = normalizedQuery,
-                plannedQueries = plannedQueries
+                plannedQueries = plannedQueries,
+                searchedProviders = searchedProviders.toList()
             )
+            }
         } catch (e: java.net.SocketTimeoutException) {
             errorResult("Search request timed out. Please try again.")
         } catch (e: java.net.UnknownHostException) {
@@ -168,6 +172,17 @@ class WebSearchTool @Inject constructor(
         }
     }
 
+    private fun searchWikipediaApi(encodedQuery: String, maxResults: Int): List<SearchResult> {
+        if (maxResults <= 0) return emptyList()
+        val url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=$encodedQuery&format=json&srlimit=$maxResults&utf8=1"
+        return searchClient.newCall(searchRequest(url)).execute().use { response ->
+            if (!response.isSuccessful) return emptyList()
+            val responseBody = response.body?.string().orEmpty()
+            if (responseBody.isBlank()) return emptyList()
+            parseWikipediaResponse(responseBody, maxResults)
+        }
+    }
+
     private fun searchGoogleNewsRss(encodedQuery: String, maxResults: Int): List<SearchResult> {
         if (maxResults <= 0) return emptyList()
         val url = "https://news.google.com/rss/search?q=$encodedQuery&hl=en-US&gl=US&ceid=US:en"
@@ -182,17 +197,13 @@ class WebSearchTool @Inject constructor(
     private fun searchRequest(url: String) = Request.Builder()
         .url(url)
         .header("User-Agent", "Mozilla/5.0 (Android) Localyze/1.0")
-        .header("Accept", "text/html,application/json")
+        .header("Accept", "application/json,application/rss+xml,text/html;q=0.9,*/*;q=0.8")
         .build()
 
     private fun parseInstantAnswerResponse(jsonStr: String, maxResults: Int): List<SearchResult> {
         val results = mutableListOf<SearchResult>()
 
         try {
-            val json = kotlinx.serialization.json.Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            }
             val root = json.parseToJsonElement(jsonStr).jsonObject
 
             val answer = root["Answer"]?.jsonPrimitive?.content
@@ -306,6 +317,40 @@ class WebSearchTool @Inject constructor(
         return results
     }
 
+    private fun parseWikipediaResponse(jsonStr: String, maxResults: Int): List<SearchResult> {
+        return runCatching {
+            val root = json.parseToJsonElement(jsonStr).jsonObject
+            root["query"]?.jsonObject
+                ?.get("search")?.jsonArray
+                ?.mapNotNull { element ->
+                    val obj = element.jsonObject
+                    val title = obj["title"]?.jsonPrimitive?.content.orEmpty().trim()
+                    val pageId = obj["pageid"]?.jsonPrimitive?.content.orEmpty().trim()
+                    val snippet = Jsoup.parse(obj["snippet"]?.jsonPrimitive?.content.orEmpty())
+                        .text()
+                        .replace(Regex("\\s+"), " ")
+                        .trim()
+                    val timestamp = obj["timestamp"]?.jsonPrimitive?.content.orEmpty().trim()
+                    val url = when {
+                        pageId.isNotBlank() -> "https://en.wikipedia.org/?curid=$pageId"
+                        title.isNotBlank() -> "https://en.wikipedia.org/wiki/${URLEncoder.encode(title.replace(' ', '_'), "UTF-8")}"
+                        else -> ""
+                    }
+                    val enrichedSnippet = listOf(
+                        snippet,
+                        timestamp.takeIf { it.isNotBlank() }?.let { "Last indexed: $it" }
+                    ).filterNotNull().filter { it.isNotBlank() }.joinToString(" ")
+                    if (title.isNotBlank() && url.isNotBlank()) {
+                        SearchResult(title, url, enrichedSnippet, "Wikipedia API")
+                    } else {
+                        null
+                    }
+                }
+                ?.take(maxResults)
+                .orEmpty()
+        }.getOrDefault(emptyList())
+    }
+
     private fun parseLiteSearchResults(html: String, maxResults: Int): List<SearchResult> {
         val document = Jsoup.parse(html)
         val results = mutableListOf<SearchResult>()
@@ -352,9 +397,20 @@ class WebSearchTool @Inject constructor(
             val title = item.selectFirst("title")?.text()?.trim().orEmpty()
             val url = item.selectFirst("link")?.text()?.trim().orEmpty()
             val rawSnippet = item.selectFirst("description")?.text().orEmpty()
-            val snippet = Jsoup.parse(rawSnippet).text().trim()
+            val snippet = Jsoup.parse(rawSnippet).text()
+                .replace(Regex("\\s+"), " ")
+                .trim()
+            val sourceName = item.selectFirst("source")?.text()?.trim().orEmpty()
+            val sourceUrl = item.selectFirst("source")?.attr("url")?.trim().orEmpty()
+            val publishedAt = item.selectFirst("pubDate")?.text()?.trim().orEmpty()
+            val enrichedSnippet = listOf(
+                snippet,
+                sourceName.takeIf { it.isNotBlank() }?.let { "Source: $it" },
+                sourceUrl.takeIf { it.startsWith("http") }?.let { "Publisher: $it" },
+                publishedAt.takeIf { it.isNotBlank() }?.let { "Published: $it" }
+            ).filterNotNull().filter { it.isNotBlank() }.joinToString(" ")
             if (title.isNotBlank() && url.startsWith("http")) {
-                results.add(SearchResult(title, url, snippet, "Google News RSS"))
+                results.add(SearchResult(title, url, enrichedSnippet, "Google News RSS"))
             }
         }
 
@@ -366,18 +422,20 @@ class WebSearchTool @Inject constructor(
     }
 
     private fun formatResults(results: List<SearchResult>, query: String): String {
-        return formatResults(results, query, plannedQueries = listOf(query))
+        return formatResults(results, query, plannedQueries = listOf(query), searchedProviders = emptyList())
     }
 
     private fun formatResults(
         results: List<SearchResult>,
         query: String,
-        plannedQueries: List<String>
+        plannedQueries: List<String>,
+        searchedProviders: List<String>
     ): String {
         if (results.isEmpty()) {
             return buildJsonObject {
                 put("query", query)
                 put("query_plan", JsonArray(plannedQueries.map { JsonPrimitive(it) }))
+                put("searched_providers", JsonArray(searchedProviders.map { JsonPrimitive(it) }))
                 put("results", buildJsonArray { })
                 put("count", 0)
                 put("fetched_at", Instant.now().toString())
@@ -388,6 +446,7 @@ class WebSearchTool @Inject constructor(
         return buildJsonObject {
             put("query", query)
             put("query_plan", JsonArray(plannedQueries.map { JsonPrimitive(it) }))
+            put("searched_providers", JsonArray(searchedProviders.map { JsonPrimitive(it) }))
             put(
                 "results",
                 JsonArray(results.map { result ->
@@ -403,6 +462,33 @@ class WebSearchTool @Inject constructor(
             put("fetched_at", Instant.now().toString())
         }.toString()
     }
+
+    private fun providersFor(query: String): List<SearchProvider> {
+        return if (requiresFreshSources(query)) {
+            listOf(
+                SearchProvider("Google News RSS", ::searchGoogleNewsRss),
+                SearchProvider("Bing Web", ::searchBingHtml),
+                SearchProvider("Wikipedia API", ::searchWikipediaApi),
+                SearchProvider("DuckDuckGo Lite", ::searchDuckDuckGoLite),
+                SearchProvider("DuckDuckGo Instant Answer", ::searchInstantAnswer),
+                SearchProvider("DuckDuckGo Web", ::searchDuckDuckGoHtml)
+            )
+        } else {
+            listOf(
+                SearchProvider("Wikipedia API", ::searchWikipediaApi),
+                SearchProvider("Bing Web", ::searchBingHtml),
+                SearchProvider("Google News RSS", ::searchGoogleNewsRss),
+                SearchProvider("DuckDuckGo Instant Answer", ::searchInstantAnswer),
+                SearchProvider("DuckDuckGo Lite", ::searchDuckDuckGoLite),
+                SearchProvider("DuckDuckGo Web", ::searchDuckDuckGoHtml)
+            )
+        }
+    }
+
+    private data class SearchProvider(
+        val displayName: String,
+        val search: (encodedQuery: String, maxResults: Int) -> List<SearchResult>
+    )
 
     private fun normalizeDuckDuckGoUrl(rawUrl: String): String {
         val absoluteUrl = when {
@@ -435,6 +521,16 @@ class WebSearchTool @Inject constructor(
     }
 }
 
+internal fun requiresFreshSources(query: String): Boolean {
+    return Regex(
+        "\\b(latest|recent|today|current|now|news|price|weather|schedule|deadline|release notes?|version|api changes?|breaking changes?|stock|score|trending|viral|won|winner|results?|headlines?|updates?|status|performing|announced|released|launched|202[0-9]|203\\d)\\b",
+        RegexOption.IGNORE_CASE
+    ).containsMatchIn(query) || Regex(
+        "\\b(top\\s+(news|headlines|stories|trending|movies|songs|albums)|this\\s+(week|month|year)|major\\s+categories|market\\s+performing)\\b",
+        RegexOption.IGNORE_CASE
+    ).containsMatchIn(query)
+}
+
 internal fun normalizeWebSearchQueries(query: String, year: Int = Year.now().value): List<String> {
     val trimmed = query
         .trim()
@@ -458,13 +554,7 @@ internal fun normalizeWebSearchQueries(query: String, year: Int = Year.now().val
     queries += cleaned.ifBlank { trimmed }
     queries += trimmed
 
-    val currentIntent = Regex(
-        "\\b(latest|recent|today|current|now|news|price|version|release|schedule|deadline|trending|viral|won|winner|results?|headlines?|updates?|status|performing|announced|released|launched|202[5-9]|203\\d)\\b",
-        RegexOption.IGNORE_CASE
-    ).containsMatchIn(trimmed) || Regex(
-        "\\b(top\\s+(news|headlines|stories|trending|movies|songs|albums)|this\\s+(week|month|year)|major\\s+categories|market\\s+performing)\\b",
-        RegexOption.IGNORE_CASE
-    ).containsMatchIn(trimmed)
+    val currentIntent = requiresFreshSources(trimmed)
 
     if (currentIntent && !cleaned.contains(year.toString())) {
         queries += "$cleaned $year"

@@ -32,7 +32,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.io.FileOutputStream
-import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
@@ -440,25 +439,25 @@ class SendMessageUseCase @Inject constructor(
             emit(ChatResponseEvent.Completed(fullText = curatedWebAnswer, thinkingText = null))
             return@flow
         }
-        val onlineCurrentFallback = curatedOnlineCurrentFallbackFor(
+        val webSearchFailureAnswer = curatedWebSearchFailureAnswerFor(
             userMessage = userMessage,
             capabilityMode = capabilityMode,
             allowWebSearch = allowWebSearch,
             preflightWebResult = preflightWebResult
         )
-        if (onlineCurrentFallback != null) {
-            onlineCurrentFallback.chunked(32).forEach { chunk ->
+        if (webSearchFailureAnswer != null) {
+            webSearchFailureAnswer.chunked(32).forEach { chunk ->
                 emit(ChatResponseEvent.StreamingToken(chunk))
             }
             val assistantMsg = Message(
                 conversationId = conversationId,
                 role = MessageRole.ASSISTANT,
-                content = onlineCurrentFallback,
+                content = webSearchFailureAnswer,
                 timestamp = System.currentTimeMillis()
             )
             chatRepository.saveMessage(assistantMsg)
-            autoGenerateTitle(conversationId, onlineCurrentFallback)
-            emit(ChatResponseEvent.Completed(fullText = onlineCurrentFallback, thinkingText = null))
+            autoGenerateTitle(conversationId, webSearchFailureAnswer)
+            emit(ChatResponseEvent.Completed(fullText = webSearchFailureAnswer, thinkingText = null))
             return@flow
         }
 
@@ -981,11 +980,7 @@ class SendMessageUseCase @Inject constructor(
         if (results.isEmpty()) return null
 
         val highlights = results
-            .map { snippet ->
-                (if (snippet.snippet.isNotBlank()) snippet.snippet else snippet.title)
-                    .replace(Regex("\\s+"), " ")
-                    .trim()
-            }
+            .map { it.toReadableBullet() }
             .filter { it.isNotBlank() }
             .distinct()
             .take(4)
@@ -996,23 +991,23 @@ class SendMessageUseCase @Inject constructor(
             .distinctBy { it.url }
             .take(4)
             .joinToString("\n") { item ->
-                "- ${item.title.ifBlank { "Source" }} - ${item.url}"
+                "- ${item.cleanTitle().ifBlank { "Source" }}${item.publisherSuffix()} - ${item.url}"
             }
 
-        return """
-            ## Latest update
-
-            Here is the newest sourced information I found for: "$userMessage"
-
-            ### Key points
-            ${highlights.joinToString("\n") { "- $it" }}
-
-            ### Sources
-            $sourceLines
-        """.trimIndent()
+        return listOf(
+            "## Latest update",
+            "",
+            "Here is the newest sourced information I found for: \"$userMessage\"",
+            "",
+            "### Key points",
+            highlights.joinToString("\n") { "- $it" },
+            "",
+            "### Sources",
+            sourceLines
+        ).joinToString("\n")
     }
 
-    private fun curatedOnlineCurrentFallbackFor(
+    private fun curatedWebSearchFailureAnswerFor(
         userMessage: String,
         capabilityMode: String,
         allowWebSearch: Boolean,
@@ -1020,54 +1015,10 @@ class SendMessageUseCase @Inject constructor(
     ): String? {
         if (capabilityMode !in setOf("chat", "data")) return null
         if (!allowWebSearch) return null
-        if (!hasCurrentIntent(userMessage)) return null
+        if (preflightWebResult == null) return null
         val hadSearchFailure = preflightWebResult?.isError == true ||
             preflightWebResult?.result?.let(::webResultHasNoHits) == true
         if (!hadSearchFailure) return null
-
-        val text = userMessage.lowercase()
-        val sourceLinks = when {
-            text.containsAny("federal funds", "federal reserve") -> listOf(
-                "https://www.federalreserve.gov/monetarypolicy/openmarket.htm",
-                "https://www.newyorkfed.org/markets/reference-rates/effr"
-            )
-            text.containsAny("android 16", "android features", "android version") -> listOf(
-                "https://developer.android.com/about/versions",
-                "https://source.android.com/docs/setup/about/build-numbers"
-            )
-            text.containsAny("cryptocurrency regulation", "crypto regulation", "stablecoin") -> listOf(
-                "https://www.fsb.org/work-of-the-fsb/financial-innovation-and-structural-change/crypto-assets-and-global-stablecoins/",
-                "https://www.fatf-gafi.org/en/topics/Virtual-assets.html"
-            )
-            text.containsAny("oscar", "oscars", "academy awards", "won") -> listOf(
-                "https://www.oscars.org/oscars/ceremonies",
-                "https://www.oscars.org/"
-            )
-            text.containsAny("music trends", "pop culture", "billboard") -> listOf(
-                "https://www.billboard.com/charts/",
-                "https://www.ifpi.org/"
-            )
-            text.containsAny("india-uk", "free trade agreement", "fta") -> listOf(
-                "https://www.gov.uk/government/collections/uk-india-trade-negotiations",
-                "https://pib.gov.in/"
-            )
-            text.containsAny("climate", "global summits", "cop") -> listOf(
-                "https://unfccc.int/process-and-meetings/conferences",
-                "https://www.unep.org/explore-topics/climate-action"
-            )
-            text.containsAny("ai regulation", "eu ai act") -> listOf(
-                "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
-                "https://eur-lex.europa.eu/"
-            )
-            text.containsAny("quantum computing") -> listOf(
-                "https://www.nature.com/subjects/quantum-information",
-                "https://quantum-computing.ibm.com/"
-            )
-            else -> listOf(
-                "https://www.reuters.com/",
-                "https://apnews.com/"
-            )
-        }
 
         val reason = if (preflightWebResult?.isError == true) {
             "The live search request failed during this run."
@@ -1075,19 +1026,14 @@ class SendMessageUseCase @Inject constructor(
             "The live search returned no usable results for this prompt."
         }
 
-        val sourceLines = sourceLinks.joinToString("\n") { "- $it" }
-        val today = LocalDate.now().toString()
         return """
-            ## Live update check incomplete
+            ## I couldn't get reliable live results
 
-            I tried to fetch the latest data, but couldn't complete a reliable live pull.
-            - Checked on: $today
-            - Reason: $reason
+            I searched for: "$userMessage"
 
-            I don't want to guess on a time-sensitive question, so use one of these primary sources:
-            $sourceLines
+            Reason: $reason
 
-            If you want, I can still give a concise background explainer while you verify the latest numbers or announcements.
+            I won't guess or cite hardcoded links for a live question. Check the connection, try again, or narrow the query with a specific country, date, product, company, or event.
         """.trimIndent()
     }
 
@@ -1095,7 +1041,54 @@ class SendMessageUseCase @Inject constructor(
         val title: String,
         val url: String,
         val snippet: String
-    )
+    ) {
+        fun cleanTitle(): String {
+            val publisher = publisherName()
+            val compact = title.replace(Regex("\\s+"), " ").trim()
+            return if (!publisher.isNullOrBlank() && compact.endsWith(" - $publisher", ignoreCase = true)) {
+                compact.removeSuffix(" - $publisher").trim()
+            } else {
+                compact
+            }
+        }
+
+        fun publisherName(): String? {
+            return Regex("\\bSource: ([^\\n]+?)(?: Publisher:| Published:|$)")
+                .find(snippet)
+                ?.groupValues
+                ?.getOrNull(1)
+                ?.trim()
+                ?.takeIf { it.isNotBlank() }
+        }
+
+        fun publishedAt(): String? {
+            return Regex("\\bPublished: ([^\\n]+)$")
+                .find(snippet)
+                ?.groupValues
+                ?.getOrNull(1)
+                ?.trim()
+                ?.takeIf { it.isNotBlank() }
+        }
+
+        fun publisherSuffix(): String {
+            return publisherName()?.let { " - $it" }.orEmpty()
+        }
+
+        fun toReadableBullet(): String {
+            val details = listOfNotNull(publisherName(), publishedAt()).joinToString("; ")
+            val headline = cleanTitle().ifBlank {
+                snippet
+                    .substringBefore(" Source:")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+            }
+            return if (details.isBlank()) {
+                headline
+            } else {
+                "$headline ($details)"
+            }
+        }
+    }
 
     private fun webResultHasNoHits(webResult: String): Boolean {
         return runCatching {

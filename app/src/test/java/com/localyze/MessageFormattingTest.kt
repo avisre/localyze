@@ -1,6 +1,7 @@
 package com.localyze
 
 import com.localyze.tools.normalizeWebSearchQueries
+import com.localyze.tools.requiresFreshSources
 import com.localyze.ui.components.MarkdownBlock
 import com.localyze.ui.components.normalizeMarkdownForDisplay
 import com.localyze.ui.components.parseMarkdownBlocks
@@ -54,6 +55,20 @@ class MessageFormattingTest {
 
         assertTrue(movieQueries.any { it.contains("2026") })
         assertTrue(trendingQueries.any { it.contains("2026") })
+    }
+
+    @Test
+    fun freshSourceDetectorCoversCommonLiveQuestionPhrases() {
+        val liveQuestions = listOf(
+            "What is the current Federal Funds rate?",
+            "What are today's technology headlines?",
+            "Who won the Oscar for Best Picture in 2026?",
+            "What are the top trending movies in India this week?"
+        )
+
+        liveQuestions.forEach { question ->
+            assertTrue(question, requiresFreshSources(question))
+        }
     }
 
     @Test
