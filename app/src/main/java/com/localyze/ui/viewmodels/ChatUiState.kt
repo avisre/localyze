@@ -24,6 +24,8 @@ data class ChatUiState(
     val streamingText: String = "",
     /** Accumulated thinking text for the in-progress response. */
     val thinkingText: String = "",
+    /** Human-readable generation phase shown while the assistant is working. */
+    val generationStatus: String = "",
     /** Tool calls that are currently active (executing or completed). */
     val activeToolCalls: List<ActiveToolCall> = emptyList(),
     /** Active capability mode (chat, see, write, brainstorm, code, data). */

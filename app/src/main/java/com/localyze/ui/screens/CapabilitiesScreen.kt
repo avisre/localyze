@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Image
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -138,15 +136,6 @@ fun CapabilitiesScreen(
                 actions = listOf(
                     CapabilityAction("Search web", "Ask before leaving device", "chat", Icons.Outlined.Public),
                     CapabilityAction("Ask about image", "Describe and inspect", "see", Icons.Outlined.Image)
-                ),
-                onSelect = ::choose
-            )
-
-            CapabilitySection(
-                title = "Code",
-                actions = listOf(
-                    CapabilityAction("Write code", "Generate and explain", "code", Icons.Outlined.Code),
-                    CapabilityAction("Run / debug code", "Trace errors and fixes", "code", Icons.Outlined.Terminal)
                 ),
                 onSelect = ::choose
             )

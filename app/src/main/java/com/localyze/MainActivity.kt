@@ -12,6 +12,7 @@ import com.localyze.data.repository.ModelRepository
 import com.localyze.ui.navigation.MainNavigation
 import com.localyze.ui.theme.LocalyzeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URLDecoder
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -25,27 +26,27 @@ class MainActivity : ComponentActivity() {
 
     private var sharedText by mutableStateOf<String?>(null)
     private var sharedImageUris by mutableStateOf<List<String>>(emptyList())
+    private var codeTestPrompt by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleIncomingIntent(intent)
-        
-        // Debug: handle ADB-send intent (adb shell am start -n com.localyze/.MainActivity -e chat_msg "hello")
-        val debugMsg = intent?.getStringExtra("chat_msg")
-        if (debugMsg != null) {
-            android.util.Log.d("MainActivity", "Debug chat_msg received: $debugMsg")
-            sharedText = debugMsg
-        }
-        
+        handleDebugChatIntent(intent)
+        handleCodeTestIntent(intent)
+
         setContent {
             LocalyzeTheme {
                 MainNavigation(
                     sharedText = sharedText,
                     sharedImageUris = sharedImageUris,
+                    codeTestPrompt = codeTestPrompt,
                     onSharedContentConsumed = {
                         sharedText = null
                         sharedImageUris = emptyList()
+                    },
+                    onCodeTestPromptConsumed = {
+                        codeTestPrompt = null
                     },
                     modelRepository = modelRepository,
                     gemmaInferenceEngine = gemmaInferenceEngine
@@ -56,7 +57,37 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleIncomingIntent(intent)
+        handleDebugChatIntent(intent)
+        handleCodeTestIntent(intent)
+    }
+
+    private fun handleDebugChatIntent(intent: Intent?) {
+        val debugMsg = intent?.getStringExtra("chat_msg")
+            ?.let(::decodeDebugMessage)
+            ?.trim()
+        if (!debugMsg.isNullOrEmpty()) {
+            android.util.Log.d("MainActivity", "Debug chat_msg received: $debugMsg")
+            sharedText = debugMsg
+            sharedImageUris = emptyList()
+        }
+    }
+
+    private fun decodeDebugMessage(raw: String): String {
+        val normalized = raw.replace("%s", " ")
+        return runCatching {
+            URLDecoder.decode(normalized, Charsets.UTF_8.name())
+        }.getOrDefault(normalized)
+    }
+
+    private fun handleCodeTestIntent(intent: Intent?) {
+        if (intent == null) return
+        if (intent.getBooleanExtra("triggerTest", false)) {
+            val prompt = intent.getStringExtra("testPrompt") ?: "make a portfolio website with animations"
+            android.util.Log.d("MainActivity", "Code test prompt: $prompt")
+            codeTestPrompt = prompt
+        }
     }
 
     private fun handleIncomingIntent(intent: Intent?) {

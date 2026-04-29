@@ -60,15 +60,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DropdownMenuItem
@@ -129,6 +128,7 @@ import com.localyze.domain.models.MessageRole
 import com.localyze.ui.components.AssistantMessageBubble
 import com.localyze.ui.components.AudioRecorderButton
 import com.localyze.ui.components.AudioWaveform
+import com.localyze.ui.components.GenerationFeedback
 import com.localyze.ui.components.HandleToolConfirmation
 import com.localyze.ui.components.ReferenceHeader
 import com.localyze.ui.components.ReferenceQuickActionCard
@@ -437,7 +437,7 @@ fun ChatScreen(
                             enabled = !uiState.isStreaming
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.MoreVert,
+                                imageVector = Icons.Filled.Add,
                                 contentDescription = "New conversation",
                                 tint = if (uiState.isStreaming) TextSecondary else OnBackground
                             )
@@ -475,6 +475,7 @@ fun ChatScreen(
                         },
                         onStopGeneration = { viewModel.stopGeneration() },
                         onPrompt = { prompt -> viewModel.sendMessage(prompt) },
+                        onEnableWebSearch = { viewModel.enableWebSearch() },
                         onNewChat = {
                             viewModel.createNewConversation()
                             onNewConversation()
@@ -671,6 +672,7 @@ fun ChatMessageList(
     val scope = rememberCoroutineScope()
     val hasDisplayItems = uiState.messages.isNotEmpty() ||
             uiState.streamingText.isNotEmpty() ||
+            uiState.isStreaming ||
             uiState.activeToolCalls.isNotEmpty()
     var followOutput by rememberSaveable(uiState.currentConversationId) { mutableStateOf(true) }
     val atBottomState = remember(listState) {
@@ -715,8 +717,9 @@ fun ChatMessageList(
 
         // Compute anchor index from uiState so we don't depend on layout timing.
         val bottomAnchorIndex = uiState.messages.size +
+            (if (uiState.isStreaming && uiState.generationStatus.isNotBlank()) 1 else 0) +
             uiState.activeToolCalls.size +
-            if (uiState.streamingText.isNotEmpty()) 1 else 0
+            (if (uiState.streamingText.isNotEmpty()) 1 else 0)
         if (bottomAnchorIndex >= 0) {
             listState.requestScrollToItem(bottomAnchorIndex)
         }
@@ -840,6 +843,19 @@ fun ChatMessageList(
                 }
             }
 
+            if (uiState.isStreaming && uiState.generationStatus.isNotBlank()) {
+                item(key = "generation-feedback") {
+                    GenerationFeedback(
+                        status = uiState.generationStatus,
+                        detail = if (uiState.activeToolCalls.any { it.toolName == "web_search" }) {
+                            "Fetching sources before drafting"
+                        } else {
+                            "The answer will appear below"
+                        }
+                    )
+                }
+            }
+
             itemsIndexed(
                 items = uiState.activeToolCalls,
                 key = { index, toolCall -> "tool-${toolCall.toolName}-$index" }
@@ -883,8 +899,9 @@ fun ChatMessageList(
                 onClick = {
                     followOutput = true
                     val bottomAnchorIndex = uiState.messages.size +
+                        (if (uiState.isStreaming && uiState.generationStatus.isNotBlank()) 1 else 0) +
                         uiState.activeToolCalls.size +
-                        if (uiState.streamingText.isNotEmpty()) 1 else 0
+                        (if (uiState.streamingText.isNotEmpty()) 1 else 0)
                     if (bottomAnchorIndex >= 0) {
                         listState.requestScrollToItem(bottomAnchorIndex)
                     }
@@ -959,6 +976,7 @@ private fun ChatHomeContent(
     onSend: () -> Unit,
     onStopGeneration: () -> Unit,
     onPrompt: (String) -> Unit,
+    onEnableWebSearch: () -> Unit,
     onNewChat: () -> Unit,
     onOpenAttachments: () -> Unit,
     onOpenConversations: () -> Unit,
@@ -979,8 +997,15 @@ private fun ChatHomeContent(
         ) {
             StatusChip(text = "On-device", selected = true)
             StatusChip(text = "Gemma 4 E4B")
-            StatusChip(text = "Private by default")
+            StatusChip(text = if (allowWebSearch) "Web search on" else "Web search off")
             StatusChip(text = "No cloud chat")
+        }
+
+        if (!allowWebSearch) {
+            WebSearchNotice(
+                onEnable = onEnableWebSearch,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         PrivacyReadyCard(modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp))
@@ -1010,7 +1035,7 @@ private fun ChatHomeContent(
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 ReferenceQuickActionCard(
-                    icon = Icons.Outlined.History,
+                    icon = Icons.Filled.Add,
                     title = "New chat",
                     modifier = Modifier.weight(1f),
                     onClick = onNewChat
@@ -1030,10 +1055,16 @@ private fun ChatHomeContent(
                     onClick = { onPrompt("What do you remember about me?") }
                 )
                 ReferenceQuickActionCard(
-                    icon = Icons.Outlined.Security,
-                    title = "View memory",
+                    icon = Icons.Outlined.Public,
+                    title = if (allowWebSearch) "Search web" else "Enable web",
                     modifier = Modifier.weight(1f),
-                    onClick = { onPrompt("Show me what is saved in memory and how I can manage it.") }
+                    onClick = {
+                        if (allowWebSearch) {
+                            onPrompt("Search the web for today's top technology headlines and summarize them with sources.")
+                        } else {
+                            onEnableWebSearch()
+                        }
+                    }
                 )
             }
         }

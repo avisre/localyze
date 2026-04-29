@@ -1,6 +1,7 @@
 package com.localyze
 
 import com.localyze.ai.KNOWLEDGE_AND_TOOL_INSTRUCTION
+import com.localyze.ai.RESPONSE_FORMAT_INSTRUCTION
 import com.localyze.ai.shouldExposeToolToModel
 import com.localyze.ui.viewmodels.ChatUiState
 import com.localyze.ui.viewmodels.SettingsUiState
@@ -37,12 +38,28 @@ class InferencePolicyRegressionTest {
             "location-specific",
             "price",
             "schedule",
-            "news"
+            "award-result",
+            "trending",
+            "news",
+            "changed after your built-in knowledge",
+            "returned snippets and urls"
         )
 
         currentInfoTriggers.forEach { trigger ->
             assertTrue("Expected web-search policy to mention '$trigger'", policy.contains(trigger))
         }
+    }
+
+    @Test
+    fun responseFormatPolicyPreventsWallOfTextAnswers() {
+        val policy = RESPONSE_FORMAT_INSTRUCTION.lowercase(Locale.US)
+
+        assertTrue(policy.contains("clean markdown"))
+        assertTrue(policy.contains("avoid walls of text"))
+        assertTrue(policy.contains("sources section"))
+        assertTrue(policy.contains("do not say you cannot browse"))
+        assertTrue(policy.contains("jargon-free"))
+        assertTrue(policy.contains("non-expert"))
     }
 
     @Test

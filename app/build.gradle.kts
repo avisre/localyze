@@ -22,6 +22,14 @@ val premiumSubscriptionProductId = providers.gradleProperty("LOCALYZE_PREMIUM_SU
     .get()
     .replace("\\", "\\\\")
     .replace("\"", "\\\"")
+val debugUseMockEngine = providers.gradleProperty("LOCALYZE_USE_MOCK_ENGINE")
+    .orElse("false")
+    .map { it.equals("true", ignoreCase = true).toString() }
+    .get()
+val debugUseTestDownload = providers.gradleProperty("LOCALYZE_USE_TEST_DOWNLOAD")
+    .orElse("false")
+    .map { it.equals("true", ignoreCase = true).toString() }
+    .get()
 
 android {
     namespace = "com.localyze"
@@ -66,10 +74,10 @@ android {
             isDebuggable = true
             // Set to false to use real Gemma 4 E4B model
             // Set to true for mock mode (development/CI/unsupported devices)
-            buildConfigField("Boolean", "USE_MOCK_ENGINE", "false")
+            buildConfigField("Boolean", "USE_MOCK_ENGINE", debugUseMockEngine)
             // Set to false to download real model (3.65 GB)
             // Set to true for test download (small tokenizer.json file)
-            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
+            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", debugUseTestDownload)
             buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
         }
     }
@@ -149,6 +157,7 @@ dependencies {
 
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.jsoup:jsoup:1.18.3")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
@@ -167,4 +176,5 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 }

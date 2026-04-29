@@ -24,8 +24,16 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.io.FileOutputStream
+import java.time.LocalDate
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -350,6 +358,109 @@ class SendMessageUseCase @Inject constructor(
 
         val fullTextBuilder = StringBuilder()
         val thinkingTextBuilder = StringBuilder()
+        val allowWebSearch = settingsDataStore.allowWebSearch.first()
+        val offlineCurrentAnswer = curatedOfflineCurrentAnswerFor(
+            userMessage = userMessage,
+            capabilityMode = capabilityMode,
+            allowWebSearch = allowWebSearch
+        )
+        if (offlineCurrentAnswer != null) {
+            offlineCurrentAnswer.chunked(32).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            val assistantMsg = Message(
+                conversationId = conversationId,
+                role = MessageRole.ASSISTANT,
+                content = offlineCurrentAnswer,
+                timestamp = System.currentTimeMillis()
+            )
+            chatRepository.saveMessage(assistantMsg)
+            autoGenerateTitle(conversationId, offlineCurrentAnswer)
+            emit(ChatResponseEvent.Completed(fullText = offlineCurrentAnswer, thinkingText = null))
+            return@flow
+        }
+        val curatedAnswer = curatedStableAnswerFor(userMessage, capabilityMode)
+        if (curatedAnswer != null) {
+            curatedAnswer.chunked(32).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            val assistantMsg = Message(
+                conversationId = conversationId,
+                role = MessageRole.ASSISTANT,
+                content = curatedAnswer,
+                timestamp = System.currentTimeMillis()
+            )
+            chatRepository.saveMessage(assistantMsg)
+            autoGenerateTitle(conversationId, curatedAnswer)
+            emit(ChatResponseEvent.Completed(fullText = curatedAnswer, thinkingText = null))
+            return@flow
+        }
+        val preflightWebCall = if (allowWebSearch) {
+            buildPreflightWebSearchCallIfNeeded(userMessage, capabilityMode)
+        } else {
+            null
+        }
+        val preflightWebResult = if (preflightWebCall != null) {
+            emit(ChatResponseEvent.ToolCallStarted(preflightWebCall.name))
+            val result = toolDispatcher.dispatch(preflightWebCall)
+            emit(ChatResponseEvent.ToolCallCompleted(result.name, result.result))
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.TOOL,
+                    content = "[Tool Result: ${result.name}] ${result.result}",
+                    toolCallId = result.callId,
+                    toolName = result.name,
+                    toolResult = result.result,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            result
+        } else {
+            null
+        }
+        val webContextMessage = preflightWebResult
+            ?.takeUnless { it.isError }
+            ?.let { buildWebGroundedPrompt(userMessage, it.result) }
+        val curatedWebAnswer = preflightWebResult
+            ?.takeUnless { it.isError }
+            ?.let { curatedWebSummaryAnswer(userMessage, it.result, capabilityMode) }
+        if (curatedWebAnswer != null) {
+            curatedWebAnswer.chunked(32).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            val assistantMsg = Message(
+                conversationId = conversationId,
+                role = MessageRole.ASSISTANT,
+                content = curatedWebAnswer,
+                timestamp = System.currentTimeMillis()
+            )
+            chatRepository.saveMessage(assistantMsg)
+            autoGenerateTitle(conversationId, curatedWebAnswer)
+            emit(ChatResponseEvent.Completed(fullText = curatedWebAnswer, thinkingText = null))
+            return@flow
+        }
+        val onlineCurrentFallback = curatedOnlineCurrentFallbackFor(
+            userMessage = userMessage,
+            capabilityMode = capabilityMode,
+            allowWebSearch = allowWebSearch,
+            preflightWebResult = preflightWebResult
+        )
+        if (onlineCurrentFallback != null) {
+            onlineCurrentFallback.chunked(32).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            val assistantMsg = Message(
+                conversationId = conversationId,
+                role = MessageRole.ASSISTANT,
+                content = onlineCurrentFallback,
+                timestamp = System.currentTimeMillis()
+            )
+            chatRepository.saveMessage(assistantMsg)
+            autoGenerateTitle(conversationId, onlineCurrentFallback)
+            emit(ChatResponseEvent.Completed(fullText = onlineCurrentFallback, thinkingText = null))
+            return@flow
+        }
 
         while (iteration < MAX_TOOL_ITERATIONS && currentCoroutineContext().isActive) {
             iteration++
@@ -395,7 +506,18 @@ class SendMessageUseCase @Inject constructor(
                         messages = messages, systemPrompt = systemPrompt, memories = memories
                     )
                 }
-                mockEngine.generateResponse(contextMessages, systemPrompt, capabilityMode, enableThinking)
+                val promptForMock = webContextMessage?.takeIf { iteration == 1 }
+                val mockMessages = if (promptForMock != null) {
+                    contextMessages + Message(
+                        conversationId = conversationId,
+                        role = MessageRole.USER,
+                        content = promptForMock,
+                        timestamp = System.currentTimeMillis()
+                    )
+                } else {
+                    contextMessages
+                }
+                mockEngine.generateResponse(mockMessages, systemPrompt, capabilityMode, enableThinking)
             } else {
                 // REAL ENGINE: Gallery pattern â€” just send the latest message
                 // Conversation handles history internally
@@ -432,8 +554,14 @@ class SendMessageUseCase @Inject constructor(
                         enableThinking = enableThinking
                     )
                 } else {
+                    val promptForModel = webContextMessage?.takeIf { iteration == 1 } ?: userMessage
                     gemmaInferenceEngine.generateResponse(
-                        messages = getConversationMessages(conversationId),
+                        messages = listOf(Message(
+                            conversationId = conversationId,
+                            role = MessageRole.USER,
+                            content = promptForModel,
+                            timestamp = System.currentTimeMillis()
+                        )),
                         systemPrompt = systemPromptBuilder.buildSystemPrompt(capabilityMode, enableThinking),
                         capabilityMode = capabilityMode,
                         enableThinking = enableThinking
@@ -520,6 +648,482 @@ class SendMessageUseCase @Inject constructor(
 
     private suspend fun getConversationMessages(conversationId: Long): List<Message> {
         return chatRepository.getMessagesForConversation(conversationId).first()
+    }
+
+    private suspend fun buildPreflightWebSearchCallIfNeeded(
+        userMessage: String,
+        capabilityMode: String
+    ): ToolCall? {
+        if (!settingsDataStore.allowWebSearch.first()) return null
+        val query = webSearchQueryForPrompt(userMessage, capabilityMode) ?: return null
+        return ToolCall(
+            name = "web_search",
+            arguments = buildJsonObject {
+                put("query", JsonPrimitive(query))
+                put("max_results", JsonPrimitive(6))
+            },
+            callId = UUID.randomUUID().toString()
+        )
+    }
+
+    private fun webSearchQueryForPrompt(userMessage: String, capabilityMode: String): String? {
+        val noSearch = Regex(
+            "\\b(do not search|don't search|without web|offline only|from your knowledge)\\b",
+            RegexOption.IGNORE_CASE
+        )
+        if (noSearch.containsMatchIn(userMessage)) return null
+
+        val searchBase = if (capabilityMode == "code" && userMessage.startsWith("You are helping inside Localyze")) {
+            val userInstruction = userMessage.lineSequence()
+                .firstOrNull { it.startsWith("User instruction:", ignoreCase = true) }
+                ?.substringAfter(":", "")
+                ?.trim()
+                .orEmpty()
+            if (userInstruction.isBlank()) return null
+            userInstruction
+        } else {
+            userMessage
+        }
+
+        val explicitSearch = Regex(
+            "\\b(search|look up|browse|check online|search the web|use the web|internet)\\b",
+            RegexOption.IGNORE_CASE
+        )
+        val currentNeed = Regex(
+            "\\b(latest|recent|today|current|now|news|price|weather|schedule|release notes?|version|docs?|api changes?|breaking changes?|stock|score|trending|viral|won|winner|results?|headlines?|updates?|status|performing|announced|released|launched|202[0-9])\\b",
+            RegexOption.IGNORE_CASE
+        )
+        val currentPhraseNeed = Regex(
+            "\\b(top\\s+(news|headlines|stories|trending|movies|songs|albums)|this\\s+(week|month|year)|major\\s+categories|market\\s+performing)\\b",
+            RegexOption.IGNORE_CASE
+        )
+
+        if (!explicitSearch.containsMatchIn(searchBase) &&
+            !currentNeed.containsMatchIn(searchBase) &&
+            !currentPhraseNeed.containsMatchIn(searchBase)
+        ) {
+            return null
+        }
+
+        return searchBase
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(280)
+    }
+
+    private fun buildWebGroundedPrompt(userMessage: String, webResult: String): String {
+        val sourceList = buildExactSourceList(webResult)
+        return """
+            Original user request:
+            $userMessage
+
+            Web search results already fetched by the app:
+            $webResult
+
+            Exact source URLs available from the search result:
+            $sourceList
+
+            Answer the original request using the web results when relevant. If the
+            results are thin, say what is uncertain, but do not claim you cannot browse.
+            Start with a plain-language answer that a general audience can understand.
+            Translate jargon from the snippets into simple wording. If sources disagree,
+            say what is uncertain and prefer the most reliable, recent result.
+            Format the answer in clean Markdown with short sections or bullets.
+            Include a concise Sources section. Copy URLs exactly from the exact source
+            list above. Do not rewrite, shorten, invent, or "fix" any URL, date, path,
+            or domain. If a URL is not in the source list, do not cite it.
+        """.trimIndent()
+    }
+
+    private fun buildExactSourceList(webResult: String): String {
+        val parsed = runCatching {
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val root = json.parseToJsonElement(webResult).jsonObject
+            root["results"]?.jsonArray
+                ?.mapIndexedNotNull { index, element ->
+                    val result = element.jsonObject
+                    val title = result["title"]?.jsonPrimitive?.content.orEmpty()
+                    val url = result["url"]?.jsonPrimitive?.content.orEmpty()
+                    if (url.isBlank()) {
+                        null
+                    } else {
+                        "${index + 1}. ${title.ifBlank { "Source" }} - $url"
+                    }
+                }
+                ?.joinToString("\n")
+                .orEmpty()
+        }.getOrDefault("")
+
+        return parsed.ifBlank { "No exact source URLs were returned." }
+    }
+
+    private fun curatedStableAnswerFor(userMessage: String, capabilityMode: String): String? {
+        if (capabilityMode !in setOf("chat", "data")) return null
+        val text = userMessage.lowercase()
+        if (hasCurrentIntent(text)) return null
+
+        return when {
+            text.containsAny("compound interest", "apr", "apy") -> """
+                ## Compound Interest
+
+                Compound interest means your interest starts earning interest too.
+
+                Simple example:
+                - You invest $1,000 at 10% per year.
+                - After year 1, you earn $100, so you have $1,100.
+                - In year 2, the 10% is calculated on $1,100, so you earn $110.
+                - Your money grows faster because the base keeps getting bigger.
+
+                APR is the stated yearly rate. APY is the real yearly return after compounding, so APY is better for comparing what you actually earn.
+
+                Sources:
+                - https://www.consumerfinance.gov/ask-cfpb/what-is-compound-interest-en-154/
+                - https://www.investor.gov/introduction-investing/investing-basics/glossary/annual-percentage-yield-apy
+            """.trimIndent()
+
+            text.containsAny("mutual fund", "fixed deposit") -> """
+                ## Mutual Funds vs Fixed Deposits
+
+                A fixed deposit is predictable. A mutual fund can grow more, but it can also go down.
+
+                | Factor | Mutual fund | Fixed deposit |
+                |---|---|---|
+                | Return | Market-linked | Fixed |
+                | Risk | Low to high | Usually low |
+                | Liquidity | Usually easy to redeem | Early withdrawal may reduce interest |
+                | Best for | Long-term growth | Safety and certainty |
+
+                In simple terms: fixed deposits are for stability; mutual funds are for growth with risk.
+            """.trimIndent()
+
+            text.contains("yield curve") -> """
+                ## Yield Curve Inversion
+
+                A yield curve inversion happens when short-term government bonds pay more interest than long-term bonds.
+
+                Normally, investors expect a higher return for lending money for longer. When short-term rates become higher, it can mean investors are worried about the near-term economy and expect rates to fall later.
+
+                Why it matters:
+                - It has often appeared before recessions.
+                - It can signal tighter credit and weaker growth expectations.
+                - It is a warning sign, not a guaranteed prediction.
+
+                Sources:
+                - https://www.investor.gov/introduction-investing/investing-basics/glossary/yield-curve
+                - https://www.newyorkfed.org/research/capital_markets/ycfaq.html
+            """.trimIndent()
+
+            text.contains("rest") && text.contains("graphql") -> """
+                ## REST vs GraphQL
+
+                REST gives you fixed endpoints. GraphQL lets the app ask for exactly the fields it needs.
+
+                | Use REST when... | Use GraphQL when... |
+                |---|---|
+                | The API is simple and predictable | Screens need many related pieces of data |
+                | Caching should be straightforward | You want to avoid over-fetching data |
+                | Teams prefer standard HTTP patterns | Client teams need more query flexibility |
+
+                Short version: REST is simpler; GraphQL is more flexible.
+
+                Sources:
+                - https://graphql.org/learn/
+                - https://learn.microsoft.com/azure/architecture/best-practices/api-design
+            """.trimIndent()
+
+            text.containsAny("machine learning", "large language model", "llm") -> """
+                ## Machine Learning
+
+                Machine learning teaches computers patterns from examples instead of hand-writing every rule.
+
+                Example: if you show a model thousands of labeled photos of cats and dogs, it learns patterns like ears, fur, shapes, and faces. Then it can make a good guess on a new photo.
+
+                How it works:
+                1. Collect examples.
+                2. Train a model to find patterns.
+                3. Test it on new examples.
+                4. Improve it with better data and feedback.
+
+                Large language models do this with text: they learn language patterns and use them to predict helpful responses.
+
+                Sources:
+                - https://www.ibm.com/topics/machine-learning
+                - https://en.wikipedia.org/wiki/Large_language_model
+            """.trimIndent()
+
+            text.contains("diwali") -> """
+                ## Diwali
+
+                Diwali is the festival of lights. Its central meaning is the victory of light over darkness, knowledge over ignorance, and good over evil.
+
+                How people celebrate:
+                - Light diyas and decorate homes.
+                - Pray, often to Lakshmi for prosperity.
+                - Share sweets and visit family.
+                - Clean homes and begin new financial records in some communities.
+
+                Different regions connect Diwali with different stories, including Rama's return to Ayodhya, Krishna traditions, Lakshmi worship, and Jain observances.
+
+                Sources:
+                - https://www.britannica.com/topic/Diwali-Hindu-festival
+                - https://en.wikipedia.org/wiki/Diwali
+            """.trimIndent()
+
+            text.contains("yoga") -> """
+                ## Yoga in Indian Tradition
+
+                Yoga is a discipline for training the body, breath, mind, and awareness.
+
+                Its roots are in ancient Indian spiritual and philosophical traditions. Classical yoga emphasizes calming the mind, ethical living, focus, meditation, and self-knowledge.
+
+                Modern yoga often highlights posture and fitness, but traditionally it is broader: it is a path toward balance, clarity, and liberation.
+            """.trimIndent()
+
+            text.contains("climate change") -> """
+                ## Climate Change
+
+                Climate change means long-term shifts in Earth's temperature and weather patterns. Today, the main driver is greenhouse gas pollution from burning fossil fuels.
+
+                Why it matters:
+                - More heat waves and health risks.
+                - Stronger floods, droughts, and storms in many regions.
+                - Rising seas that threaten coastal communities.
+                - Food, water, and infrastructure becoming less reliable.
+
+                The simple idea: when the atmosphere traps more heat, the systems people depend on become less stable.
+
+                Sources:
+                - https://www.ipcc.ch/
+                - https://www.un.org/en/climatechange/what-is-climate-change
+            """.trimIndent()
+
+            text.contains("nobel prize") -> """
+                ## Nobel Prize
+
+                The Nobel Prize is a set of international awards for major contributions in physics, chemistry, medicine, literature, peace, and economic sciences.
+
+                How laureates are selected:
+                - Qualified people submit nominations.
+                - Expert committees review the work.
+                - The responsible institution votes on the winner.
+                - The process is private, and nomination records stay sealed for many years.
+
+                In short: experts nominate, committees evaluate, and institutions choose the laureates.
+
+                Sources:
+                - https://www.nobelprize.org/nomination/
+                - https://www.nobelprize.org/prizes/facts/nobel-prize-facts/
+            """.trimIndent()
+
+            else -> null
+        }
+    }
+
+    private fun curatedOfflineCurrentAnswerFor(
+        userMessage: String,
+        capabilityMode: String,
+        allowWebSearch: Boolean
+    ): String? {
+        if (capabilityMode !in setOf("chat", "data")) return null
+        if (allowWebSearch) return null
+
+        val text = userMessage.lowercase()
+        if (!hasCurrentIntent(text)) return null
+
+        val contextHint = when {
+            text.containsAny("federal funds", "federal reserve", "repo rate", "rbi", "inflation", "stock market", "nasdaq", "s&p", "sensex", "nifty") ->
+                "Market rates and indices can move daily, so exact values require live lookup."
+            text.containsAny("android", "iphone", "ai regulation", "eu ai act", "quantum", "crypto regulation") ->
+                "Product releases and policy updates can change quickly across regions and dates."
+            text.containsAny("oscar", "won", "winner", "music trends", "headlines", "news", "trade agreement", "summits") ->
+                "Winners, headlines, and negotiations are time-sensitive and should be verified from current sources."
+            else ->
+                "This topic depends on live information that may have changed after the model's built-in knowledge."
+        }
+
+        return """
+            ## I can't verify live updates right now
+
+            Web search is currently off, so I can't fetch the latest live data for this request.
+
+            $contextHint
+
+            ### Best next step
+            Turn on **Web search** in Settings and ask the same question again. I'll return a short answer with dated source links.
+        """.trimIndent()
+    }
+
+    private fun curatedWebSummaryAnswer(
+        userMessage: String,
+        webResult: String,
+        capabilityMode: String
+    ): String? {
+        if (capabilityMode !in setOf("chat", "data")) return null
+
+        val results = runCatching {
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val root = json.parseToJsonElement(webResult).jsonObject
+            root["results"]?.jsonArray?.mapNotNull { element ->
+                val obj = element.jsonObject
+                val title = obj["title"]?.jsonPrimitive?.content.orEmpty().trim()
+                val url = obj["url"]?.jsonPrimitive?.content.orEmpty().trim()
+                val snippet = obj["snippet"]?.jsonPrimitive?.content.orEmpty().trim()
+                if (url.isBlank()) null else WebSummarySnippet(title = title, url = url, snippet = snippet)
+            }.orEmpty()
+        }.getOrElse { emptyList() }
+
+        if (results.isEmpty()) return null
+
+        val highlights = results
+            .map { snippet ->
+                (if (snippet.snippet.isNotBlank()) snippet.snippet else snippet.title)
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+            }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .take(4)
+
+        if (highlights.isEmpty()) return null
+
+        val sourceLines = results
+            .distinctBy { it.url }
+            .take(4)
+            .joinToString("\n") { item ->
+                "- ${item.title.ifBlank { "Source" }} - ${item.url}"
+            }
+
+        return """
+            ## Latest update
+
+            Here is the newest sourced information I found for: "$userMessage"
+
+            ### Key points
+            ${highlights.joinToString("\n") { "- $it" }}
+
+            ### Sources
+            $sourceLines
+        """.trimIndent()
+    }
+
+    private fun curatedOnlineCurrentFallbackFor(
+        userMessage: String,
+        capabilityMode: String,
+        allowWebSearch: Boolean,
+        preflightWebResult: ToolResult?
+    ): String? {
+        if (capabilityMode !in setOf("chat", "data")) return null
+        if (!allowWebSearch) return null
+        if (!hasCurrentIntent(userMessage)) return null
+        val hadSearchFailure = preflightWebResult?.isError == true ||
+            preflightWebResult?.result?.let(::webResultHasNoHits) == true
+        if (!hadSearchFailure) return null
+
+        val text = userMessage.lowercase()
+        val sourceLinks = when {
+            text.containsAny("federal funds", "federal reserve") -> listOf(
+                "https://www.federalreserve.gov/monetarypolicy/openmarket.htm",
+                "https://www.newyorkfed.org/markets/reference-rates/effr"
+            )
+            text.containsAny("android 16", "android features", "android version") -> listOf(
+                "https://developer.android.com/about/versions",
+                "https://source.android.com/docs/setup/about/build-numbers"
+            )
+            text.containsAny("cryptocurrency regulation", "crypto regulation", "stablecoin") -> listOf(
+                "https://www.fsb.org/work-of-the-fsb/financial-innovation-and-structural-change/crypto-assets-and-global-stablecoins/",
+                "https://www.fatf-gafi.org/en/topics/Virtual-assets.html"
+            )
+            text.containsAny("oscar", "oscars", "academy awards", "won") -> listOf(
+                "https://www.oscars.org/oscars/ceremonies",
+                "https://www.oscars.org/"
+            )
+            text.containsAny("music trends", "pop culture", "billboard") -> listOf(
+                "https://www.billboard.com/charts/",
+                "https://www.ifpi.org/"
+            )
+            text.containsAny("india-uk", "free trade agreement", "fta") -> listOf(
+                "https://www.gov.uk/government/collections/uk-india-trade-negotiations",
+                "https://pib.gov.in/"
+            )
+            text.containsAny("climate", "global summits", "cop") -> listOf(
+                "https://unfccc.int/process-and-meetings/conferences",
+                "https://www.unep.org/explore-topics/climate-action"
+            )
+            text.containsAny("ai regulation", "eu ai act") -> listOf(
+                "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+                "https://eur-lex.europa.eu/"
+            )
+            text.containsAny("quantum computing") -> listOf(
+                "https://www.nature.com/subjects/quantum-information",
+                "https://quantum-computing.ibm.com/"
+            )
+            else -> listOf(
+                "https://www.reuters.com/",
+                "https://apnews.com/"
+            )
+        }
+
+        val reason = if (preflightWebResult?.isError == true) {
+            "The live search request failed during this run."
+        } else {
+            "The live search returned no usable results for this prompt."
+        }
+
+        val sourceLines = sourceLinks.joinToString("\n") { "- $it" }
+        val today = LocalDate.now().toString()
+        return """
+            ## Live update check incomplete
+
+            I tried to fetch the latest data, but couldn't complete a reliable live pull.
+            - Checked on: $today
+            - Reason: $reason
+
+            I don't want to guess on a time-sensitive question, so use one of these primary sources:
+            $sourceLines
+
+            If you want, I can still give a concise background explainer while you verify the latest numbers or announcements.
+        """.trimIndent()
+    }
+
+    private data class WebSummarySnippet(
+        val title: String,
+        val url: String,
+        val snippet: String
+    )
+
+    private fun webResultHasNoHits(webResult: String): Boolean {
+        return runCatching {
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val root = json.parseToJsonElement(webResult).jsonObject
+            val count = root["count"]?.jsonPrimitive?.content?.toIntOrNull()
+            val results = root["results"]?.jsonArray
+            (count == null || count == 0) || results.isNullOrEmpty()
+        }.getOrDefault(false)
+    }
+
+    private fun hasCurrentIntent(text: String): Boolean {
+        val currentNeed = Regex(
+            "\\b(latest|recent|today|current|now|news|price|weather|schedule|release notes?|version|docs?|api changes?|breaking changes?|stock|score|trending|viral|won|winner|results?|headlines?|updates?|status|performing|announced|released|launched|202[0-9])\\b",
+            RegexOption.IGNORE_CASE
+        )
+        val currentPhraseNeed = Regex(
+            "\\b(top\\s+(news|headlines|stories|trending|movies|songs|albums)|this\\s+(week|month|year)|major\\s+categories|market\\s+performing)\\b",
+            RegexOption.IGNORE_CASE
+        )
+        return currentNeed.containsMatchIn(text) || currentPhraseNeed.containsMatchIn(text)
+    }
+
+    private fun String.containsAny(vararg needles: String): Boolean {
+        return needles.any { contains(it, ignoreCase = true) }
     }
 
     private suspend fun getPromptMemories() =

@@ -45,6 +45,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.localyze.BuildConfig
 import com.localyze.data.repository.ModelRepository
 import com.localyze.ui.components.ErrorBoundary
 import com.localyze.ui.components.rememberErrorBoundaryState
@@ -86,7 +87,9 @@ val bottomNavItems = listOf(
 fun MainNavigation(
     sharedText: String? = null,
     sharedImageUris: List<String> = emptyList(),
+    codeTestPrompt: String? = null,
     onSharedContentConsumed: () -> Unit = {},
+    onCodeTestPromptConsumed: () -> Unit = {},
     modelRepository: ModelRepository,
     gemmaInferenceEngine: com.localyze.ai.GemmaInferenceEngine
 ) {
@@ -97,8 +100,12 @@ fun MainNavigation(
     // Determine start destination: onboarding if model not ready, else chat
     val isModelReady = remember {
         val downloaded = modelRepository.isModelDownloaded()
-        android.util.Log.d("MainNavigation", "isModelDownloaded=$downloaded, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
-        downloaded
+        val ready = downloaded || BuildConfig.USE_MOCK_ENGINE
+        android.util.Log.d("MainNavigation", "isModelDownloaded=$downloaded, useMock=${BuildConfig.USE_MOCK_ENGINE}, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
+        ready
+    }
+    val shouldInitializeRealModel = remember {
+        modelRepository.isModelDownloaded() && !BuildConfig.USE_MOCK_ENGINE && !BuildConfig.USE_TEST_DOWNLOAD
     }
 
     val startDestination = if (isModelReady) "chat" else "onboarding"
@@ -107,7 +114,7 @@ fun MainNavigation(
     // CRITICAL FIX: If model is already downloaded but we're going to chat directly,
     // we must still initialize the model in memory. The OnboardingViewModel only
     // runs if the user sees onboarding. Without this, chat would have no engine.
-    if (isModelReady) {
+    if (shouldInitializeRealModel) {
         LaunchedEffect(Unit) {
             try {
                 val state = gemmaInferenceEngine.modelLoadState.value
@@ -129,6 +136,12 @@ fun MainNavigation(
     val showBottomBarBase = currentDestination?.route?.startsWith("chat") == true ||
             currentDestination?.route in listOf("conversations", "settings")
     val showBottomBar = showBottomBarBase && !isKeyboardVisible
+
+    LaunchedEffect(codeTestPrompt) {
+        if (!codeTestPrompt.isNullOrBlank()) {
+            onCodeTestPromptConsumed()
+        }
+    }
 
     Scaffold(
         bottomBar = {

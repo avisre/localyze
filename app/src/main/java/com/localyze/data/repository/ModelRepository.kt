@@ -81,6 +81,12 @@ class ModelRepository @Inject constructor(
             android.util.Log.d(TAG, "Found model: ${file.name} (${file.length() / 1024 / 1024} MB)")
             return file
         }
+        // Fallback: Qualcomm NPU-optimized variant (backwards-compatible on GPU)
+        val qualcommFile = File(modelDir, "gemma-4-E2B-it_qualcomm_qcs8275.litertlm")
+        if (qualcommFile.exists() && qualcommFile.length() > 0L) {
+            android.util.Log.d(TAG, "Found Qualcomm model: ${qualcommFile.name} (${qualcommFile.length() / 1024 / 1024} MB)")
+            return qualcommFile
+        }
         return null
     }
 

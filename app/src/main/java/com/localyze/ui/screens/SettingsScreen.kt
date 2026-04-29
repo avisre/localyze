@@ -423,6 +423,15 @@ private fun SettingsReferenceContent(
 
         ReferenceSettingsGroup(title = "Assistant") {
             ReferenceSettingsRow(
+                icon = Icons.Outlined.Public,
+                title = "Web search",
+                subtitle = "Let the assistant fetch current sourced results",
+                checked = uiState.allowWebSearch,
+                onCheckedChange = { onToggleWebSearch() },
+                showChevron = false
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
                 icon = Icons.Outlined.Settings,
                 title = "Thinking mode",
                 subtitle = "Show reasoning traces",

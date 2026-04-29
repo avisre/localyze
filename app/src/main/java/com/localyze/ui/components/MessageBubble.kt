@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
 import com.localyze.ui.theme.Primary
 import com.localyze.ui.theme.SurfaceVariant
@@ -112,10 +111,8 @@ fun AssistantMessageBubble(
             Box(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
-                Text(
-                    text = if (isStreaming) "$message|" else message,
-                    color = OnBackground,
-                    style = MaterialTheme.typography.bodyLarge
+                StructuredMarkdownText(
+                    markdown = if (isStreaming) "$message|" else message
                 )
             }
         }

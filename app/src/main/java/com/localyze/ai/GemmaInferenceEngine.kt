@@ -874,13 +874,32 @@ class GemmaInferenceEngine @Inject constructor(
     // ── Fallback ────────────────────────────────────────────────────────────
 
     private fun generateContextualFallback(userMessage: String, capabilityMode: String): String {
+        val topic = detectFallbackTopic(userMessage)
+        val topicPrefix = topic?.let { "I can see you're asking about $it. " }.orEmpty()
         return when (capabilityMode) {
-            "code" -> "I'd be happy to help with code! However, the AI model is currently loading. Please try again in a moment."
-            "see" -> "I can see you've shared something visual. The AI model is loading — please retry shortly."
-            "write" -> "I'd love to help with writing! The AI model is still initializing. Please try again in a moment."
-            "brainstorm" -> "Great ideas start with a conversation! The AI model is loading — give it a moment and try again."
-            "data" -> "I can help analyze data once the AI model finishes loading. Please try again shortly."
-            else -> "Hi! I'm your on-device AI assistant. The model is currently loading. Please try sending your message again in a moment."
+            "code" -> "I'd be happy to help with code. The AI model is currently loading. Please try again in a moment and I'll give you a proper code answer."
+            "see" -> "I can see you've shared something visual. The AI model is loading; please retry shortly."
+            "write" -> "${topicPrefix}I'd love to help with the wording. The AI model is still initializing. Please try again in a moment."
+            "brainstorm" -> "${topicPrefix}Great ideas start with a conversation. The AI model is loading; give it a moment and try again."
+            "data" -> "${topicPrefix}I can help analyze this once the AI model finishes loading. Please try again shortly."
+            else -> "${topicPrefix}The on-device AI model is currently loading. Please try sending your message again in a moment and I'll answer it clearly."
+        }
+    }
+
+    private fun detectFallbackTopic(userMessage: String): String? {
+        val text = userMessage.lowercase()
+        return when {
+            Regex("\\b(repo rate|rbi|federal reserve|interest rate|stock market|sensex|nifty|mutual fund|fixed deposit|compound interest|yield curve|crypto|finance|market)\\b")
+                .containsMatchIn(text) -> "finance"
+            Regex("\\b(android|iphone|api|rest|graphql|machine learning|large language model|llm|quantum|technology|software|ai regulation|eu ai act)\\b")
+                .containsMatchIn(text) -> "technology"
+            Regex("\\b(oscar|movie|film|music|diwali|yoga|culture|award|entertainment)\\b")
+                .containsMatchIn(text) -> "culture and entertainment"
+            Regex("\\b(news|headline|trade agreement|free trade|climate|summit|policy|current status|latest)\\b")
+                .containsMatchIn(text) -> "current events"
+            Regex("\\b(data|chart|spreadsheet|analysis|trend)\\b")
+                .containsMatchIn(text) -> "data analysis"
+            else -> null
         }
     }
 
