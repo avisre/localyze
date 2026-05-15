@@ -1,0 +1,183 @@
+{
+  "_doc": "12 prompts that previously thinking-leaked; retest with streaming filter + ANSWER FIRST prompt.",
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app",
+    "The user is asking",
+    "The user wants",
+    "I should answer",
+    "I will answer",
+    "Let me think",
+    "This is a general"
+  ],
+  "questions": [
+    {
+      "id": "X011",
+      "fingerprint": "fact",
+      "prompt": "Year humans first walked on the moon",
+      "category": "fact",
+      "expected_keywords": [
+        "1969"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X073",
+      "fingerprint": "daily",
+      "prompt": "How to remove a coffee stain from carpet",
+      "category": "daily",
+      "expected_keywords": [
+        "blot",
+        "cold",
+        "vinegar",
+        "soap"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X076",
+      "fingerprint": "daily",
+      "prompt": "How long to thaw a frozen turkey",
+      "category": "daily",
+      "expected_keywords": [
+        "day",
+        "hour",
+        "fridge",
+        "24"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X077",
+      "fingerprint": "daily",
+      "prompt": "How to unclog a kitchen sink",
+      "category": "daily",
+      "expected_keywords": [
+        "baking soda",
+        "vinegar",
+        "plunger",
+        "snake"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X082",
+      "fingerprint": "daily",
+      "prompt": "How to descale a kettle",
+      "category": "daily",
+      "expected_keywords": [
+        "vinegar",
+        "citric",
+        "water",
+        "boil"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X112",
+      "fingerprint": "tech",
+      "prompt": "Difference between SSD and HDD?",
+      "category": "tech",
+      "expected_keywords": [
+        "SSD",
+        "HDD",
+        "flash",
+        "platter",
+        "faster"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X157",
+      "fingerprint": "howto",
+      "prompt": "How to plan a one-week vacation on a budget",
+      "category": "howto",
+      "expected_keywords": [
+        "budget",
+        "flight",
+        "Airbnb",
+        "food",
+        "attractions"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X159",
+      "fingerprint": "howto",
+      "prompt": "How to learn a new language in 3 months",
+      "category": "howto",
+      "expected_keywords": [
+        "daily",
+        "app",
+        "speak",
+        "immersion",
+        "goal"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X160",
+      "fingerprint": "howto",
+      "prompt": "How to do a basic squat correctly",
+      "category": "howto",
+      "expected_keywords": [
+        "feet",
+        "shoulder",
+        "knee",
+        "hip",
+        "back"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X166",
+      "fingerprint": "howto",
+      "prompt": "How to prepare for a job interview",
+      "category": "howto",
+      "expected_keywords": [
+        "research",
+        "practice",
+        "question",
+        "STAR",
+        "outfit"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X193",
+      "fingerprint": "edge",
+      "prompt": "Why does time feel faster as you age?",
+      "category": "edge",
+      "expected_keywords": [
+        "proportion",
+        "novelty",
+        "brain",
+        "experience"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "X227",
+      "fingerprint": "time",
+      "prompt": "How many days between January 1 and December 31 (non-leap)?",
+      "category": "time",
+      "expected_keywords": [
+        "364",
+        "365"
+      ],
+      "must_not_contain": []
+    }
+  ]
+}

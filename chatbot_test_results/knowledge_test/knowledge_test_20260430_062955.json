@@ -1,0 +1,167 @@
+[
+  {
+    "index": 1,
+    "question": "What is the capital of France?",
+    "response_time_sec": 6.36,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Paris",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 2,
+    "question": "What is 2 plus 2?",
+    "response_time_sec": 3.23,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "4",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 3,
+    "question": "Who wrote Romeo and Juliet?",
+    "response_time_sec": 3.23,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "William Shakespeare",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 4,
+    "question": "What is the chemical symbol for water?",
+    "response_time_sec": 3.21,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "H2O",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 5,
+    "question": "How many planets are in our solar system?",
+    "response_time_sec": 3.11,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "8",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 6,
+    "question": "What is the speed of light approximately?",
+    "response_time_sec": 3.2,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "299,792,458 m/s",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 7,
+    "question": "Who painted the Mona Lisa?",
+    "response_time_sec": 3.11,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Leonardo da Vinci",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 8,
+    "question": "What is the largest ocean on Earth?",
+    "response_time_sec": 3.14,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Pacific Ocean",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 9,
+    "question": "What year did World War II end?",
+    "response_time_sec": 3.17,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "1945",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 10,
+    "question": "What is the smallest prime number?",
+    "response_time_sec": 3.23,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "2",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 11,
+    "question": "Who invented the telephone?",
+    "response_time_sec": 3.2,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Alexander Graham Bell",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 12,
+    "question": "What is the capital of Japan?",
+    "response_time_sec": 3.17,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Tokyo",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 13,
+    "question": "How many continents are there?",
+    "response_time_sec": 3.13,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "7",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 14,
+    "question": "What gas do plants absorb from the atmosphere?",
+    "response_time_sec": 3.19,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "Carbon dioxide",
+    "reason": "Some relevant info but incorrect key details"
+  },
+  {
+    "index": 15,
+    "question": "What is the freezing point of water in Celsius?",
+    "response_time_sec": 3.14,
+    "response_text": "Report / Flag response",
+    "tool_triggered": false,
+    "score": 3,
+    "max_score": 10,
+    "expected": "0\u00b0C",
+    "reason": "Some relevant info but incorrect key details"
+  }
+]

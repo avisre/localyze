@@ -286,7 +286,7 @@ private fun TaskItem(
                         modifier = Modifier
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(PastelGreen),
+                            .background(Primary.copy(alpha = 0.8f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

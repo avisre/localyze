@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "tag": "ws_landing",
+      "prompt": "build a simple landing page for a coffee shop",
+      "status": "TIMEOUT",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 240.3,
+      "info": {
+        "path": "?",
+        "code_length": 0,
+        "full_text_len": 0
+      },
+      "apply_log": []
+    },
+    {
+      "tag": "ws_explain",
+      "prompt": "explain what a Python list comprehension is",
+      "status": "OK",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 3.1,
+      "info": {
+        "path": "gemma",
+        "code_length": 0,
+        "full_text_len": 130
+      },
+      "apply_log": [
+        "05-08 12:24:13.393  3745  3745 D CodeWorkspace: Streaming completed, fullText length=130",
+        "05-08 12:24:13.393  3745  3745 D CodeWorkspace: Completed text length=130, containsCodeBlock=false"
+      ]
+    },
+    {
+      "tag": "ws_debug",
+      "prompt": "find the bug: def avg(xs): return sum(xs)/len(xs)",
+      "status": "OK",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 3.1,
+      "info": {
+        "path": "gemma",
+        "code_length": 0,
+        "full_text_len": 135
+      },
+      "apply_log": [
+        "05-08 12:24:17.740  4083  4083 D CodeWorkspace: Streaming completed, fullText length=135",
+        "05-08 12:24:17.740  4083  4083 D CodeWorkspace: Completed text length=135, containsCodeBlock=false"
+      ]
+    }
+  ]
+}

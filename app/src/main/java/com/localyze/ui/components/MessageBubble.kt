@@ -14,14 +14,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.localyze.ui.theme.Hairline
 import com.localyze.ui.theme.OnPrimary
 import com.localyze.ui.theme.Primary
+import com.localyze.ui.theme.Surface
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
 
@@ -39,7 +42,12 @@ fun UserMessageBubble(
         horizontalAlignment = Alignment.End
     ) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(
+                topStart = 18.dp,
+                topEnd = 18.dp,
+                bottomStart = 18.dp,
+                bottomEnd = 6.dp
+            ),
             color = Primary,
             modifier = Modifier.widthIn(max = 560.dp)
         ) {
@@ -94,6 +102,8 @@ fun AssistantMessageBubble(
     isStreaming: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val chartResults = remember(message) { if (!isStreaming) extractChartResults(message) else emptyList() }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -101,19 +111,48 @@ fun AssistantMessageBubble(
         horizontalAlignment = Alignment.Start
     ) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, SurfaceVariant),
+            shape = RoundedCornerShape(
+                topStart = 18.dp,
+                topEnd = 18.dp,
+                bottomStart = 6.dp,
+                bottomEnd = 18.dp
+            ),
+            color = Surface,
+            border = BorderStroke(0.5.dp, Hairline),
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 720.dp)
         ) {
-            Box(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-            ) {
+            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
                 StructuredMarkdownText(
                     markdown = if (isStreaming) "$message|" else message
                 )
+                if (chartResults.isNotEmpty()) {
+                    ErrorBoundary(label = "chart") {
+                        chartResults.forEach { chartResult ->
+                            when (chartResult.type) {
+                                ChartType.LINE -> InlineLineChart(
+                                    data = chartResult.data,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                                ChartType.PIE -> InlinePieChart(
+                                    data = chartResult.data,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                                ChartType.BAR -> InlineBarChart(
+                                    data = chartResult.data,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                            if (shouldShowCompanionBarChart(chartResult)) {
+                                InlineBarChart(
+                                    data = chartResult.data,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
         Text(

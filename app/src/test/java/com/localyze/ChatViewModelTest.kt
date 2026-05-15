@@ -89,7 +89,6 @@ class ChatViewModelTest {
         savedStateHandle = SavedStateHandle()
 
         // Default stubbing for use cases
-        whenever(sendMessageUseCase.isUsingMockEngine()).thenReturn(false)
         doNothing().whenever(sendMessageUseCase).resetEngineConversation(any(), any())
         runBlocking {
             doReturn(Unit).whenever(sendMessageUseCase).resetEngineConversationWithSavedContext(any(), any(), any())
@@ -180,6 +179,39 @@ class ChatViewModelTest {
         assertFalse(state.isStreaming)
         assertEquals("Hello", state.messages.lastOrNull { it.role == MessageRole.ASSISTANT }?.content)
         verify(sendMessageUseCase).sendMessage(eq(42L), eq("Hi there"), any(), any())
+    }
+
+    @Test
+    fun `sendMessageInNewConversation starts a clean conversation before sending`() = testScope.runTest {
+        val newConversation = Conversation(id = 84L, title = "New Chat", capabilityMode = "chat")
+        whenever(chatRepository.createConversation(any())).thenReturn(newConversation)
+        whenever(chatRepository.getMessagesForConversation(84L)).thenReturn(
+            flowOf(
+                listOf(
+                    Message(id = 1L, conversationId = 84L, role = MessageRole.USER, content = "What is 2 + 2?", timestamp = 1L),
+                    Message(id = 2L, conversationId = 84L, role = MessageRole.ASSISTANT, content = "4", timestamp = 2L)
+                )
+            )
+        )
+
+        val tokenFlow: Flow<ChatResponseEvent> = flow {
+            emit(ChatResponseEvent.StreamingToken("4"))
+            emit(ChatResponseEvent.Completed("4", null))
+        }
+        whenever(sendMessageUseCase.sendMessage(eq(84L), any(), any(), any())).thenReturn(tokenFlow)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.sendMessageInNewConversation("  What is 2 + 2?  ")
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(84L, state.currentConversationId)
+        assertFalse(state.isStreaming)
+        assertEquals("4", state.messages.lastOrNull { it.role == MessageRole.ASSISTANT }?.content)
+        verify(sendMessageUseCase).resetEngineConversation(eq("chat"), eq(false))
+        verify(sendMessageUseCase).sendMessage(eq(84L), eq("What is 2 + 2?"), any(), any())
     }
 
     @Test

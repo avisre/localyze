@@ -15,8 +15,9 @@
 # TensorFlow Lite
 -keep class org.tensorflow.lite.** { *; }
 
-# MediaPipe
--keep class com.google.mediapipe.** { *; }
+# LiteRT-LM (native JNI classes and model loading)
+-keep class com.google.ai.edge.litertlm.** { *; }
+-keep class com.google.ai.edge.litertlm.** { *; }
 
 # Kotlin Serialization
 -keepattributes *Annotation*, InnerClasses
@@ -38,4 +39,90 @@
 
 -keepclasseswithmembers class com.localyze.** {
     kotlinx.serialization.KSerializer serializer(...);
+}
+
+# SQLCipher
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+
+# Firebase Crashlytics
+-keep class com.google.firebase.crashlytics.** { *; }
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+
+# Play Integrity API
+-keep class com.google.android.play.core.integrity.** { *; }
+
+# Paging3
+-keep class androidx.paging.** { *; }
+-keep class androidx.paging.compose.** { *; }
+
+# ── OkHttp ──────────────────────────────────────────────────────
+# OkHttp uses reflection in its platform / TLS layer.
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-keepclassmembers class okhttp3.internal.publicsuffix.PublicSuffixDatabase { *; }
+
+# ── JSoup ───────────────────────────────────────────────────────
+# JSoup parses HTML reflectively and runs on the JVM stdlib.
+-keep class org.jsoup.** { *; }
+-keepnames class org.jsoup.nodes.**
+-dontwarn org.jsoup.**
+
+# ── WorkManager ─────────────────────────────────────────────────
+# Worker subclasses are instantiated via reflection by WorkManager.
+-keep class * extends androidx.work.Worker
+-keep class * extends androidx.work.CoroutineWorker
+-keep class * extends androidx.work.ListenableWorker
+-keepclassmembers class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+
+# ── Hilt / Dagger ───────────────────────────────────────────────
+# Generated Hilt entry points + module classes are reflectively wired.
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class *
+-keep @dagger.hilt.android.AndroidEntryPoint class *
+-keep @dagger.Module class *
+-keep @dagger.hilt.InstallIn class *
+-keepclassmembers class * {
+    @javax.inject.Inject <init>(...);
+}
+
+# ── Room ────────────────────────────────────────────────────────
+# Room generates impl classes ending in _Impl that are looked up by name.
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keep @androidx.room.Dao class *
+-keepclassmembers class ** {
+    @androidx.room.* <methods>;
+}
+-dontwarn androidx.room.paging.**
+
+# ── DataStore ───────────────────────────────────────────────────
+-keep class androidx.datastore.preferences.** { *; }
+
+# ── Billing ─────────────────────────────────────────────────────
+-keep class com.android.billingclient.api.** { *; }
+
+# ── kotlinx.coroutines (rarely needed but cheap) ────────────────
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.android.AndroidExceptionPreHandler {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+
+# ── App models / DTOs (broad — cheap to keep, expensive to lose) ─
+# All domain models go through serialization / Room / reflection in tests.
+-keep class com.localyze.domain.** { *; }
+-keep class com.localyze.data.** { *; }
+-keep class com.localyze.ai.** { *; }
+-keep class com.localyze.tools.** { *; }
+
+# Keep enum values (ToolDispatcher, CapabilityMode, ConversationFilter, etc.)
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
 }

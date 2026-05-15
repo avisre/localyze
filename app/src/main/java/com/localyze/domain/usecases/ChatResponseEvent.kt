@@ -26,6 +26,16 @@ sealed class ChatResponseEvent {
         val thinkingText: String?
     ) : ChatResponseEvent()
 
+    /** The conversation context was proactively reset to avoid window exhaustion. */
+    data class ContextReset(val message: String = "Conversation context refreshed to keep responses fast.") : ChatResponseEvent()
+
+    /** A destructive tool call requires user confirmation before execution. */
+    data class ToolConfirmationNeeded(
+        val toolName: String,
+        val message: String,
+        val toolCall: com.localyze.domain.models.ToolCall
+    ) : ChatResponseEvent()
+
     /** An error occurred during generation. */
     data class Error(val message: String) : ChatResponseEvent()
 }

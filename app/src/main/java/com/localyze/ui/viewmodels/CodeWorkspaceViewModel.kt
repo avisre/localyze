@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.ChatRepository
+import com.localyze.domain.models.Message
+import com.localyze.domain.models.MessageRole
 import com.localyze.domain.usecases.ChatResponseEvent
 import com.localyze.domain.usecases.SendMessageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +51,11 @@ enum class CodeAssistAction(
         "Review",
         "Provide a comprehensive code review covering style, architecture, security, and maintainability.",
         "Review this code comprehensively:"
+    ),
+    WebsiteRequest(
+        "Website",
+        "Generate a complete, production-ready HTML document with embedded CSS and JavaScript. Make it fully responsive and interactive.",
+        "Build a complete website:"
     )
 }
 
@@ -67,7 +74,7 @@ data class CodeWorkspaceUiState(
     val language: String = "HTML",
     val instruction: String = "",
     val selectedPane: CodeWorkspacePane = CodeWorkspacePane.Editor,
-    val selectedAction: CodeAssistAction = CodeAssistAction.Explain,
+    val selectedAction: CodeAssistAction = CodeAssistAction.WebsiteRequest,
     val messages: List<CodeWorkspaceMessage> = emptyList(),
     val responseText: String = "",
     val thinkingText: String = "",
@@ -79,7 +86,8 @@ data class CodeWorkspaceUiState(
     val allowWebSearch: Boolean = false,
     val currentConversationId: Long = -1L,
     val attachedImage: android.graphics.Bitmap? = null,
-    val error: String? = null
+    val error: String? = null,
+    val isFullScreenPreview: Boolean = false
 )
 
 @HiltViewModel
@@ -99,7 +107,14 @@ class CodeWorkspaceViewModel @Inject constructor(
     }
 
     fun updateCode(value: String) {
-        _uiState.update { it.copy(code = value) }
+        _uiState.update {
+            it.copy(
+                code = value,
+                language = detectLanguageFromCode(value).takeUnless { detected ->
+                    detected == "Plain text" && value.isBlank()
+                } ?: "Plain text"
+            )
+        }
     }
 
     fun updateInstruction(value: String) {
@@ -141,17 +156,26 @@ class CodeWorkspaceViewModel @Inject constructor(
     fun askAssistant() {
         val state = _uiState.value
         if (state.isStreaming) return
+        val effectiveAction = resolveCodeAssistAction(
+            instruction = state.instruction,
+            selectedAction = state.selectedAction
+        )
 
-        val prompt = if (state.instruction.isBlank() && state.code.isBlank()) {
+        val prompt = if (state.instruction.isBlank() && state.code.isBlank() && state.attachedImage == null) {
             _uiState.update { it.copy(error = "Enter code in the editor or type a question.") }
             return
         } else {
             buildCodeWorkspacePrompt(
                 language = state.language,
-                action = state.selectedAction,
+                action = effectiveAction,
                 code = state.code,
                 instruction = state.instruction
             )
+        }
+
+        if (effectiveAction == CodeAssistAction.WebsiteRequest && state.attachedImage == null) {
+            generateWebsiteLocally(state)
+            return
         }
 
         _uiState.update {
@@ -162,9 +186,10 @@ class CodeWorkspaceViewModel @Inject constructor(
                 generationStatus = "Analyzing code",
                 activeToolCalls = emptyList(),
                 error = null,
+                selectedAction = effectiveAction,
                 messages = it.messages + CodeWorkspaceMessage(
                     role = "user",
-                    content = state.instruction.ifBlank { "${state.selectedAction.label} this code" }
+                    content = state.instruction.ifBlank { "${effectiveAction.label} this code" }
                 )
             )
         }
@@ -175,7 +200,7 @@ class CodeWorkspaceViewModel @Inject constructor(
                 if (state.attachedImage != null) {
                     val imagePrompt = buildCodeWorkspacePromptWithImage(
                         language = state.language,
-                        action = state.selectedAction,
+                        action = effectiveAction,
                         code = state.code,
                         instruction = state.instruction
                     )
@@ -251,18 +276,18 @@ class CodeWorkspaceViewModel @Inject constructor(
     fun applyResponseToEditor(responseTextOverride: String? = null) {
         val state = _uiState.value
         val textToProcess = responseTextOverride ?: state.responseText
-        android.util.Log.d("CodeWorkspace", "applyResponseToEditor called, responseText length=${textToProcess.length}")
+        com.localyze.utils.AppLog.d("CodeWorkspace", "applyResponseToEditor called, responseText length=${textToProcess.length}")
 
         // Step 1: Extract all code blocks from the response
         val responseForCode = stripThoughtSections(textToProcess)
         val blocks = extractAllCodeBlocks(responseForCode)
-        android.util.Log.d("CodeWorkspace", "Extracted ${blocks.size} code blocks")
+        com.localyze.utils.AppLog.d("CodeWorkspace", "Extracted ${blocks.size} code blocks")
 
         if (blocks.isEmpty()) {
             // No code blocks found, check if the raw response is HTML-like
             val trimmed = extractCompleteHtmlDocument(responseForCode) ?: responseForCode.trim()
             if (looksLikeHtml(trimmed)) {
-                android.util.Log.d("CodeWorkspace", "Falling back to full response as HTML, length=${trimmed.length}")
+                com.localyze.utils.AppLog.d("CodeWorkspace", "Falling back to full response as HTML, length=${trimmed.length}")
                 _uiState.update {
                 it.copy(
                     code = trimmed,
@@ -271,7 +296,7 @@ class CodeWorkspaceViewModel @Inject constructor(
                 )
             }
             } else {
-                android.util.Log.d("CodeWorkspace", "Response does not look like HTML, skipping apply")
+                com.localyze.utils.AppLog.d("CodeWorkspace", "Response does not look like HTML, skipping apply")
             }
             return
         }
@@ -279,7 +304,7 @@ class CodeWorkspaceViewModel @Inject constructor(
         // Step 2: Find the best HTML block (complete document preferred)
         val bestHtml = findBestHtmlBlock(blocks)
         if (bestHtml != null) {
-            android.util.Log.d("CodeWorkspace", "Found complete HTML block, lang=${bestHtml.language}, length=${bestHtml.code.length}")
+            com.localyze.utils.AppLog.d("CodeWorkspace", "Found complete HTML block, lang=${bestHtml.language}, length=${bestHtml.code.length}")
             _uiState.update {
                 it.copy(
                     code = bestHtml.code,
@@ -293,7 +318,7 @@ class CodeWorkspaceViewModel @Inject constructor(
         // Step 3: Merge multiple blocks into a single HTML file
         val merged = mergeBlocksIntoHtml(blocks)
         if (merged != null) {
-            android.util.Log.d("CodeWorkspace", "Merged ${blocks.size} blocks into HTML, length=${merged.length}")
+            com.localyze.utils.AppLog.d("CodeWorkspace", "Merged ${blocks.size} blocks into HTML, length=${merged.length}")
             _uiState.update {
                 it.copy(
                     code = merged,
@@ -307,7 +332,7 @@ class CodeWorkspaceViewModel @Inject constructor(
         // Step 4: Use the largest code block whatever it is
         val largest = blocks.maxByOrNull { it.code.length }!!
         val detectedLang = largest.language.ifBlank { detectLanguageFromCode(largest.code) }
-        android.util.Log.d("CodeWorkspace", "Using largest block: detectedLang=$detectedLang, length=${largest.code.length}")
+        com.localyze.utils.AppLog.d("CodeWorkspace", "Using largest block: detectedLang=$detectedLang, length=${largest.code.length}")
         _uiState.update {
             it.copy(
                 code = largest.code,
@@ -388,7 +413,10 @@ class CodeWorkspaceViewModel @Inject constructor(
             is ChatResponseEvent.StreamingToken -> {
                 _uiState.update { state ->
                     if (state.streamTokens) {
-                        state.copy(responseText = state.responseText + event.text, isStreaming = true, generationStatus = "Writing code answer")
+                        var newText = state.responseText + event.text
+                        newText = newText.replace(Regex("(\\d)([a-zA-Z])"), "$1 $2")
+                        newText = newText.replace(Regex("([a-zA-Z])(\\d)"), "$1 $2")
+                        state.copy(responseText = newText, isStreaming = true, generationStatus = "Writing code answer")
                     } else {
                         state.copy(isStreaming = true, generationStatus = "Writing code answer")
                     }
@@ -431,14 +459,16 @@ class CodeWorkspaceViewModel @Inject constructor(
             }
 
             is ChatResponseEvent.Completed -> {
-                android.util.Log.d("CodeWorkspace", "Streaming completed, fullText length=${event.fullText.length}")
+                com.localyze.utils.AppLog.d("CodeWorkspace", "Streaming completed, fullText length=${event.fullText.length}")
                 val completedText = if (_uiState.value.responseText.isBlank()) {
                     event.fullText
                 } else {
                     _uiState.value.responseText
                 }
+                val isWebsiteOrFix = _uiState.value.selectedAction == CodeAssistAction.Fix ||
+                    _uiState.value.selectedAction == CodeAssistAction.WebsiteRequest
                 _uiState.update { state ->
-                    android.util.Log.d("CodeWorkspace", "Completed text length=${completedText.length}, containsCodeBlock=${completedText.contains("```")}")
+                    com.localyze.utils.AppLog.d("CodeWorkspace", "Completed text length=${completedText.length}, containsCodeBlock=${completedText.contains("```")}")
                     state.copy(
                         isStreaming = false,
                         generationStatus = "",
@@ -448,10 +478,22 @@ class CodeWorkspaceViewModel @Inject constructor(
                         messages = state.messages + CodeWorkspaceMessage(role = "assistant", content = completedText)
                     )
                 }
-                // Auto-apply code blocks when streaming completes
-                android.util.Log.d("CodeWorkspace", "Calling applyResponseToEditor() after stream completion")
-                applyResponseToEditor(completedText)
-                android.util.Log.d("CodeWorkspace", "After applyResponseToEditor: code length=${_uiState.value.code.length}, selectedPane=${_uiState.value.selectedPane}")
+                if (isWebsiteOrFix) {
+                    com.localyze.utils.AppLog.d("CodeWorkspace", "Auto-applying code after stream completion")
+                    applyResponseToEditor(completedText)
+                    if (_uiState.value.code.isNotBlank()) {
+                        _uiState.update { it.copy(selectedPane = CodeWorkspacePane.Preview) }
+                    }
+                    com.localyze.utils.AppLog.d("CodeWorkspace", "After apply: code length=${_uiState.value.code.length}, pane=${_uiState.value.selectedPane}")
+                }
+            }
+
+            is ChatResponseEvent.ContextReset -> {
+                // No-op in code workspace; context reset is primarily a chat UI concern.
+            }
+
+            is ChatResponseEvent.ToolConfirmationNeeded -> {
+                // No-op in code workspace; tool confirmations are handled in chat.
             }
 
             is ChatResponseEvent.Error -> {
@@ -480,24 +522,75 @@ class CodeWorkspaceViewModel @Inject constructor(
         }
     }
 
+    fun toggleFullScreenPreview() {
+        _uiState.update { it.copy(isFullScreenPreview = !it.isFullScreenPreview) }
+    }
+
+    fun exitFullScreenPreview() {
+        _uiState.update { it.copy(isFullScreenPreview = false) }
+    }
+
     fun triggerTestPrompt(prompt: String) {
         _uiState.update { it.copy(instruction = prompt) }
         askAssistant()
+    }
+
+    private fun generateWebsiteLocally(state: CodeWorkspaceUiState) {
+        val request = state.instruction.ifBlank { "Create a premium responsive website" }
+        val html = buildWebsiteTemplateForInstruction(request)
+        _uiState.update {
+            it.copy(
+                code = html,
+                language = "HTML",
+                instruction = request,
+                selectedAction = CodeAssistAction.WebsiteRequest,
+                selectedPane = CodeWorkspacePane.Preview,
+                messages = it.messages +
+                    CodeWorkspaceMessage(role = "user", content = request) +
+                    CodeWorkspaceMessage(
+                        role = "assistant",
+                        content = "Created a complete responsive HTML website and opened the live preview."
+                    ),
+                responseText = "",
+                thinkingText = "",
+                generationStatus = "",
+                activeToolCalls = emptyList(),
+                isStreaming = false,
+                error = null
+            )
+        }
+        viewModelScope.launch {
+            val conversationId = ensureWorkspaceConversation()
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.USER,
+                    content = request
+                )
+            )
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = "```html\n$html\n```"
+                )
+            )
+        }
     }
 }
 
 // Code block extraction
 
-private data class CodeBlock(val language: String, val code: String)
+internal data class CodeBlock(val language: String, val code: String)
 
-private fun stripThoughtSections(text: String): String {
+internal fun stripThoughtSections(text: String): String {
     return text
         .replace(Regex("""<thought[\s\S]*?</thought>""", RegexOption.IGNORE_CASE), "")
         .replace(Regex("""<think[\s\S]*?</think>""", RegexOption.IGNORE_CASE), "")
         .trim()
 }
 
-private fun extractCompleteHtmlDocument(text: String): String? {
+internal fun extractCompleteHtmlDocument(text: String): String? {
     val lower = text.lowercase()
     val end = lower.lastIndexOf("</html>")
     if (end < 0) return null
@@ -518,7 +611,7 @@ private fun extractCompleteHtmlDocument(text: String): String? {
  * - ```\n ... ```    (newline before content)
  * - ~~...~~          (strikethrough from model corrections)
  */
-private fun extractAllCodeBlocks(markdown: String): List<CodeBlock> {
+internal fun extractAllCodeBlocks(markdown: String): List<CodeBlock> {
     val results = mutableListOf<CodeBlock>()
     // Match code blocks with optional language tag, allowing flexible whitespace
     val regex = Regex("""```[ \t]*([A-Za-z0-9_+-]*)[^\S\r\n]*(?:\r?\n)([\s\S]*?)```""")
@@ -579,7 +672,7 @@ private fun findBestHtmlBlock(blocks: List<CodeBlock>): CodeBlock? {
  * Merge multiple code blocks (e.g. separate HTML + CSS + JS blocks)
  * into a single complete HTML document.
  */
-private fun mergeBlocksIntoHtml(blocks: List<CodeBlock>): String? {
+internal fun mergeBlocksIntoHtml(blocks: List<CodeBlock>): String? {
     if (blocks.size < 2) return null
 
     val htmlBlocks = blocks.filter { b ->
@@ -674,7 +767,7 @@ private fun stripHtmlWrapper(html: String): String {
 /**
  * Check if raw text (no code blocks) looks like HTML that can be previewed.
  */
-private fun looksLikeHtml(text: String): Boolean {
+internal fun looksLikeHtml(text: String): Boolean {
     val lower = text.lowercase()
     return lower.contains("<html") || lower.contains("<!doctype") ||
            lower.contains("<body") || lower.contains("<div") ||
@@ -682,7 +775,7 @@ private fun looksLikeHtml(text: String): Boolean {
            lower.contains("<section") || lower.contains("<nav")
 }
 
-private fun detectLanguageFromCode(code: String): String {
+internal fun detectLanguageFromCode(code: String): String {
     val lower = code.lowercase()
     return when {
         lower.contains("<!doctype html") || (lower.contains("<html") && lower.contains("</html")) -> "HTML"
@@ -713,24 +806,47 @@ internal fun buildCodeWorkspacePrompt(
     val trimmedCode = code.trimEnd().take(MAX_CODE_WORKSPACE_PROMPT_CODE_CHARS)
     val userInstruction = instruction.trim()
     val detectedLang = language.ifBlank { detectLanguageFromCode(trimmedCode) }
+    val isWebsite = action == CodeAssistAction.WebsiteRequest
 
     return buildString {
-        appendLine("You are a senior software engineer assisting in Localyze's code workspace.")
+        if (isWebsite) {
+            appendLine("Generate a COMPLETE, standalone HTML document for: $userInstruction")
+            appendLine("CRITICAL RULES:")
+            appendLine("- Output ONLY the HTML code inside one ```html fenced block. No text before or after.")
+            appendLine("- Must be a full <html> document with embedded <style> and <script>.")
+            appendLine("- Fully responsive. Real product names/prices/descriptions. No lorem ipsum.")
+            appendLine("- Modern design with CSS Grid/Flexbox, smooth transitions, working navigation.")
+            appendLine("- For ecommerce: product grid, cart sidebar, checkout form, hero banner.")
+            appendLine("- No external images. Use CSS gradients, emoji icons, SVG placeholders.")
+        } else {
+            appendLine("You are helping inside Localyze.ai's code workspace as a senior software engineer.")
+        appendLine("The assistant's public name is Localyze.ai. It is based on Gemma 4 E4B, but do not call yourself Gemma.")
         appendLine("Your job is to help the user understand, debug, fix, and improve their code.")
         appendLine("Detected language: $detectedLang")
         appendLine("Action: ${action.label} - ${action.instruction}")
+        appendLine("User instruction: ${userInstruction.ifBlank { "${action.label} this code" }}")
+        appendLine()
+        appendLine("CLARIFICATION POLICY: If the user instruction is too vague to act on")
+        appendLine("(\"make it better\", \"fix the bug\" with no symptom described, \"refactor\" with no")
+        appendLine("goal), ask 1-3 specific follow-up questions and stop. Examples of vague:")
+        appendLine("- \"fix this\" with no error message or symptom -> ask which behavior is broken")
+        appendLine("- \"refactor\" -> ask: optimize for what? performance, readability, testability?")
+        appendLine("- no code provided + \"build me a tool\" -> ask language, inputs, expected output")
+        appendLine("Skip clarification when: explicit error message, concrete language, clear goal, or")
+        appendLine("when reasonable defaults work. Format follow-ups as a numbered list and stop.")
         appendLine()
         appendLine("OUTPUT CONTRACT - follow exactly:")
         appendLine("1. Start with a clear, concise summary of what the code does (2-3 sentences).")
         appendLine("2. If the action is Explain: describe the logic step by step, call out patterns/algorithms, and note any assumptions.")
         appendLine("3. If the action is Debug: list each bug or issue with line references and severity (Critical/Warning/Info).")
-        appendLine("4. If the action is Fix: provide corrected code in a fenced code block with the same language tag, then explain what was fixed.")
+        appendLine("4. If the action is Fix: provide the corrected full code in one fenced code block with the same language tag, then briefly explain what was fixed.")
         appendLine("5. If the action is Optimize: explain the performance or readability issue, then show the optimized version with benchmarks if applicable.")
         appendLine("6. If the action is Review: cover code style, architecture, security, maintainability, and test coverage.")
         appendLine("7. Use markdown formatting: headers, bullet points, bold for key terms, and fenced code blocks for any code.")
         appendLine("8. Be specific: reference variable names, function names, and line numbers when pointing out issues.")
         appendLine("9. Do not output <thought>, <think>, planning notes, or self-review text.")
         appendLine("10. Keep explanations accessible but technically accurate. Use analogies for complex concepts.")
+        appendLine("11. For Debug, Explain, and Review, do not provide a full replacement file unless the user explicitly asks for one.")
         appendLine()
         if (trimmedCode.isBlank()) {
             appendLine("No code was provided in the editor. The user is asking a general question.")
@@ -745,7 +861,30 @@ internal fun buildCodeWorkspacePrompt(
             appendLine("USER'S SPECIFIC REQUEST:")
             appendLine(userInstruction)
         }
+        }
     }.trim()
+}
+
+internal fun resolveCodeAssistAction(
+    instruction: String,
+    selectedAction: CodeAssistAction
+): CodeAssistAction {
+    val text = instruction.lowercase()
+    return when {
+        Regex("\\b(build|create|make|generate|design|code)\\b.*\\b(website|landing page|homepage|webpage|ecommerce|e-commerce|store|portfolio|blog|dashboard|landing)\\b").containsMatchIn(text) ->
+            CodeAssistAction.WebsiteRequest
+        Regex("\\b(fix|correct|repair|patch|rewrite|apply|make it work|solve)\\b").containsMatchIn(text) ->
+            CodeAssistAction.Fix
+        Regex("\\b(debug|bug|error|exception|stack trace|fails?|failure|broken|issue|problem|why)\\b").containsMatchIn(text) ->
+            CodeAssistAction.Debug
+        Regex("\\b(optimi[sz]e|performance|faster|speed|memory|efficient)\\b").containsMatchIn(text) ->
+            CodeAssistAction.Optimize
+        Regex("\\b(review|audit|production ready|security|maintainability|quality)\\b").containsMatchIn(text) ->
+            CodeAssistAction.Review
+        Regex("\\b(explain|understand|what does|how does|walk me through)\\b").containsMatchIn(text) ->
+            CodeAssistAction.Explain
+        else -> selectedAction
+    }
 }
 
 internal fun buildCodeWorkspacePromptWithImage(
@@ -765,4 +904,3 @@ internal fun buildCodeWorkspacePromptWithImage(
         appendLine("If the image shows a UI, describe what the code is trying to achieve visually.")
     }.trim()
 }
-

@@ -1,0 +1,6157 @@
+[
+  {
+    "id": "Q001",
+    "prompt": "What's the capital of Japan?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Tokyo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "stable fact"
+  },
+  {
+    "id": "Q002",
+    "prompt": "What is the capital of France?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Paris"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q003",
+    "prompt": "What's the capital of Australia?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Canberra"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "not Sydney"
+  },
+  {
+    "id": "Q004",
+    "prompt": "Capital of Brazil?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Brasilia"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q005",
+    "prompt": "What is the capital city of Canada?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Ottawa"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "not Toronto"
+  },
+  {
+    "id": "Q006",
+    "prompt": "Which country has the largest population?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "India",
+      "China"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "as of 2023+ India"
+  },
+  {
+    "id": "Q007",
+    "prompt": "What is the longest river in the world?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Nile",
+      "Amazon"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "debated"
+  },
+  {
+    "id": "Q008",
+    "prompt": "Which is the tallest mountain in the world?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Everest"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q009",
+    "prompt": "How many continents are there?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "7",
+      "seven"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q010",
+    "prompt": "What is the smallest country in the world?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Vatican"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q011",
+    "prompt": "Which ocean is the largest?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Pacific"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q012",
+    "prompt": "What's the capital of Germany?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Berlin"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q013",
+    "prompt": "Capital of Italy?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Rome"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q014",
+    "prompt": "What is the capital of Spain?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Madrid"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q015",
+    "prompt": "Capital of Russia?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Moscow"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q016",
+    "prompt": "What's the capital of South Korea?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Seoul"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q017",
+    "prompt": "Which desert is the largest?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Sahara",
+      "Antarctic"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "depends on hot vs cold"
+  },
+  {
+    "id": "Q018",
+    "prompt": "What country is Mount Fuji in?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Japan"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q019",
+    "prompt": "What sea separates Europe from Africa?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Mediterranean"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q020",
+    "prompt": "How many states does the US have?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "50",
+      "fifty"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q021",
+    "prompt": "What is the capital of India?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "New Delhi",
+      "Delhi"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q022",
+    "prompt": "Capital of China?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Beijing"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q023",
+    "prompt": "What's the largest country by area?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Russia"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q024",
+    "prompt": "Which river runs through London?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Thames"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q025",
+    "prompt": "What country is the Eiffel Tower in?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "France"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q026",
+    "prompt": "Which continent is Egypt in?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Africa"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q027",
+    "prompt": "What is the capital of Mexico?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Mexico City"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q028",
+    "prompt": "Which country has the most time zones?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "France",
+      "Russia"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "France with territories"
+  },
+  {
+    "id": "Q029",
+    "prompt": "Where is the Great Barrier Reef?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Australia"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q030",
+    "prompt": "Capital of Argentina?",
+    "category": "fact_geography",
+    "expected_keywords": [
+      "Buenos Aires"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q031",
+    "prompt": "What is the speed of light?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "299",
+      "300,000",
+      "light"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "approx 3e8 m/s"
+  },
+  {
+    "id": "Q032",
+    "prompt": "What is the chemical symbol for gold?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Au"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q033",
+    "prompt": "How many bones are in the adult human body?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "206"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q034",
+    "prompt": "What is the largest planet in our solar system?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Jupiter"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q035",
+    "prompt": "What gas do plants absorb from the air?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "carbon dioxide",
+      "CO2"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q036",
+    "prompt": "What is the smallest unit of life?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "cell"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q037",
+    "prompt": "What is H2O commonly known as?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "water"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q038",
+    "prompt": "How many planets are in our solar system?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "8",
+      "eight"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q039",
+    "prompt": "What is the boiling point of water in Celsius?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "100"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q040",
+    "prompt": "What is the freezing point of water in Fahrenheit?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "32"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q041",
+    "prompt": "What force keeps us on the ground?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "gravity"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q042",
+    "prompt": "What organ pumps blood through the body?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "heart"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q043",
+    "prompt": "What is the powerhouse of the cell?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "mitochondria"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q044",
+    "prompt": "How many chromosomes do humans have?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "46",
+      "23 pairs"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q045",
+    "prompt": "What is the chemical symbol for water?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "H2O"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q046",
+    "prompt": "What does DNA stand for?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "deoxyribonucleic"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q047",
+    "prompt": "Which planet is known as the Red Planet?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Mars"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q048",
+    "prompt": "How long does light take from the Sun to Earth?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "8",
+      "eight"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "about 8 minutes"
+  },
+  {
+    "id": "Q049",
+    "prompt": "What is the most abundant gas in Earth's atmosphere?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "nitrogen"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q050",
+    "prompt": "Who proposed the theory of relativity?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Einstein"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q051",
+    "prompt": "What part of the eye controls how much light enters?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "pupil",
+      "iris"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q052",
+    "prompt": "What's the chemical symbol for sodium?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Na"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q053",
+    "prompt": "How many teeth does an adult human have?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "32"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q054",
+    "prompt": "What is photosynthesis in simple terms?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "sunlight",
+      "energy",
+      "plants"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q055",
+    "prompt": "What is the hardest natural substance?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "diamond"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q056",
+    "prompt": "What is absolute zero in Celsius?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "-273"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q057",
+    "prompt": "How many legs does a spider have?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "8",
+      "eight"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q058",
+    "prompt": "What is the largest organ in the human body?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "skin"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q059",
+    "prompt": "What's the speed of sound in air roughly?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "343",
+      "340"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "m/s"
+  },
+  {
+    "id": "Q060",
+    "prompt": "What galaxy is Earth in?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Milky Way"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q061",
+    "prompt": "What is the pH of pure water?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "7"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q062",
+    "prompt": "How many elements are on the periodic table?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "118"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q063",
+    "prompt": "Who discovered penicillin?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Fleming"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q064",
+    "prompt": "What is the smallest planet in our solar system?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "Mercury"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q065",
+    "prompt": "What's the unit of electrical resistance?",
+    "category": "fact_science",
+    "expected_keywords": [
+      "ohm"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q066",
+    "prompt": "When did World War 2 end?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1945"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q067",
+    "prompt": "When did World War 1 start?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1914"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q068",
+    "prompt": "Who was the first president of the United States?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Washington"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q069",
+    "prompt": "In what year did humans first land on the moon?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1969"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q070",
+    "prompt": "Who invented the telephone?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Bell"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q071",
+    "prompt": "When did the Berlin Wall fall?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1989"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q072",
+    "prompt": "Who painted the Mona Lisa?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "da Vinci",
+      "Leonardo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q073",
+    "prompt": "When was the Declaration of Independence signed?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1776"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q074",
+    "prompt": "Who was the British prime minister during WWII?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Churchill"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q075",
+    "prompt": "When did the Titanic sink?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1912"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q076",
+    "prompt": "Who wrote the Communist Manifesto?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Marx"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q077",
+    "prompt": "When did the Roman Empire fall?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "476"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "Western Rome"
+  },
+  {
+    "id": "Q078",
+    "prompt": "Who was the Egyptian queen famous for her romance with Caesar?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Cleopatra"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q079",
+    "prompt": "When did India gain independence?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1947"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q080",
+    "prompt": "Who discovered America in 1492?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Columbus"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q081",
+    "prompt": "When did the Cold War end?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1991",
+      "1989"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q082",
+    "prompt": "Who was the first emperor of China?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Qin",
+      "Shi Huang"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q083",
+    "prompt": "Who invented the light bulb?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Edison"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q084",
+    "prompt": "When did the French Revolution begin?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1789"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q085",
+    "prompt": "Who was Mahatma Gandhi?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "India",
+      "nonviolent",
+      "independence"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q086",
+    "prompt": "In which year did the Soviet Union dissolve?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1991"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q087",
+    "prompt": "Who wrote the Gettysburg Address?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Lincoln"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q088",
+    "prompt": "When was the United Nations founded?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "1945"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q089",
+    "prompt": "Which war was fought between the North and South in America?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Civil War"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q090",
+    "prompt": "Who was the longest reigning British monarch?",
+    "category": "fact_history",
+    "expected_keywords": [
+      "Elizabeth",
+      "Victoria"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "Elizabeth II surpassed Victoria"
+  },
+  {
+    "id": "Q091",
+    "prompt": "Who wrote Romeo and Juliet?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Shakespeare"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q092",
+    "prompt": "Who painted the Sistine Chapel ceiling?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Michelangelo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q093",
+    "prompt": "Who composed the Ninth Symphony?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Beethoven"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q094",
+    "prompt": "Who directed the movie Jaws?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Spielberg"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q095",
+    "prompt": "Who sang Bohemian Rhapsody?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Queen",
+      "Mercury"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q096",
+    "prompt": "Who wrote Harry Potter?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Rowling"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q097",
+    "prompt": "How many Grand Slams are in tennis per year?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "4",
+      "four"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q098",
+    "prompt": "How many players on a soccer team on the field?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "11",
+      "eleven"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q099",
+    "prompt": "Who is known as the King of Pop?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Michael Jackson"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q100",
+    "prompt": "Who painted Starry Night?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Van Gogh"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q101",
+    "prompt": "Who wrote Pride and Prejudice?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Austen"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q102",
+    "prompt": "Who is the main character in The Great Gatsby?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Gatsby",
+      "Nick"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q103",
+    "prompt": "In chess, how does the knight move?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "L",
+      "two",
+      "one"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q104",
+    "prompt": "Who wrote 1984?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Orwell"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q105",
+    "prompt": "Who painted The Last Supper?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "da Vinci",
+      "Leonardo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q106",
+    "prompt": "Who composed Four Seasons?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Vivaldi"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q107",
+    "prompt": "Who is the lead singer of U2?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Bono"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q108",
+    "prompt": "How many keys are on a standard piano?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "88"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q109",
+    "prompt": "Who wrote The Lord of the Rings?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Tolkien"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q110",
+    "prompt": "Who is Spider-Man's alter ego?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Peter Parker"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q111",
+    "prompt": "How many rings are on the Olympic flag?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "5",
+      "five"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q112",
+    "prompt": "Who painted the Persistence of Memory?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Dali"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q113",
+    "prompt": "Who wrote The Catcher in the Rye?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Salinger"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q114",
+    "prompt": "Who is Batman's secret identity?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Bruce Wayne"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q115",
+    "prompt": "Who directed The Godfather?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Coppola"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q116",
+    "prompt": "How many strings on a standard guitar?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "6",
+      "six"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q117",
+    "prompt": "Who wrote Don Quixote?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Cervantes"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q118",
+    "prompt": "Who painted Guernica?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Picasso"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q119",
+    "prompt": "Who sang Imagine?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Lennon"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q120",
+    "prompt": "Who wrote Moby Dick?",
+    "category": "fact_general",
+    "expected_keywords": [
+      "Melville"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q121",
+    "prompt": "What is 20% of 200?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "40"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q122",
+    "prompt": "What's 15% of 80?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "12"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q123",
+    "prompt": "Calculate 25 times 4.",
+    "category": "math_basic",
+    "expected_keywords": [
+      "100"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q124",
+    "prompt": "What is 144 divided by 12?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "12"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q125",
+    "prompt": "What is 7 squared?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "49"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q126",
+    "prompt": "What is the square root of 81?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "9"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q127",
+    "prompt": "What is 12 plus 37?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "49"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q128",
+    "prompt": "What is 100 minus 47?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "53"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q129",
+    "prompt": "What is 9 times 8?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "72"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q130",
+    "prompt": "Calculate 1/4 plus 1/2.",
+    "category": "math_basic",
+    "expected_keywords": [
+      "3/4",
+      "0.75"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q131",
+    "prompt": "What is 33% of 99?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "32.67",
+      "33"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q132",
+    "prompt": "What is 2 to the power of 10?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "1024"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q133",
+    "prompt": "What's 50% of 360?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "180"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q134",
+    "prompt": "What is 17 times 6?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "102"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q135",
+    "prompt": "What is 1000 divided by 25?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "40"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q136",
+    "prompt": "What is 0.5 plus 0.25?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "0.75"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q137",
+    "prompt": "What is 3/5 as a decimal?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "0.6"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q138",
+    "prompt": "What is 75% of 200?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "150"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q139",
+    "prompt": "Calculate 18 plus 27.",
+    "category": "math_basic",
+    "expected_keywords": [
+      "45"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q140",
+    "prompt": "What is 15 times 15?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "225"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q141",
+    "prompt": "What is 64 divided by 8?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "8"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q142",
+    "prompt": "What is 6 factorial?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "720"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q143",
+    "prompt": "What is 11 squared?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "121"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q144",
+    "prompt": "What's 5% of 1000?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "50"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q145",
+    "prompt": "Calculate 99 minus 33.",
+    "category": "math_basic",
+    "expected_keywords": [
+      "66"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q146",
+    "prompt": "What is 2 plus 2 times 3?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "8"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "order of operations"
+  },
+  {
+    "id": "Q147",
+    "prompt": "What is 250 plus 750?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "1000"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q148",
+    "prompt": "What is 36 divided by 6?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "6"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q149",
+    "prompt": "What is 12 times 12?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "144"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q150",
+    "prompt": "What is 10% of 50?",
+    "category": "math_basic",
+    "expected_keywords": [
+      "5"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q151",
+    "prompt": "If a meal costs $40 and I want to tip 20%, how much is the tip?",
+    "category": "math_word",
+    "expected_keywords": [
+      "8"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q152",
+    "prompt": "A shirt is $50 with 25% off. What's the discounted price?",
+    "category": "math_word",
+    "expected_keywords": [
+      "37.5",
+      "37.50"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q153",
+    "prompt": "Split a $120 bill three ways. How much does each pay?",
+    "category": "math_word",
+    "expected_keywords": [
+      "40"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q154",
+    "prompt": "If I drive 60 mph for 2.5 hours, how far do I go?",
+    "category": "math_word",
+    "expected_keywords": [
+      "150"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q155",
+    "prompt": "A 30% tip on a $75 bill is how much?",
+    "category": "math_word",
+    "expected_keywords": [
+      "22.5",
+      "22.50"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q156",
+    "prompt": "If I save $200 a month, how much in 18 months?",
+    "category": "math_word",
+    "expected_keywords": [
+      "3600"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q157",
+    "prompt": "A book is 20% off $25. New price?",
+    "category": "math_word",
+    "expected_keywords": [
+      "20"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q158",
+    "prompt": "4 friends split a $96 dinner bill. Each owes?",
+    "category": "math_word",
+    "expected_keywords": [
+      "24"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q159",
+    "prompt": "Driving 70 mph for 3 hours covers how many miles?",
+    "category": "math_word",
+    "expected_keywords": [
+      "210"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q160",
+    "prompt": "Total cost of 6 items at $7.50 each?",
+    "category": "math_word",
+    "expected_keywords": [
+      "45"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q161",
+    "prompt": "A 15% tip on $46 dinner is how much?",
+    "category": "math_word",
+    "expected_keywords": [
+      "6.9",
+      "6.90"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q162",
+    "prompt": "If gas costs $3.50 a gallon and I buy 12 gallons, total?",
+    "category": "math_word",
+    "expected_keywords": [
+      "42"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q163",
+    "prompt": "A jacket is $80, marked down 40%. Sale price?",
+    "category": "math_word",
+    "expected_keywords": [
+      "48"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q164",
+    "prompt": "If a recipe serves 4 and I need 10 servings, multiplier?",
+    "category": "math_word",
+    "expected_keywords": [
+      "2.5"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q165",
+    "prompt": "A $1500 TV with 8% sales tax costs how much?",
+    "category": "math_word",
+    "expected_keywords": [
+      "1620"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q166",
+    "prompt": "Cycling at 12 mph for 90 minutes covers?",
+    "category": "math_word",
+    "expected_keywords": [
+      "18"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "miles"
+  },
+  {
+    "id": "Q167",
+    "prompt": "If I work 8 hours at $22/hour, what do I earn?",
+    "category": "math_word",
+    "expected_keywords": [
+      "176"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q168",
+    "prompt": "Three pizzas at $14.99 each total?",
+    "category": "math_word",
+    "expected_keywords": [
+      "44.97"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q169",
+    "prompt": "A 10% discount on $250 means I pay?",
+    "category": "math_word",
+    "expected_keywords": [
+      "225"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q170",
+    "prompt": "If a phone bill is $85 and I pay half, my share is?",
+    "category": "math_word",
+    "expected_keywords": [
+      "42.5",
+      "42.50"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q171",
+    "prompt": "Convert 100 F to Celsius.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "37.7",
+      "37.8",
+      "38"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q172",
+    "prompt": "How many kilometers in 10 miles?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "16.09",
+      "16.1"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q173",
+    "prompt": "Convert 5 feet to centimeters.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "152.4",
+      "152"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q174",
+    "prompt": "How many pounds is 50 kg?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "110",
+      "110.2"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q175",
+    "prompt": "Convert 32 F to Celsius.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "0"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q176",
+    "prompt": "How many liters in 1 gallon?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "3.78",
+      "3.79"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q177",
+    "prompt": "Convert 100 km to miles.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "62.1",
+      "62"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q178",
+    "prompt": "How many inches in 30 cm?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "11.8",
+      "12"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q179",
+    "prompt": "Convert 75 kg to pounds.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "165",
+      "165.3"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q180",
+    "prompt": "How many meters in a mile?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "1609"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q181",
+    "prompt": "Convert 25 C to Fahrenheit.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "77"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q182",
+    "prompt": "How many ounces in a pound?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "16"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q183",
+    "prompt": "Convert 6 feet to meters.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "1.83",
+      "1.82"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q184",
+    "prompt": "How many milliliters in a cup?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "240",
+      "236"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q185",
+    "prompt": "Convert 5 kilometers to miles.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "3.1",
+      "3.11"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q186",
+    "prompt": "How many grams in a kilogram?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "1000"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q187",
+    "prompt": "Convert 180 F to C.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "82",
+      "82.2"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q188",
+    "prompt": "How many feet in a meter?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "3.28"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q189",
+    "prompt": "Convert 2 liters to gallons.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "0.52",
+      "0.53"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q190",
+    "prompt": "How many centimeters in an inch?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "2.54"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q191",
+    "prompt": "Convert 40 C to F.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "104"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q192",
+    "prompt": "How many tablespoons in a cup?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "16"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q193",
+    "prompt": "Convert 200 pounds to kilograms.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "90.7",
+      "91"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q194",
+    "prompt": "How many seconds in an hour?",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "3600"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q195",
+    "prompt": "Convert 1 mile to feet.",
+    "category": "unit_convert",
+    "expected_keywords": [
+      "5280"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q196",
+    "prompt": "How long should I boil an egg for medium-soft yolk?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "6",
+      "7",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q197",
+    "prompt": "How many hours of sleep do adults need?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "7",
+      "8",
+      "hours"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q198",
+    "prompt": "How much water should I drink a day?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "8",
+      "glasses",
+      "liters",
+      "2"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q199",
+    "prompt": "How long to bake chicken breast at 400 F?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "20",
+      "25",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q200",
+    "prompt": "What's a good internal temp for cooked chicken?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "165"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "F"
+  },
+  {
+    "id": "Q201",
+    "prompt": "How long to brew black tea?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "3",
+      "5",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q202",
+    "prompt": "How do I remove a red wine stain from carpet?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "salt",
+      "club soda",
+      "blot"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q203",
+    "prompt": "How long do hard boiled eggs last in the fridge?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "week",
+      "7"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q204",
+    "prompt": "What temperature should my freezer be?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "0",
+      "-18"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q205",
+    "prompt": "How long should I steep green tea?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "2",
+      "3",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q206",
+    "prompt": "How often should I change my toothbrush?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "3",
+      "month"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q207",
+    "prompt": "How long does it take to cook rice on the stove?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "18",
+      "20",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q208",
+    "prompt": "What's the ideal humidity for indoor air?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "30",
+      "50",
+      "%"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q209",
+    "prompt": "How long can leftovers stay in the fridge?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "3",
+      "4",
+      "day"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q210",
+    "prompt": "What temperature is medium rare steak?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "130",
+      "135"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "F"
+  },
+  {
+    "id": "Q211",
+    "prompt": "How do I get rid of hiccups?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "water",
+      "breath",
+      "hold"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q212",
+    "prompt": "Tips to fall asleep faster?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "routine",
+      "screen",
+      "dark"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q213",
+    "prompt": "How long should a power nap be?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "20",
+      "30",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q214",
+    "prompt": "What's the proper way to load a dishwasher?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "bottom",
+      "top",
+      "plates"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q215",
+    "prompt": "How long do bananas last on the counter?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "3",
+      "5",
+      "day"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q216",
+    "prompt": "Is it rude to chew with your mouth open?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "yes",
+      "rude"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q217",
+    "prompt": "Should I tip at a buffet?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "yes",
+      "small",
+      "tip"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q218",
+    "prompt": "How do I fold a fitted sheet?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "corners",
+      "tuck",
+      "fold"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q219",
+    "prompt": "How often should I water indoor plants?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "week",
+      "soil",
+      "dry"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q220",
+    "prompt": "What's the best way to store coffee beans?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "airtight",
+      "cool",
+      "dark"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q221",
+    "prompt": "How long should I marinate chicken?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "30",
+      "hour",
+      "overnight"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q222",
+    "prompt": "Is it ok to refreeze thawed meat?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "fridge",
+      "safe",
+      "thawed"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q223",
+    "prompt": "How long to cook pasta al dente?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "8",
+      "10",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q224",
+    "prompt": "How much coffee for a 12-cup pot?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "12",
+      "tablespoons",
+      "scoops"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q225",
+    "prompt": "What's the right way to address a wedding invitation?",
+    "category": "daily_life",
+    "expected_keywords": [
+      "Mr",
+      "Mrs",
+      "address"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q226",
+    "prompt": "How do I take a screenshot on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "power",
+      "volume",
+      "down"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q227",
+    "prompt": "How do I turn off Wi-Fi on my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "Wi-Fi",
+      "toggle"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q228",
+    "prompt": "How do I clear browser cache in Chrome?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "clear",
+      "browsing"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q229",
+    "prompt": "How do I create a strong password?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "length",
+      "symbol",
+      "number"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q230",
+    "prompt": "How do I back up my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "cloud",
+      "Google",
+      "backup"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q231",
+    "prompt": "How do I forget a Wi-Fi network on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "forget",
+      "network"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q232",
+    "prompt": "How do I enable dark mode on my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "display",
+      "dark"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q233",
+    "prompt": "How do I turn on airplane mode?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "airplane",
+      "toggle"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q234",
+    "prompt": "How do I share my screen on Zoom?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "share",
+      "screen",
+      "button"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q235",
+    "prompt": "How do I uninstall an app on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "long press",
+      "uninstall",
+      "settings"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q236",
+    "prompt": "How do I send a calendar invite in Gmail?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "calendar",
+      "event",
+      "invite"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q237",
+    "prompt": "How do I check my phone storage?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "storage",
+      "phone"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q238",
+    "prompt": "How do I block a phone number?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "call",
+      "block",
+      "settings"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q239",
+    "prompt": "How do I update my Android phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "system",
+      "update"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q240",
+    "prompt": "How do I set up an out of office email?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "vacation",
+      "responder",
+      "auto"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q241",
+    "prompt": "How do I change my Google password?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "account",
+      "security",
+      "password"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q242",
+    "prompt": "How do I turn off notifications for an app?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "notifications",
+      "off"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q243",
+    "prompt": "How do I add a contact on my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "contacts",
+      "add",
+      "save"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q244",
+    "prompt": "How do I scan a QR code?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "camera",
+      "QR",
+      "point"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q245",
+    "prompt": "How do I use two-factor authentication?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "2FA",
+      "code",
+      "verification"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q246",
+    "prompt": "How do I save a webpage as a PDF?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "print",
+      "save",
+      "PDF"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q247",
+    "prompt": "How do I find a lost Android phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "Find My Device",
+      "Google",
+      "locate"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q248",
+    "prompt": "How do I add a credit card to Google Pay?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "wallet",
+      "add",
+      "card"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q249",
+    "prompt": "How do I record my screen on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "screen",
+      "record",
+      "settings"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q250",
+    "prompt": "How do I sync my Google contacts?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "account",
+      "sync",
+      "contacts"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q251",
+    "prompt": "How do I change the default browser on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "apps",
+      "default"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q252",
+    "prompt": "How do I free up space on my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "delete",
+      "uninstall",
+      "cache"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q253",
+    "prompt": "How do I use voice typing on Android?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "microphone",
+      "keyboard",
+      "voice"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q254",
+    "prompt": "How do I disable autocorrect?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "settings",
+      "keyboard",
+      "autocorrect"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q255",
+    "prompt": "How do I print from my phone?",
+    "category": "tech_howto",
+    "expected_keywords": [
+      "print",
+      "Wi-Fi",
+      "share"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q256",
+    "prompt": "Write a thank-you note to my coworker for helping with a project.",
+    "category": "writing",
+    "expected_keywords": [
+      "Thank",
+      "appreciate",
+      "Dear",
+      "Best"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q257",
+    "prompt": "Write a short apology email for missing a meeting.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "apologize",
+      "sorry",
+      "Best"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q258",
+    "prompt": "Help me write a polite email to my landlord about a leaky faucet.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Dear",
+      "faucet",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q259",
+    "prompt": "Draft a birthday message for my mom.",
+    "category": "writing",
+    "expected_keywords": [
+      "happy birthday",
+      "love",
+      "Mom"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q260",
+    "prompt": "Write a positive Yelp review for a coffee shop.",
+    "category": "writing",
+    "expected_keywords": [
+      "coffee",
+      "great",
+      "recommend"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q261",
+    "prompt": "Compose a short Instagram caption for a beach photo.",
+    "category": "writing",
+    "expected_keywords": [
+      "beach",
+      "sun",
+      "wave"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q262",
+    "prompt": "Write a professional email asking for a salary raise.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Dear",
+      "raise",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q263",
+    "prompt": "Help me write a cover letter intro for a marketing job.",
+    "category": "writing",
+    "expected_keywords": [
+      "Dear",
+      "marketing",
+      "experience"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q264",
+    "prompt": "Draft a sympathy message for a friend who lost a pet.",
+    "category": "writing",
+    "expected_keywords": [
+      "sorry",
+      "loss",
+      "pet"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q265",
+    "prompt": "Write a short toast for my best friend's wedding.",
+    "category": "writing",
+    "expected_keywords": [
+      "love",
+      "friend",
+      "wedding",
+      "toast"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q266",
+    "prompt": "Compose a polite email declining a job offer.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Thank",
+      "decline",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q267",
+    "prompt": "Help me write a follow-up email after a job interview.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "interview",
+      "Thank",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q268",
+    "prompt": "Draft a congratulations message for a friend's promotion.",
+    "category": "writing",
+    "expected_keywords": [
+      "congratulations",
+      "promotion",
+      "proud"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q269",
+    "prompt": "Write a Twitter post about a productivity tip.",
+    "category": "writing",
+    "expected_keywords": [
+      "productivity",
+      "tip"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q270",
+    "prompt": "Compose a short bio for LinkedIn for a software engineer.",
+    "category": "writing",
+    "expected_keywords": [
+      "software",
+      "engineer",
+      "passionate"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q271",
+    "prompt": "Write a friendly reminder email about an upcoming meeting.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "reminder",
+      "meeting",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q272",
+    "prompt": "Draft a thank-you email after a job interview.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Thank",
+      "interview",
+      "Best"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q273",
+    "prompt": "Help me write a polite complaint about a late delivery.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "delivery",
+      "late",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q274",
+    "prompt": "Write an out-of-office auto-reply for a 1-week vacation.",
+    "category": "writing",
+    "expected_keywords": [
+      "out of office",
+      "return",
+      "email"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q275",
+    "prompt": "Compose a heartfelt anniversary message for my spouse.",
+    "category": "writing",
+    "expected_keywords": [
+      "love",
+      "anniversary",
+      "years"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q276",
+    "prompt": "Write a goodbye email to coworkers leaving a job.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Thank",
+      "miss",
+      "Best"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q277",
+    "prompt": "Draft an introductory email to a new client.",
+    "category": "writing",
+    "expected_keywords": [
+      "Subject",
+      "Dear",
+      "introduce",
+      "Regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q278",
+    "prompt": "Help me write a positive book review.",
+    "category": "writing",
+    "expected_keywords": [
+      "book",
+      "loved",
+      "recommend"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q279",
+    "prompt": "Compose a short LinkedIn message asking to connect.",
+    "category": "writing",
+    "expected_keywords": [
+      "connect",
+      "interest",
+      "regards"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q280",
+    "prompt": "Write a polite note to a neighbor about loud noise.",
+    "category": "writing",
+    "expected_keywords": [
+      "neighbor",
+      "noise",
+      "appreciate"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q281",
+    "prompt": "What is inflation?",
+    "category": "definitions",
+    "expected_keywords": [
+      "prices",
+      "rise",
+      "purchasing"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q282",
+    "prompt": "Explain blockchain in simple terms.",
+    "category": "definitions",
+    "expected_keywords": [
+      "chain",
+      "blocks",
+      "distributed",
+      "ledger"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q283",
+    "prompt": "What is machine learning?",
+    "category": "definitions",
+    "expected_keywords": [
+      "data",
+      "algorithm",
+      "learn"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q284",
+    "prompt": "What does API stand for?",
+    "category": "definitions",
+    "expected_keywords": [
+      "application",
+      "programming",
+      "interface"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q285",
+    "prompt": "What is GDP?",
+    "category": "definitions",
+    "expected_keywords": [
+      "gross",
+      "domestic",
+      "product"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q286",
+    "prompt": "Explain cryptocurrency.",
+    "category": "definitions",
+    "expected_keywords": [
+      "digital",
+      "decentralized",
+      "currency"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q287",
+    "prompt": "What is a stock?",
+    "category": "definitions",
+    "expected_keywords": [
+      "share",
+      "ownership",
+      "company"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q288",
+    "prompt": "What's a recession?",
+    "category": "definitions",
+    "expected_keywords": [
+      "economy",
+      "decline",
+      "GDP"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q289",
+    "prompt": "Define photosynthesis.",
+    "category": "definitions",
+    "expected_keywords": [
+      "plants",
+      "sunlight",
+      "energy"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q290",
+    "prompt": "What is climate change?",
+    "category": "definitions",
+    "expected_keywords": [
+      "temperature",
+      "global",
+      "warming"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q291",
+    "prompt": "What is empathy?",
+    "category": "definitions",
+    "expected_keywords": [
+      "feelings",
+      "understand",
+      "others"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q292",
+    "prompt": "Explain quantum computing simply.",
+    "category": "definitions",
+    "expected_keywords": [
+      "qubits",
+      "quantum",
+      "superposition"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q293",
+    "prompt": "What is artificial intelligence?",
+    "category": "definitions",
+    "expected_keywords": [
+      "machines",
+      "intelligence",
+      "learn"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q294",
+    "prompt": "What is a mortgage?",
+    "category": "definitions",
+    "expected_keywords": [
+      "loan",
+      "house",
+      "property"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q295",
+    "prompt": "What does ROI mean?",
+    "category": "definitions",
+    "expected_keywords": [
+      "return",
+      "investment"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q296",
+    "prompt": "What is a meme?",
+    "category": "definitions",
+    "expected_keywords": [
+      "image",
+      "internet",
+      "joke"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q297",
+    "prompt": "Define ecosystem.",
+    "category": "definitions",
+    "expected_keywords": [
+      "organisms",
+      "environment",
+      "interact"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q298",
+    "prompt": "What is a startup?",
+    "category": "definitions",
+    "expected_keywords": [
+      "company",
+      "new",
+      "growth"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q299",
+    "prompt": "What does SEO mean?",
+    "category": "definitions",
+    "expected_keywords": [
+      "search",
+      "engine",
+      "optimization"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q300",
+    "prompt": "What is venture capital?",
+    "category": "definitions",
+    "expected_keywords": [
+      "funding",
+      "startup",
+      "investor"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q301",
+    "prompt": "Define democracy.",
+    "category": "definitions",
+    "expected_keywords": [
+      "people",
+      "government",
+      "vote"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q302",
+    "prompt": "What is the metaverse?",
+    "category": "definitions",
+    "expected_keywords": [
+      "virtual",
+      "world",
+      "digital"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q303",
+    "prompt": "What's a black hole?",
+    "category": "definitions",
+    "expected_keywords": [
+      "gravity",
+      "space",
+      "light"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q304",
+    "prompt": "Define osmosis.",
+    "category": "definitions",
+    "expected_keywords": [
+      "water",
+      "membrane",
+      "concentration"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q305",
+    "prompt": "What is a hedge fund?",
+    "category": "definitions",
+    "expected_keywords": [
+      "investment",
+      "fund",
+      "manager"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q306",
+    "prompt": "What is a placebo?",
+    "category": "definitions",
+    "expected_keywords": [
+      "fake",
+      "treatment",
+      "effect"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q307",
+    "prompt": "What does HTTP stand for?",
+    "category": "definitions",
+    "expected_keywords": [
+      "hypertext",
+      "transfer",
+      "protocol"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q308",
+    "prompt": "What is a virus in biology?",
+    "category": "definitions",
+    "expected_keywords": [
+      "infect",
+      "cells",
+      "replicate"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q309",
+    "prompt": "Define irony.",
+    "category": "definitions",
+    "expected_keywords": [
+      "opposite",
+      "expected",
+      "meaning"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q310",
+    "prompt": "What is a sonnet?",
+    "category": "definitions",
+    "expected_keywords": [
+      "14 lines",
+      "poem",
+      "rhyme"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q311",
+    "prompt": "How do I reverse a string in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "[::-1]",
+      "reverse"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q312",
+    "prompt": "Write a Python function to check if a number is prime.",
+    "category": "code",
+    "expected_keywords": [
+      "def",
+      "prime",
+      "return"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q313",
+    "prompt": "How do I sort a list in JavaScript?",
+    "category": "code",
+    "expected_keywords": [
+      ".sort",
+      "sort"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q314",
+    "prompt": "What's a regex to match an email address?",
+    "category": "code",
+    "expected_keywords": [
+      "@",
+      "regex",
+      "[a-z"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q315",
+    "prompt": "How do I declare a variable in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "=",
+      "variable"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q316",
+    "prompt": "Write a SQL query to select all from table users.",
+    "category": "code",
+    "expected_keywords": [
+      "SELECT",
+      "FROM",
+      "users"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q317",
+    "prompt": "How do I read a file in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "open",
+      "read"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q318",
+    "prompt": "How do I add to a JavaScript array?",
+    "category": "code",
+    "expected_keywords": [
+      "push",
+      "array"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q319",
+    "prompt": "Write a Python loop from 1 to 10.",
+    "category": "code",
+    "expected_keywords": [
+      "for",
+      "range"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q320",
+    "prompt": "What's the difference between == and === in JavaScript?",
+    "category": "code",
+    "expected_keywords": [
+      "type",
+      "strict",
+      "equality"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q321",
+    "prompt": "How do I create a dictionary in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "{}",
+      "dict"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q322",
+    "prompt": "Write SQL to count rows in a table.",
+    "category": "code",
+    "expected_keywords": [
+      "COUNT",
+      "SELECT"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q323",
+    "prompt": "How do I import a module in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "import"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q324",
+    "prompt": "How do I define a function in JavaScript?",
+    "category": "code",
+    "expected_keywords": [
+      "function",
+      "=>",
+      "return"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q325",
+    "prompt": "How do I check if a key exists in a Python dict?",
+    "category": "code",
+    "expected_keywords": [
+      "in",
+      "key"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q326",
+    "prompt": "Write a regex to match a phone number.",
+    "category": "code",
+    "expected_keywords": [
+      "regex",
+      "\\d",
+      "[0-9"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q327",
+    "prompt": "What is a list comprehension in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "[",
+      "for",
+      "in"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q328",
+    "prompt": "Write a SQL query to join two tables.",
+    "category": "code",
+    "expected_keywords": [
+      "JOIN",
+      "ON"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q329",
+    "prompt": "How do I print to console in JavaScript?",
+    "category": "code",
+    "expected_keywords": [
+      "console.log"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q330",
+    "prompt": "What's the difference between let and var in JavaScript?",
+    "category": "code",
+    "expected_keywords": [
+      "scope",
+      "block",
+      "var"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q331",
+    "prompt": "How do I handle an exception in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "try",
+      "except"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q332",
+    "prompt": "What does a 404 error mean?",
+    "category": "code",
+    "expected_keywords": [
+      "not found",
+      "page"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q333",
+    "prompt": "How do I commit changes in git?",
+    "category": "code",
+    "expected_keywords": [
+      "commit",
+      "git",
+      "-m"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q334",
+    "prompt": "How do I remove duplicates from a Python list?",
+    "category": "code",
+    "expected_keywords": [
+      "set",
+      "list"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q335",
+    "prompt": "What is a lambda function in Python?",
+    "category": "code",
+    "expected_keywords": [
+      "lambda",
+      "anonymous",
+      "function"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q336",
+    "prompt": "How do you say 'thank you' in Spanish?",
+    "category": "translation",
+    "expected_keywords": [
+      "gracias"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q337",
+    "prompt": "Translate 'good morning' to French.",
+    "category": "translation",
+    "expected_keywords": [
+      "bonjour"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q338",
+    "prompt": "How do you say 'hello' in German?",
+    "category": "translation",
+    "expected_keywords": [
+      "hallo",
+      "guten tag"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q339",
+    "prompt": "What's 'I love you' in Italian?",
+    "category": "translation",
+    "expected_keywords": [
+      "ti amo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q340",
+    "prompt": "How do you say 'goodbye' in Japanese?",
+    "category": "translation",
+    "expected_keywords": [
+      "sayonara"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q341",
+    "prompt": "Translate 'please' to Spanish.",
+    "category": "translation",
+    "expected_keywords": [
+      "por favor"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q342",
+    "prompt": "How do you say 'where is the bathroom' in French?",
+    "category": "translation",
+    "expected_keywords": [
+      "toilettes",
+      "ou"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q343",
+    "prompt": "What's 'thank you very much' in German?",
+    "category": "translation",
+    "expected_keywords": [
+      "danke",
+      "sehr",
+      "vielen"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q344",
+    "prompt": "How do you say 'good night' in Italian?",
+    "category": "translation",
+    "expected_keywords": [
+      "buonanotte"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q345",
+    "prompt": "Translate 'how are you' to Japanese.",
+    "category": "translation",
+    "expected_keywords": [
+      "genki",
+      "ogenki"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q346",
+    "prompt": "How do you say 'cheers' in German?",
+    "category": "translation",
+    "expected_keywords": [
+      "prost"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q347",
+    "prompt": "How do you say 'I am hungry' in Spanish?",
+    "category": "translation",
+    "expected_keywords": [
+      "tengo hambre"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q348",
+    "prompt": "Translate 'see you tomorrow' to French.",
+    "category": "translation",
+    "expected_keywords": [
+      "demain",
+      "voir"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q349",
+    "prompt": "How do you say 'yes' and 'no' in Japanese?",
+    "category": "translation",
+    "expected_keywords": [
+      "hai",
+      "iie"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q350",
+    "prompt": "Translate 'I don't understand' to Italian.",
+    "category": "translation",
+    "expected_keywords": [
+      "non capisco"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q351",
+    "prompt": "What's the current price of Bitcoin?",
+    "category": "current_events",
+    "expected_keywords": [
+      "bitcoin",
+      "$",
+      "price"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "needs live data"
+  },
+  {
+    "id": "Q352",
+    "prompt": "What's today's weather in London?",
+    "category": "current_events",
+    "expected_keywords": [
+      "London",
+      "weather"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q353",
+    "prompt": "Who won the latest Super Bowl?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Super Bowl",
+      "won"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q354",
+    "prompt": "What is Apple's current stock price?",
+    "category": "current_events",
+    "expected_keywords": [
+      "AAPL",
+      "$",
+      "price"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q355",
+    "prompt": "What are the top news headlines today?",
+    "category": "current_events",
+    "expected_keywords": [
+      "headline",
+      "news"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q356",
+    "prompt": "What's the latest score in the NBA finals?",
+    "category": "current_events",
+    "expected_keywords": [
+      "NBA",
+      "score"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q357",
+    "prompt": "Current price of gold per ounce?",
+    "category": "current_events",
+    "expected_keywords": [
+      "gold",
+      "$",
+      "ounce"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q358",
+    "prompt": "Who is the current president of the United States?",
+    "category": "current_events",
+    "expected_keywords": [
+      "president"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q359",
+    "prompt": "What's the weather forecast for tomorrow in New York?",
+    "category": "current_events",
+    "expected_keywords": [
+      "New York",
+      "forecast",
+      "weather"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q360",
+    "prompt": "Latest Tesla stock price?",
+    "category": "current_events",
+    "expected_keywords": [
+      "TSLA",
+      "$",
+      "Tesla"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q361",
+    "prompt": "Who won the most recent Oscar for Best Picture?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Oscar",
+      "Best Picture"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q362",
+    "prompt": "What's the current Bitcoin to USD rate?",
+    "category": "current_events",
+    "expected_keywords": [
+      "BTC",
+      "USD",
+      "rate"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q363",
+    "prompt": "Any major news from this week?",
+    "category": "current_events",
+    "expected_keywords": [
+      "news",
+      "week"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q364",
+    "prompt": "What's the current EUR to USD exchange rate?",
+    "category": "current_events",
+    "expected_keywords": [
+      "EUR",
+      "USD",
+      "exchange"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q365",
+    "prompt": "Latest Premier League standings?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Premier League",
+      "standings"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q366",
+    "prompt": "What's the current price of an iPhone 15?",
+    "category": "current_events",
+    "expected_keywords": [
+      "iPhone",
+      "$",
+      "price"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q367",
+    "prompt": "Who's leading the Formula 1 championship?",
+    "category": "current_events",
+    "expected_keywords": [
+      "F1",
+      "Formula",
+      "leading"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q368",
+    "prompt": "Current crude oil price per barrel?",
+    "category": "current_events",
+    "expected_keywords": [
+      "oil",
+      "barrel",
+      "$"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q369",
+    "prompt": "What movie is number 1 at the box office?",
+    "category": "current_events",
+    "expected_keywords": [
+      "box office",
+      "number 1"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q370",
+    "prompt": "Latest news on AI from OpenAI?",
+    "category": "current_events",
+    "expected_keywords": [
+      "OpenAI",
+      "news",
+      "AI"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q371",
+    "prompt": "What's the weather in Tokyo right now?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Tokyo",
+      "weather"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q372",
+    "prompt": "Current price of Ethereum?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Ethereum",
+      "ETH",
+      "$"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q373",
+    "prompt": "Who won the latest Wimbledon men's final?",
+    "category": "current_events",
+    "expected_keywords": [
+      "Wimbledon",
+      "won"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q374",
+    "prompt": "Latest Microsoft stock price?",
+    "category": "current_events",
+    "expected_keywords": [
+      "MSFT",
+      "$",
+      "Microsoft"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q375",
+    "prompt": "What's trending on Twitter today?",
+    "category": "current_events",
+    "expected_keywords": [
+      "trend",
+      "Twitter",
+      "X"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q376",
+    "prompt": "Show me Apple's revenue for the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Apple",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "AAPL"
+  },
+  {
+    "id": "Q377",
+    "prompt": "Visualize Microsoft's profit over the past 5 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Microsoft",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "MSFT"
+  },
+  {
+    "id": "Q378",
+    "prompt": "What is NVIDIA's total assets growth?",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "NVIDIA",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "NVDA"
+  },
+  {
+    "id": "Q379",
+    "prompt": "Plot Tesla's revenue over the last 4 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Tesla",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "TSLA"
+  },
+  {
+    "id": "Q380",
+    "prompt": "Show Amazon's net income trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Amazon",
+      "income"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "AMZN"
+  },
+  {
+    "id": "Q381",
+    "prompt": "Visualize Google's revenue for the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Google",
+      "Alphabet",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "GOOGL"
+  },
+  {
+    "id": "Q382",
+    "prompt": "Plot TCS revenue for the past 5 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "TCS",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "Indian company"
+  },
+  {
+    "id": "Q383",
+    "prompt": "Show Reliance Industries' profit over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Reliance",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q384",
+    "prompt": "Visualize Infosys total assets growth.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Infosys",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q385",
+    "prompt": "Plot HDFC Bank's revenue trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "HDFC",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q386",
+    "prompt": "Show me Alibaba's revenue for the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Alibaba",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q387",
+    "prompt": "Visualize Tencent's profit growth.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Tencent",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q388",
+    "prompt": "Plot BYD's revenue over the past 4 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "BYD",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q389",
+    "prompt": "Show Shell's net income for the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Shell",
+      "income"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "UK"
+  },
+  {
+    "id": "Q390",
+    "prompt": "Visualize AstraZeneca's revenue trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "AstraZeneca",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q391",
+    "prompt": "Plot HSBC's total assets over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "HSBC",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q392",
+    "prompt": "Show me SAP's revenue for the past 5 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "SAP",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "Germany"
+  },
+  {
+    "id": "Q393",
+    "prompt": "Visualize BMW's profit over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "BMW",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q394",
+    "prompt": "Plot Volkswagen's revenue trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Volkswagen",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q395",
+    "prompt": "Show LVMH's net income for the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "LVMH",
+      "income"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "France"
+  },
+  {
+    "id": "Q396",
+    "prompt": "Visualize TotalEnergies' revenue growth.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "TotalEnergies",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q397",
+    "prompt": "Plot RBC's total assets over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "RBC",
+      "Royal Bank",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "Canada"
+  },
+  {
+    "id": "Q398",
+    "prompt": "Show Shopify's revenue for the past 4 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Shopify",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q399",
+    "prompt": "Visualize FEMSA's profit over the last 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "FEMSA",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": "Mexico"
+  },
+  {
+    "id": "Q400",
+    "prompt": "Plot America Movil's revenue trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "America Movil",
+      "AMX",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q401",
+    "prompt": "Show me Apple's net income for the last 5 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Apple",
+      "income"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q402",
+    "prompt": "Visualize Microsoft's total assets growth.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Microsoft",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q403",
+    "prompt": "Plot NVIDIA's revenue over the past 4 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "NVIDIA",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q404",
+    "prompt": "Show Tesla's profit trend.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Tesla",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q405",
+    "prompt": "Visualize Amazon's revenue for the past 5 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Amazon",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q406",
+    "prompt": "Plot Google's total assets.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Google",
+      "Alphabet",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q407",
+    "prompt": "Show TCS profit trend over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "TCS",
+      "profit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q408",
+    "prompt": "Visualize Reliance's total assets growth.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Reliance",
+      "assets"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q409",
+    "prompt": "Plot Infosys revenue for the past 3 years.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "Infosys",
+      "revenue"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q410",
+    "prompt": "Show HDFC Bank's net income over time.",
+    "category": "financial_visualization",
+    "expected_keywords": [
+      "HDFC",
+      "income"
+    ],
+    "web_dependent": false,
+    "deterministic_path": true,
+    "notes": ""
+  },
+  {
+    "id": "Q411",
+    "prompt": "Tell me a short joke.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "joke has a punchline"
+  },
+  {
+    "id": "Q412",
+    "prompt": "Tell me a dad joke.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q413",
+    "prompt": "Tell me a pun.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q414",
+    "prompt": "Give me a knock-knock joke.",
+    "category": "creative",
+    "expected_keywords": [
+      "knock",
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q415",
+    "prompt": "Write a haiku about the ocean.",
+    "category": "creative",
+    "expected_keywords": [
+      "ocean",
+      "wave",
+      "sea"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "5-7-5"
+  },
+  {
+    "id": "Q416",
+    "prompt": "Write a short poem about autumn.",
+    "category": "creative",
+    "expected_keywords": [
+      "leaves",
+      "fall",
+      "autumn"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q417",
+    "prompt": "Give me a fun riddle.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q418",
+    "prompt": "Tell me a riddle about time.",
+    "category": "creative",
+    "expected_keywords": [
+      "time",
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q419",
+    "prompt": "Write a 4-line poem about friendship.",
+    "category": "creative",
+    "expected_keywords": [
+      "friend",
+      "love"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q420",
+    "prompt": "Start a fantasy story with a dragon.",
+    "category": "creative",
+    "expected_keywords": [
+      "dragon",
+      "kingdom",
+      "knight"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q421",
+    "prompt": "Give me an inspirational quote about courage.",
+    "category": "creative",
+    "expected_keywords": [
+      "courage",
+      "brave",
+      "fear"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q422",
+    "prompt": "Write a haiku about a city at night.",
+    "category": "creative",
+    "expected_keywords": [
+      "city",
+      "night",
+      "light"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q423",
+    "prompt": "Tell me a joke about programmers.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q424",
+    "prompt": "Write a short poem about coffee.",
+    "category": "creative",
+    "expected_keywords": [
+      "coffee",
+      "morning",
+      "cup"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q425",
+    "prompt": "Give me a riddle about an egg.",
+    "category": "creative",
+    "expected_keywords": [
+      "egg",
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q426",
+    "prompt": "Tell me a Halloween joke.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q427",
+    "prompt": "Write a limerick about a cat.",
+    "category": "creative",
+    "expected_keywords": [
+      "cat",
+      "limerick"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "AABBA"
+  },
+  {
+    "id": "Q428",
+    "prompt": "Give me a sci-fi story prompt.",
+    "category": "creative",
+    "expected_keywords": [
+      "space",
+      "future",
+      "alien"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q429",
+    "prompt": "Write a poem about rain.",
+    "category": "creative",
+    "expected_keywords": [
+      "rain",
+      "drop",
+      "sky"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q430",
+    "prompt": "Tell me a joke a 7-year-old would laugh at.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q431",
+    "prompt": "Make up a short bedtime story.",
+    "category": "creative",
+    "expected_keywords": [
+      "once upon",
+      "time"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q432",
+    "prompt": "Write a poem about the stars.",
+    "category": "creative",
+    "expected_keywords": [
+      "star",
+      "sky",
+      "night"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q433",
+    "prompt": "Give me a romance story idea.",
+    "category": "creative",
+    "expected_keywords": [
+      "love",
+      "meet",
+      "story"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q434",
+    "prompt": "Write a song lyric about freedom.",
+    "category": "creative",
+    "expected_keywords": [
+      "free",
+      "freedom",
+      "fly"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q435",
+    "prompt": "Tell me a clean office joke.",
+    "category": "creative",
+    "expected_keywords": [
+      "?"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q436",
+    "prompt": "Give me a mystery story opening line.",
+    "category": "creative",
+    "expected_keywords": [
+      "dark",
+      "mystery",
+      "night"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q437",
+    "prompt": "Write a haiku about snow.",
+    "category": "creative",
+    "expected_keywords": [
+      "snow",
+      "winter",
+      "cold"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q438",
+    "prompt": "Tell me a tongue twister.",
+    "category": "creative",
+    "expected_keywords": [
+      "sells",
+      "Peter",
+      "she"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q439",
+    "prompt": "Give me a quote about perseverance.",
+    "category": "creative",
+    "expected_keywords": [
+      "never",
+      "give up",
+      "persever"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q440",
+    "prompt": "Write a short story about a robot finding love.",
+    "category": "creative",
+    "expected_keywords": [
+      "robot",
+      "love"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q441",
+    "prompt": "How can I be more productive in the morning?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "routine",
+      "morning",
+      "wake"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q442",
+    "prompt": "Tips to improve my focus while studying?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "focus",
+      "study",
+      "distraction"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q443",
+    "prompt": "How do I build a habit of exercising?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "habit",
+      "exercise",
+      "routine"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q444",
+    "prompt": "Best way to manage stress at work?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "stress",
+      "break",
+      "breathe"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q445",
+    "prompt": "How can I sleep better at night?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "sleep",
+      "routine",
+      "screen"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q446",
+    "prompt": "Tips to drink more water daily?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "water",
+      "bottle",
+      "remind"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q447",
+    "prompt": "How do I stay motivated to work out?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "motivation",
+      "goal",
+      "consistent"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q448",
+    "prompt": "What's a good beginner workout routine?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "workout",
+      "beginner",
+      "exercise"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q449",
+    "prompt": "How do I stop procrastinating?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "task",
+      "break",
+      "start"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q450",
+    "prompt": "Tips to wake up early without feeling tired?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "sleep",
+      "early",
+      "routine"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q451",
+    "prompt": "How can I be more confident in social situations?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "confidence",
+      "practice",
+      "social"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q452",
+    "prompt": "Best way to start journaling?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "journal",
+      "daily",
+      "write"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q453",
+    "prompt": "How do I learn a new language fast?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "practice",
+      "language",
+      "daily"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q454",
+    "prompt": "Tips to save more money each month?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "budget",
+      "save",
+      "spend"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q455",
+    "prompt": "How do I overcome a fear of public speaking?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "practice",
+      "fear",
+      "speak"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q456",
+    "prompt": "What's a good study technique for memorizing?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "repetition",
+      "memory",
+      "study"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q457",
+    "prompt": "How can I be a better listener?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "listen",
+      "attention",
+      "active"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q458",
+    "prompt": "Tips to reduce screen time?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "screen",
+      "limit",
+      "break"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q459",
+    "prompt": "How do I make new friends as an adult?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "friends",
+      "hobby",
+      "social"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q460",
+    "prompt": "Best way to start meditation?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "meditation",
+      "breath",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q461",
+    "prompt": "How do I deal with burnout?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "burnout",
+      "rest",
+      "break"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q462",
+    "prompt": "Tips to read more books each year?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "books",
+      "read",
+      "daily"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q463",
+    "prompt": "How can I be more disciplined?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "discipline",
+      "routine",
+      "habit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q464",
+    "prompt": "What's a good morning stretch routine?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "stretch",
+      "morning",
+      "minute"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q465",
+    "prompt": "How do I improve my posture?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "posture",
+      "back",
+      "shoulder"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q466",
+    "prompt": "Tips to stay focused while working from home?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "focus",
+      "home",
+      "schedule"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q467",
+    "prompt": "How can I be happier?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "gratitude",
+      "happy",
+      "habit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q468",
+    "prompt": "Best way to track my fitness goals?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "track",
+      "goals",
+      "fitness"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q469",
+    "prompt": "How do I get out of a bad mood?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "mood",
+      "walk",
+      "music"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q470",
+    "prompt": "Tips for better time management?",
+    "category": "personal_advice",
+    "expected_keywords": [
+      "time",
+      "priority",
+      "task"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q471",
+    "prompt": "How do I market my new small business?",
+    "category": "business_general",
+    "expected_keywords": [
+      "social media",
+      "market",
+      "audience"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q472",
+    "prompt": "What's the difference between marketing and advertising?",
+    "category": "business_general",
+    "expected_keywords": [
+      "marketing",
+      "advertising"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q473",
+    "prompt": "How do I write a good elevator pitch?",
+    "category": "business_general",
+    "expected_keywords": [
+      "pitch",
+      "concise",
+      "value"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q474",
+    "prompt": "Tips for naming a startup?",
+    "category": "business_general",
+    "expected_keywords": [
+      "name",
+      "brand",
+      "simple"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q475",
+    "prompt": "How do I find my target audience?",
+    "category": "business_general",
+    "expected_keywords": [
+      "audience",
+      "demographic",
+      "research"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q476",
+    "prompt": "What is a business plan?",
+    "category": "business_general",
+    "expected_keywords": [
+      "plan",
+      "business",
+      "strategy"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q477",
+    "prompt": "How do I price my product?",
+    "category": "business_general",
+    "expected_keywords": [
+      "price",
+      "cost",
+      "market"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q478",
+    "prompt": "Best social media platforms for a small business?",
+    "category": "business_general",
+    "expected_keywords": [
+      "Instagram",
+      "Facebook",
+      "platform"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q479",
+    "prompt": "Tips for cold emailing potential clients?",
+    "category": "business_general",
+    "expected_keywords": [
+      "subject",
+      "personalize",
+      "value"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q480",
+    "prompt": "How do I handle a difficult customer?",
+    "category": "business_general",
+    "expected_keywords": [
+      "listen",
+      "calm",
+      "solution"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q481",
+    "prompt": "What makes a good logo?",
+    "category": "business_general",
+    "expected_keywords": [
+      "simple",
+      "memorable",
+      "logo"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q482",
+    "prompt": "How do I build a brand?",
+    "category": "business_general",
+    "expected_keywords": [
+      "brand",
+      "consistent",
+      "identity"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q483",
+    "prompt": "Tips for hiring my first employee?",
+    "category": "business_general",
+    "expected_keywords": [
+      "hire",
+      "interview",
+      "fit"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q484",
+    "prompt": "How do I get more reviews for my business?",
+    "category": "business_general",
+    "expected_keywords": [
+      "review",
+      "ask",
+      "customer"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q485",
+    "prompt": "What's a SWOT analysis?",
+    "category": "business_general",
+    "expected_keywords": [
+      "strengths",
+      "weakness",
+      "opportunity",
+      "threat"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q486",
+    "prompt": "How do I network effectively?",
+    "category": "business_general",
+    "expected_keywords": [
+      "network",
+      "connect",
+      "follow up"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q487",
+    "prompt": "Tips for pitching investors?",
+    "category": "business_general",
+    "expected_keywords": [
+      "pitch",
+      "investor",
+      "value"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q488",
+    "prompt": "How do I write a mission statement?",
+    "category": "business_general",
+    "expected_keywords": [
+      "mission",
+      "statement",
+      "purpose"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q489",
+    "prompt": "Best way to retain customers?",
+    "category": "business_general",
+    "expected_keywords": [
+      "retain",
+      "service",
+      "value"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q490",
+    "prompt": "How do I scale my business?",
+    "category": "business_general",
+    "expected_keywords": [
+      "scale",
+      "growth",
+      "system"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q491",
+    "prompt": "hi",
+    "category": "edge_case",
+    "expected_keywords": [
+      "hi",
+      "hello",
+      "hey"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "greeting"
+  },
+  {
+    "id": "Q492",
+    "prompt": "?",
+    "category": "edge_case",
+    "expected_keywords": [
+      "?",
+      "question",
+      "help"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "ambiguous"
+  },
+  {
+    "id": "Q493",
+    "prompt": "help",
+    "category": "edge_case",
+    "expected_keywords": [
+      "help",
+      "assist"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q494",
+    "prompt": "What can you do?",
+    "category": "edge_case",
+    "expected_keywords": [
+      "help",
+      "answer",
+      "can"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q495",
+    "prompt": "Hello",
+    "category": "edge_case",
+    "expected_keywords": [
+      "hello",
+      "hi"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q496",
+    "prompt": "Tell me something interesting and translate it to French.",
+    "category": "edge_case",
+    "expected_keywords": [
+      "interesting",
+      "French"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "multi-part"
+  },
+  {
+    "id": "Q497",
+    "prompt": "ok",
+    "category": "edge_case",
+    "expected_keywords": [
+      "ok",
+      "anything",
+      "help"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "very short"
+  },
+  {
+    "id": "Q498",
+    "prompt": "Define life and write a poem about it.",
+    "category": "edge_case",
+    "expected_keywords": [
+      "life",
+      "poem"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "multi-part"
+  },
+  {
+    "id": "Q499",
+    "prompt": "test",
+    "category": "edge_case",
+    "expected_keywords": [
+      "test",
+      "working",
+      "ready"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": ""
+  },
+  {
+    "id": "Q500",
+    "prompt": "Why?",
+    "category": "edge_case",
+    "expected_keywords": [
+      "why",
+      "question",
+      "context"
+    ],
+    "web_dependent": false,
+    "deterministic_path": false,
+    "notes": "ambiguous"
+  },
+  {
+    "id": "Q501",
+    "prompt": "Kantara movie",
+    "category": "web_search_regression",
+    "expected_keywords": [
+      "Kantara"
+    ],
+    "forbidden_keywords": [
+      "\"results\":",
+      "\"query\":",
+      "\"fetched_at\":",
+      "\"snippet\":",
+      "\"url\":"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "Regression: web_search must summarize, never leak JSON"
+  },
+  {
+    "id": "Q502",
+    "prompt": "Tell me about the movie Oppenheimer",
+    "category": "web_search_regression",
+    "expected_keywords": [
+      "Oppenheimer",
+      "Nolan",
+      "atomic",
+      "bomb"
+    ],
+    "forbidden_keywords": [
+      "\"results\":",
+      "\"query\":",
+      "\"fetched_at\":"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "Regression: long-form entity lookup"
+  },
+  {
+    "id": "Q503",
+    "prompt": "Who is Lionel Messi",
+    "category": "web_search_regression",
+    "expected_keywords": [
+      "Argentin",
+      "football",
+      "soccer",
+      "Barcelona",
+      "Inter Miami"
+    ],
+    "forbidden_keywords": [
+      "\"results\":",
+      "\"query\":",
+      "\"fetched_at\":"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "Regression: person entity lookup"
+  },
+  {
+    "id": "Q504",
+    "prompt": "What is RRR movie about",
+    "category": "web_search_regression",
+    "expected_keywords": [
+      "RRR",
+      "Telugu",
+      "Rajamouli",
+      "India"
+    ],
+    "forbidden_keywords": [
+      "\"results\":",
+      "\"query\":",
+      "\"fetched_at\":"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "Regression: regional film lookup"
+  },
+  {
+    "id": "Q505",
+    "prompt": "Demon Slayer latest season",
+    "category": "web_search_regression",
+    "expected_keywords": [
+      "Demon",
+      "Slayer",
+      "Kimetsu",
+      "anime",
+      "season"
+    ],
+    "forbidden_keywords": [
+      "\"results\":",
+      "\"query\":",
+      "\"fetched_at\":"
+    ],
+    "web_dependent": true,
+    "deterministic_path": false,
+    "notes": "Regression: recent media/anime lookup"
+  }
+]

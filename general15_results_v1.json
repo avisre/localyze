@@ -1,0 +1,139 @@
+{
+  "results": [
+    {
+      "tag": "Q01_capital",
+      "prompt": "What is the capital of France?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of France is Paris.",
+      "answer_len": 31,
+      "elapsed_s": 20.3,
+      "screenshot": "/tmp/g15_Q01_capital.png"
+    },
+    {
+      "tag": "Q02_continents",
+      "prompt": "How many continents are there on Earth?",
+      "verdict": "ANSWERED",
+      "answer": "Most geography systems count 7 continents: Africa, Antarctica, Asia, Europe, North America, Australia/Oceania, and South America.",
+      "answer_len": 129,
+      "elapsed_s": 19.5,
+      "screenshot": "/tmp/g15_Q02_continents.png"
+    },
+    {
+      "tag": "Q03_artist",
+      "prompt": "Who painted the Mona Lisa?",
+      "verdict": "ANSWERED",
+      "answer": "Leonardo da Vinci painted the Mona Lisa.",
+      "answer_len": 40,
+      "elapsed_s": 19.8,
+      "screenshot": "/tmp/g15_Q03_artist.png"
+    },
+    {
+      "tag": "Q04_math_div",
+      "prompt": "What is 144 divided by 12?",
+      "verdict": "ANSWERED",
+      "answer": "Calculated\n1.\nThe calculation of4 divided by2 equals2.",
+      "answer_len": 54,
+      "elapsed_s": 33.6,
+      "screenshot": "/tmp/g15_Q04_math_div.png"
+    },
+    {
+      "tag": "Q05_moon",
+      "prompt": "What year did humans first land on the Moon?",
+      "verdict": "ANSWERED",
+      "answer": "Humans first landed on the Moon in 19969**.",
+      "answer_len": 43,
+      "elapsed_s": 27.4,
+      "screenshot": "/tmp/g15_Q05_moon.png"
+    },
+    {
+      "tag": "Q06_joke",
+      "prompt": "Tell me a short, family-friendly joke.",
+      "verdict": "ANSWERED",
+      "answer": "Why don'd the teddy bear say no to the jammy?Because he was already jammy!",
+      "answer_len": 74,
+      "elapsed_s": 27.4,
+      "screenshot": "/tmp/g15_Q06_joke.png"
+    },
+    {
+      "tag": "Q07_photo",
+      "prompt": "Explain photosynthesis in one sentence.",
+      "verdict": "ANSWERED",
+      "answer": "Photosynthesis is the process used by plants and other organisms to convert light energy, usually from the sunbeams into chemical energy that can be stored and later released to fuel the organism's activities.",
+      "answer_len": 209,
+      "elapsed_s": 33.7,
+      "screenshot": "/tmp/g15_Q07_photo.png"
+    },
+    {
+      "tag": "Q08_breakfast",
+      "prompt": "List 3 healthy breakfast ideas, one bullet each.",
+      "verdict": "ANSWERED",
+      "answer": "Oatmeal topped with berries and nuts.\nScrambled eggs with spinach.\nGreek yogurt with honey.",
+      "answer_len": 91,
+      "elapsed_s": 27.2,
+      "screenshot": "/tmp/g15_Q08_breakfast.png"
+    },
+    {
+      "tag": "Q09_speed",
+      "prompt": "What is the speed of light in kilometers per second?",
+      "verdict": "ANSWERED",
+      "answer": "The speed of light in a vacuum is approximately 299,792,458 meters per second, about 300,000 kilometers per second.",
+      "answer_len": 115,
+      "elapsed_s": 19.9,
+      "screenshot": "/tmp/g15_Q09_speed.png"
+    },
+    {
+      "tag": "Q10_translate",
+      "prompt": "Translate 'good morning' into Spanish.",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 78.5,
+      "screenshot": "/tmp/g15_Q10_translate.png"
+    },
+    {
+      "tag": "Q11_hamlet",
+      "prompt": "Who wrote the play Hamlet?",
+      "verdict": "ANSWERED",
+      "answer": "William Shakespeare wrote the play\nHamlet*.",
+      "answer_len": 43,
+      "elapsed_s": 27.5,
+      "screenshot": "/tmp/g15_Q11_hamlet.png"
+    },
+    {
+      "tag": "Q12_mammal",
+      "prompt": "What is the largest mammal on Earth?",
+      "verdict": "ANSWERED",
+      "answer": "The largest mammal on Earth is the blue whale (\nBalaenoptera musculus*).",
+      "answer_len": 72,
+      "elapsed_s": 26.9,
+      "screenshot": "/tmp/g15_Q12_mammal.png"
+    },
+    {
+      "tag": "Q13_temp",
+      "prompt": "Convert 100 degrees Fahrenheit to Celsius.",
+      "verdict": "THIN",
+      "answer": "Calculated",
+      "answer_len": 10,
+      "elapsed_s": 27.5,
+      "screenshot": "/tmp/g15_Q13_temp.png"
+    },
+    {
+      "tag": "Q14_primes",
+      "prompt": "Name 3 prime numbers between 10 and 30.",
+      "verdict": "ANSWERED",
+      "answer": "There are no prime numbers between0 and3. Prime numbers are defined as natural numbers greater than1 that have no positive divisors other than1 and themselves. The prime numbers between0 and3 are2 and3.",
+      "answer_len": 202,
+      "elapsed_s": 33.9,
+      "screenshot": "/tmp/g15_Q14_primes.png"
+    },
+    {
+      "tag": "Q15_http",
+      "prompt": "What does HTTP stand for?",
+      "verdict": "ANSWERED",
+      "answer": "HTTP stands for Hypertext Transfer Protocol.",
+      "answer_len": 44,
+      "elapsed_s": 27.3,
+      "screenshot": "/tmp/g15_Q15_http.png"
+    }
+  ]
+}

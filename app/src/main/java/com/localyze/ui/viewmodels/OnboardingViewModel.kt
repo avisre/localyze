@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.viewmodels
+package com.localyze.ui.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.localyze.ai.ModelInitializer
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.DownloadProgress
+import com.localyze.data.repository.ModelEntry
 import com.localyze.data.repository.ModelRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -40,18 +41,17 @@ class OnboardingViewModel @Inject constructor(
      * loaded into memory, so every query fell back to hardcoded responses.
      */
     private fun checkIfModelAlreadyDownloaded() {
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: isModelDownloaded=${modelRepository.isModelDownloaded()}")
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: modelPath=${modelRepository.getModelFilePath()}")
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: modelSize=${modelRepository.getModelFileSize()}")
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: isTestModel=${modelRepository.isTestModelFile()}")
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: USE_MOCK_ENGINE=${com.localyze.BuildConfig.USE_MOCK_ENGINE}")
-        android.util.Log.d("OnboardingVM", "checkIfModelAlreadyDownloaded: USE_TEST_DOWNLOAD=${com.localyze.BuildConfig.USE_TEST_DOWNLOAD}")
+        com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: isModelDownloaded=${modelRepository.isModelDownloaded()}")
+        com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: modelPath=${modelRepository.getModelFilePath()}")
+        com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: modelSize=${modelRepository.getModelFileSize()}")
+        com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: isTestModel=${modelRepository.isTestModelFile()}")
+        com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: USE_TEST_DOWNLOAD=${com.localyze.BuildConfig.USE_TEST_DOWNLOAD}")
         if (modelRepository.isModelDownloaded()) {
             // Model file exists â€” load it into memory before showing the chat
-            android.util.Log.d("OnboardingVM", "Model already downloaded, initializing...")
+            com.localyze.utils.AppLog.d("OnboardingVM", "Model already downloaded, initializing...")
             initializeModel()
         } else {
-            android.util.Log.d("OnboardingVM", "Model NOT downloaded, showing onboarding")
+            com.localyze.utils.AppLog.d("OnboardingVM", "Model NOT downloaded, showing onboarding")
         }
     }
 
@@ -75,8 +75,13 @@ class OnboardingViewModel @Inject constructor(
                 return@launch
             }
 
-            // All prerequisites met, ready to download
-            _uiState.value = OnboardingUiState.ReadyToDownload
+            // All prerequisites met, show model selection
+            val models = modelRepository.getAllModels()
+            val selectedModel = modelRepository.getSelectedModel()
+            _uiState.value = OnboardingUiState.ModelSelection(
+                models = models,
+                selectedModel = selectedModel
+            )
         }
     }
 
@@ -88,7 +93,8 @@ class OnboardingViewModel @Inject constructor(
         if (!modelRepository.hasEnoughStorage()) {
             _uiState.value = OnboardingUiState.InsufficientStorage
         } else {
-            _uiState.value = OnboardingUiState.ReadyToDownload
+            val selectedModel = modelRepository.getSelectedModel()
+            _uiState.value = OnboardingUiState.ReadyToDownload(selectedModel)
         }
     }
 
@@ -103,11 +109,13 @@ class OnboardingViewModel @Inject constructor(
             if (modelRepository.shouldAllowDownload(allowCellular)) {
                 startDownload()
             } else {
-                // Show network warning
+                // Show network warning with dynamic model size
                 val networkStatus = modelRepository.getNetworkStatus()
+                val selectedModel = modelRepository.getSelectedModel()
+                val sizeGB = String.format("%.1f", selectedModel.sizeBytes / (1024.0 * 1024.0 * 1024.0))
                 _uiState.value = OnboardingUiState.NetworkWarning(
                     networkType = networkStatus,
-                    dataSize = "~3.6 GB"
+                    dataSize = "~$sizeGB GB"
                 )
             }
         }
@@ -125,7 +133,15 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Starts the model download process.
+     * Selects a model and transitions to ReadyToDownload.
+     */
+    fun selectModel(model: ModelEntry) {
+        modelRepository.setSelectedModel(model)
+        _uiState.value = OnboardingUiState.ReadyToDownload(model)
+    }
+
+    /**
+     * Starts the model download process for the currently selected model.
      */
     fun startDownload() {
         downloadJob?.cancel()
@@ -179,16 +195,16 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // If this is a test model (small file for debug), skip actual model initialization
-                // MockGemmaEngine will be used instead
+                // Mock mode has been removed — real engine only
                 if (modelRepository.isTestModelFile() || com.localyze.BuildConfig.USE_TEST_DOWNLOAD) {
-                    android.util.Log.d("OnboardingVM", "Test model detected, skipping real init")
+                    com.localyze.utils.AppLog.d("OnboardingVM", "Test model detected, skipping real init")
                     _uiState.value = OnboardingUiState.ReadyToChat
                     return@launch
                 }
-                android.util.Log.d("OnboardingVM", "Starting real model initialization...")
+                com.localyze.utils.AppLog.d("OnboardingVM", "Starting real model initialization...")
                 _uiState.value = OnboardingUiState.CheckingModel(isChecking = true)
                 modelInitializer.initialize()
-                android.util.Log.d("OnboardingVM", "Model initialization SUCCESS")
+                com.localyze.utils.AppLog.d("OnboardingVM", "Model initialization SUCCESS")
                 _uiState.value = OnboardingUiState.ReadyToChat
             } catch (e: Exception) {
                 android.util.Log.e("OnboardingVM", "Model initialization FAILED: ${e.message}", e)
@@ -207,7 +223,8 @@ class OnboardingViewModel @Inject constructor(
         downloadJob?.cancel()
         downloadJob = null
         modelRepository.deleteModel()
-        _uiState.value = OnboardingUiState.ReadyToDownload
+        val selectedModel = modelRepository.getSelectedModel()
+        _uiState.value = OnboardingUiState.ReadyToDownload(selectedModel)
     }
 
     /**

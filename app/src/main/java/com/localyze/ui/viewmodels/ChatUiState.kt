@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.viewmodels
+package com.localyze.ui.viewmodels
 
 import com.localyze.domain.models.Message
 import com.localyze.tools.DispatchResult
@@ -40,9 +40,12 @@ data class ChatUiState(
     val allowWebSearch: Boolean = false,
     /** Whether to show the robot mascot prominently (when no messages). */
     val showMascot: Boolean = true,
+    /** Whether the model is using prior messages in this thread as context. */
+    val isUsingThreadContext: Boolean = false,
+    /** Optional notice shown when conversation context was reset to avoid exhaustion. */
+    val contextResetNotice: String? = null,
     /** Optional error message to display in a Snackbar. */
     val error: String? = null,
-    val isMockMode: Boolean = false,
     /** Pending tool confirmation that requires user approval. */
     val pendingToolConfirmation: DispatchResult.PendingConfirmation? = null
 )

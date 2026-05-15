@@ -32,6 +32,11 @@ class ToolDispatcher @Inject constructor(
 ) {
 
     /**
+     * Retrieve a registered tool by name.
+     */
+    fun getTool(toolName: String): Tool? = toolRegistry.getTool(toolName)
+
+    /**
      * Check if a tool requires confirmation before execution.
      */
     fun requiresConfirmation(toolName: String): Boolean {

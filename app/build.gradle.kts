@@ -5,6 +5,9 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    id("org.owasp.dependencycheck")
 }
 
 val releaseKeystorePassword = providers.environmentVariable("LOCALYZE_KEYSTORE_PASSWORD")
@@ -22,10 +25,6 @@ val premiumSubscriptionProductId = providers.gradleProperty("LOCALYZE_PREMIUM_SU
     .get()
     .replace("\\", "\\\\")
     .replace("\"", "\\\"")
-val debugUseMockEngine = providers.gradleProperty("LOCALYZE_USE_MOCK_ENGINE")
-    .orElse("false")
-    .map { it.equals("true", ignoreCase = true).toString() }
-    .get()
 val debugUseTestDownload = providers.gradleProperty("LOCALYZE_USE_TEST_DOWNLOAD")
     .orElse("false")
     .map { it.equals("true", ignoreCase = true).toString() }
@@ -58,23 +57,21 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
             isDebuggable = false
-            buildConfigField("Boolean", "USE_MOCK_ENGINE", "false")
             buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
             buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
         }
         debug {
             isMinifyEnabled = false
             isDebuggable = true
-            // Set to false to use real Gemma 4 E4B model
-            // Set to true for mock mode (development/CI/unsupported devices)
-            buildConfigField("Boolean", "USE_MOCK_ENGINE", debugUseMockEngine)
+            // Mock mode removed — always use real Gemma 4 E4B model
             // Set to false to download real model (3.65 GB)
             // Set to true for test download (small tokenizer.json file)
             buildConfigField("Boolean", "USE_TEST_DOWNLOAD", debugUseTestDownload)
@@ -103,6 +100,27 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    lint {
+        // Fail release builds on hard errors, warn (don't fail) on warnings.
+        abortOnError = true
+        warningsAsErrors = false
+        checkReleaseBuilds = true
+        // Generate a baseline so we don't fail on pre-existing issues — new
+        // issues introduced after the baseline will still be flagged.
+        baseline = file("lint-baseline.xml")
+        // HTML + XML reports under app/build/reports/lint-results-*.{html,xml}
+        htmlReport = true
+        xmlReport = true
+        // Disabled checks that don't apply to this project. Keep this list
+        // small and justified.
+        disable += setOf(
+            // Hilt-injected fields are sometimes flagged.
+            "InvalidPackage",
+            // Compose-only project; we don't ship XML layouts.
+            "MissingDefaultResource"
+        )
     }
 }
 
@@ -164,6 +182,25 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+
+    // Paging3 for efficient message list loading
+    implementation("androidx.paging:paging-runtime-ktx:3.3.6")
+    implementation("androidx.paging:paging-compose:3.3.6")
+
+    // SQLCipher for encrypted database at rest
+    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("androidx.sqlite:sqlite-ktx:2.4.0")
+
+    // Play Integrity API for purchase verification
+    implementation("com.google.android.play:integrity:1.4.0")
+
+    // Firebase Crashlytics for crash reporting (opt-out)
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    // LeakCanary for debug builds to detect activity context leaks in singletons
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

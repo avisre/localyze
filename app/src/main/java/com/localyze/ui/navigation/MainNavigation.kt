@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.navigation
+package com.localyze.ui.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -53,6 +54,7 @@ import com.localyze.ui.screens.AttachmentMemoryScreen
 import com.localyze.ui.screens.BackupScreen
 import com.localyze.ui.screens.CapabilitiesScreen
 import com.localyze.ui.screens.ChatScreen
+import com.localyze.ui.screens.CodeWorkspaceScreen
 import com.localyze.ui.screens.ConversationsScreen
 import com.localyze.ui.screens.DebugToolTesterScreen
 import com.localyze.ui.screens.OnboardingScreen
@@ -73,12 +75,14 @@ sealed class BottomNavItem(
     val label: String
 ) {
     data object Chat : BottomNavItem("chat", Icons.Outlined.ChatBubbleOutline, "Chat")
+    data object Code : BottomNavItem("code_workspace", Icons.Outlined.Code, "Code")
     data object Library : BottomNavItem("conversations", Icons.Outlined.Folder, "Library")
     data object Settings : BottomNavItem("settings", Icons.Outlined.Settings, "Settings")
 }
 
 val bottomNavItems = listOf(
     BottomNavItem.Chat,
+    BottomNavItem.Code,
     BottomNavItem.Library,
     BottomNavItem.Settings
 )
@@ -97,19 +101,28 @@ fun MainNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Determine start destination: onboarding if model not ready, else chat
+    val startsInCodeWorkspaceForDebug = remember {
+        BuildConfig.DEBUG && !codeTestPrompt.isNullOrBlank()
+    }
+
+    // Determine start destination: onboarding if model not ready, else chat.
+    // Debug code-workspace launches are allowed to bypass model setup for device UI tests.
     val isModelReady = remember {
         val downloaded = modelRepository.isModelDownloaded()
-        val ready = downloaded || BuildConfig.USE_MOCK_ENGINE
-        android.util.Log.d("MainNavigation", "isModelDownloaded=$downloaded, useMock=${BuildConfig.USE_MOCK_ENGINE}, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
+        val ready = downloaded
+        com.localyze.utils.AppLog.d("MainNavigation", "isModelDownloaded=$downloaded, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
         ready
     }
     val shouldInitializeRealModel = remember {
-        modelRepository.isModelDownloaded() && !BuildConfig.USE_MOCK_ENGINE && !BuildConfig.USE_TEST_DOWNLOAD
+        modelRepository.isModelDownloaded() && !BuildConfig.USE_TEST_DOWNLOAD
     }
 
-    val startDestination = if (isModelReady) "chat" else "onboarding"
-    android.util.Log.d("MainNavigation", "startDestination=$startDestination")
+    val startDestination = when {
+        startsInCodeWorkspaceForDebug -> "code_workspace"
+        isModelReady -> "chat"
+        else -> "onboarding"
+    }
+    com.localyze.utils.AppLog.d("MainNavigation", "startDestination=$startDestination")
 
     // CRITICAL FIX: If model is already downloaded but we're going to chat directly,
     // we must still initialize the model in memory. The OnboardingViewModel only
@@ -118,11 +131,11 @@ fun MainNavigation(
         LaunchedEffect(Unit) {
             try {
                 val state = gemmaInferenceEngine.modelLoadState.value
-                android.util.Log.d("MainNavigation", "Model already downloaded, current loadState=$state")
+                com.localyze.utils.AppLog.d("MainNavigation", "Model already downloaded, current loadState=$state")
                 if (state !is com.localyze.ai.ModelLoadState.Loaded && state !is com.localyze.ai.ModelLoadState.Loading) {
-                    android.util.Log.d("MainNavigation", "Auto-initializing model...")
+                    com.localyze.utils.AppLog.d("MainNavigation", "Auto-initializing model...")
                     gemmaInferenceEngine.initialize()
-                    android.util.Log.d("MainNavigation", "Model auto-init complete, state=${gemmaInferenceEngine.modelLoadState.value}")
+                    com.localyze.utils.AppLog.d("MainNavigation", "Model auto-init complete, state=${gemmaInferenceEngine.modelLoadState.value}")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MainNavigation", "Model auto-init FAILED: ${e.message}", e)
@@ -134,12 +147,14 @@ fun MainNavigation(
 
     // Bottom bar visibility: hidden during onboarding and while the keyboard is open.
     val showBottomBarBase = currentDestination?.route?.startsWith("chat") == true ||
-            currentDestination?.route in listOf("conversations", "settings")
+            currentDestination?.route in listOf("code_workspace", "conversations", "settings")
     val showBottomBar = showBottomBarBase && !isKeyboardVisible
 
     LaunchedEffect(codeTestPrompt) {
-        if (!codeTestPrompt.isNullOrBlank()) {
-            onCodeTestPromptConsumed()
+        if (!startsInCodeWorkspaceForDebug && !codeTestPrompt.isNullOrBlank() && currentDestination != null) {
+            navController.navigate("code_workspace") {
+                launchSingleTop = true
+            }
         }
     }
 
@@ -246,6 +261,15 @@ fun MainNavigation(
                 }
             }
 
+            composable("code_workspace") {
+                ErrorBoundary(state = rememberErrorBoundaryState()) {
+                    CodeWorkspaceScreen(
+                        codeTestPrompt = codeTestPrompt,
+                        onCodeTestPromptConsumed = onCodeTestPromptConsumed
+                    )
+                }
+            }
+
             // â”€â”€ Capabilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             composable("capabilities") {
                 val capabilitiesViewModel: CapabilitiesViewModel = hiltViewModel()
@@ -282,6 +306,15 @@ fun MainNavigation(
                         },
                         onOpenToolCenter = {
                             navController.navigate("tool_center")
+                        },
+                        onOpenCodeWorkspace = {
+                            navController.navigate("code_workspace") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         onOpenSettings = {
                             navController.navigate("settings") {

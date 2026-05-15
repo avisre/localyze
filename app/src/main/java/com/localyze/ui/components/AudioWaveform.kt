@@ -11,7 +11,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.localyze.ui.theme.Primary
-import com.localyze.ui.theme.PrimaryVariant
+import com.localyze.ui.theme.SurfaceVariant
 
 /**
  * Waveform visualizer for audio recording.
@@ -50,7 +50,7 @@ fun AudioWaveform(
         val startX = ((size.width - totalWidth) / 2f).coerceAtLeast(0f)
 
         val gradientBrush = Brush.verticalGradient(
-            colors = listOf(PrimaryVariant, Primary),
+            colors = listOf(SurfaceVariant, Primary),
             startY = 0f,
             endY = maxHeightPx
         )

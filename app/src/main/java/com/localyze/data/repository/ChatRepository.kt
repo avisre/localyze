@@ -2,6 +2,7 @@
 
 import com.localyze.domain.models.Conversation
 import com.localyze.domain.models.Message
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -63,6 +64,9 @@ interface ChatRepository {
 
     /** Observe all messages for a conversation, ordered by timestamp ascending. */
     fun getMessagesForConversation(conversationId: Long): Flow<List<Message>>
+
+    /** Observe messages for a conversation as paginated data. */
+    fun getMessagesForConversationPaged(conversationId: Long): Flow<PagingData<Message>>
 
     /** Get a single message by ID. */
     suspend fun getMessage(id: Long): Message?

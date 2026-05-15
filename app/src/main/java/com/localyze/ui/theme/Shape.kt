@@ -1,13 +1,13 @@
-﻿package com.localyze.ui.theme
+package com.localyze.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 val LocalyzeShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
+    extraSmall = RoundedCornerShape(6.dp),
     small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(32.dp)
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(18.dp),
+    extraLarge = RoundedCornerShape(24.dp)
 )

@@ -1,0 +1,134 @@
+{
+  "results": [
+    {
+      "tag": "US_apple_rev",
+      "prompt": "Apple revenue for the last 3 fiscal years",
+      "metric": "revenue",
+      "verdict": "PASS",
+      "header": "Revenue (USD billions)",
+      "years": [
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "range": "$383.3B \u2192 $416.2B",
+      "screenshot": "/tmp/wm_US_apple_rev.png"
+    },
+    {
+      "tag": "US_apple_prof",
+      "prompt": "Apple profit for the last 3 fiscal years",
+      "metric": "profit",
+      "verdict": "PASS",
+      "header": "Net income (USD billions)",
+      "years": [
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "range": "$97.0B \u2192 $112.0B",
+      "screenshot": "/tmp/wm_US_apple_prof.png"
+    },
+    {
+      "tag": "US_apple_bs",
+      "prompt": "Apple balance sheet for the last 3 fiscal years",
+      "metric": "assets",
+      "verdict": "PASS",
+      "header": "Total assets (USD billions)",
+      "years": [
+        "2023",
+        "2024"
+      ],
+      "range": "$352.6B \u2192 $359.2B",
+      "screenshot": "/tmp/wm_US_apple_bs.png"
+    },
+    {
+      "tag": "US_msft_bs",
+      "prompt": "Microsoft total assets for the last 3 fiscal years",
+      "metric": "assets",
+      "verdict": "PASS",
+      "header": "Total assets (USD billions)",
+      "years": [
+        "2023"
+      ],
+      "range": "$412.0B \u2192 $619.0B",
+      "screenshot": "/tmp/wm_US_msft_bs.png"
+    },
+    {
+      "tag": "IN_hdfc_rev",
+      "prompt": "HDFC Bank revenue for the last 3 fiscal years",
+      "metric": "revenue",
+      "verdict": "PASS",
+      "header": "Revenue (INR crore)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "range": "\u20b9167,695 crore \u2192 \u20b9407,995 crore",
+      "screenshot": "/tmp/wm_IN_hdfc_rev.png"
+    },
+    {
+      "tag": "IN_hdfc_prof",
+      "prompt": "HDFC Bank net income for the past 3 years",
+      "metric": "profit",
+      "verdict": "PASS",
+      "header": "Net income (INR crore)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "range": null,
+      "screenshot": "/tmp/wm_IN_hdfc_prof.png"
+    },
+    {
+      "tag": "IN_hdfc_bs",
+      "prompt": "HDFC Bank total assets for the last 3 fiscal years",
+      "metric": "assets",
+      "verdict": "PASS",
+      "header": "Total assets (INR crore)",
+      "years": [
+        "2022"
+      ],
+      "range": "\u20b92,122,934 crore \u2192 \u20b93,617,623 crore",
+      "screenshot": "/tmp/wm_IN_hdfc_bs.png"
+    },
+    {
+      "tag": "CN_baba_prof",
+      "prompt": "Alibaba profit for the past 3 years",
+      "metric": "profit",
+      "verdict": "PASS",
+      "header": "Net income (CNY billions)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "range": "\u00a547.1B \u2192 \u00a579.7B",
+      "screenshot": "/tmp/wm_CN_baba_prof.png"
+    },
+    {
+      "tag": "UK_hsbc_bs",
+      "prompt": "HSBC balance sheet for the last 3 fiscal years",
+      "metric": "assets",
+      "verdict": "PASS",
+      "header": "Total assets (USD billions)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "range": "$2966.0B \u2192 $2957.0B",
+      "screenshot": "/tmp/wm_UK_hsbc_bs.png"
+    },
+    {
+      "tag": "CA_rbc_bs",
+      "prompt": "RBC total assets for the past 3 years",
+      "metric": "assets",
+      "verdict": "PASS",
+      "header": "Total assets (USD billions)",
+      "years": [
+        "2022"
+      ],
+      "range": "$1917.3B \u2192 $2152.3B",
+      "screenshot": "/tmp/wm_CA_rbc_bs.png"
+    }
+  ]
+}

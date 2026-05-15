@@ -9,6 +9,7 @@ data class PremiumSubscriptionState(
     val isPurchaseInProgress: Boolean = false,
     val isPremiumActive: Boolean = false,
     val isPending: Boolean = false,
+    val isVerified: Boolean = false,
     val statusMessage: String = "Connecting to Google Play",
     val errorMessage: String? = null
 ) {

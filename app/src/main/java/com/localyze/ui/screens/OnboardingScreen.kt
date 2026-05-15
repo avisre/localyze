@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.screens
+package com.localyze.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -55,16 +55,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.localyze.R
 import com.localyze.data.repository.DownloadProgress
+import com.localyze.data.repository.ModelEntry
 import com.localyze.ui.components.RobotMascot
 import com.localyze.ui.theme.Background
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
-import com.localyze.ui.theme.PastelBlue
-import com.localyze.ui.theme.PastelGreen
-import com.localyze.ui.theme.PastelOrange
-import com.localyze.ui.theme.PastelPurple
 import com.localyze.ui.theme.Primary
-import com.localyze.ui.theme.PrimaryVariant
 import com.localyze.ui.theme.Surface
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
@@ -105,8 +101,16 @@ fun OnboardingScreen(
                     is OnboardingUiState.CheckingModel -> {
                         CheckingContent(isChecking = state.isChecking)
                     }
+                    is OnboardingUiState.ModelSelection -> {
+                        ModelSelectionContent(
+                            models = state.models,
+                            selectedModel = state.selectedModel,
+                            onSelectModel = { viewModel.selectModel(it) }
+                        )
+                    }
                     is OnboardingUiState.ReadyToDownload -> {
                         ReadyToDownloadContent(
+                            selectedModel = state.selectedModel,
                             onStartDownload = { viewModel.checkNetworkAndStartDownload() }
                         )
                     }
@@ -190,7 +194,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
 
             // Title
             Text(
-                text = "Localyze",
+                text = "Localyze.ai",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp
@@ -229,8 +233,8 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
 
             FeatureCard(
                 emoji = "\uD83E\uDDE0",
-                title = "Gemma 4 E4B",
-                description = "Google's latest on-device AI model"
+                title = "Localyze.ai",
+                description = "Powered by Google's Gemma 4 on-device AI models"
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -285,12 +289,7 @@ private fun FeatureCard(
             Surface(
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = when (emoji) {
-                    "\uD83D\uDD12" -> PastelBlue
-                    "\u26A1" -> PastelOrange
-                    "\uD83E\uDDE0" -> PastelPurple
-                    else -> PastelGreen
-                }
+                color = SurfaceVariant
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -350,10 +349,145 @@ private fun CheckingContent(isChecking: Boolean) {
     }
 }
 
+// â”€â”€ Model Selection State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+@Composable
+private fun ModelSelectionContent(
+    models: List<ModelEntry>,
+    selectedModel: ModelEntry?,
+    onSelectModel: (ModelEntry) -> Unit
+) {
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            RobotMascot(
+                isThinking = false,
+                modifier = Modifier.size(160.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Choose Your Model",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = OnBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Select which Gemma 4 model to download for your device",
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextSecondary,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            models.forEach { model ->
+                val isSelected = selectedModel?.name == model.name
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) SurfaceVariant.copy(alpha = 0.3f) else Surface
+                    ),
+                    border = if (isSelected) {
+                        CardDefaults.outlinedCardBorder(enabled = true).copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(Primary)
+                        )
+                    } else {
+                        CardDefaults.outlinedCardBorder(enabled = true).copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(SurfaceVariant)
+                        )
+                    },
+                    elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = model.displayName,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = OnBackground
+                            )
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Filled.CheckCircle,
+                                    contentDescription = "Selected",
+                                    tint = Primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = model.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Size: ~${formatFileSize(model.sizeBytes)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(
+                    onClick = { onSelectModel(model) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected) Primary else SurfaceVariant,
+                        contentColor = OnPrimary
+                    )
+                ) {
+                    Text(
+                        text = if (isSelected) "Select ${model.displayName}" else "Choose ${model.displayName}",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
 // â”€â”€ Ready to Download State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @Composable
-private fun ReadyToDownloadContent(onStartDownload: () -> Unit) {
+private fun ReadyToDownloadContent(
+    selectedModel: ModelEntry,
+    onStartDownload: () -> Unit
+) {
+    val sizeText = formatFileSize(selectedModel.sizeBytes)
+
     AnimatedVisibility(
         visible = true,
         enter = fadeIn() + slideInVertically(),
@@ -381,8 +515,8 @@ private fun ReadyToDownloadContent(onStartDownload: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "The Gemma 4 E4B model needs to be downloaded to your device.\n" +
-                        "This is approximately 3.6 GB and requires a stable Wi-Fi connection.",
+                text = "Localyze.ai needs to download the ${selectedModel.displayName} model to your device.\n" +
+                        "This is approximately $sizeText and requires a stable Wi-Fi connection.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
                 textAlign = TextAlign.Center
@@ -434,7 +568,7 @@ private fun NetworkWarningContent(
                 imageVector = Icons.Default.Warning,
                 contentDescription = "Warning",
                 modifier = Modifier.size(80.dp),
-                tint = PastelOrange
+                tint = SurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -461,7 +595,7 @@ private fun NetworkWarningContent(
 
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = PastelOrange.copy(alpha = 0.2f)
+                    containerColor = SurfaceVariant.copy(alpha = 0.2f)
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -469,7 +603,7 @@ private fun NetworkWarningContent(
                     text = "This may result in significant data charges from your carrier. " +
                             "We recommend using Wi-Fi for this download.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PastelOrange,
+                    color = TextSecondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(12.dp)
                 )
@@ -484,7 +618,7 @@ private fun NetworkWarningContent(
                     .height(48.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PastelOrange,
+                    containerColor = Primary,
                     contentColor = OnPrimary
                 )
             ) {
@@ -724,7 +858,7 @@ private fun ReadyToChatContent(onStartChatting: () -> Unit) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "Ready",
-                    tint = PastelGreen,
+                    tint = Primary,
                     modifier = Modifier.size(36.dp)
                 )
             }
@@ -882,7 +1016,7 @@ private fun InsufficientRamContent(
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Warning",
-                tint = PastelOrange,
+                tint = SurfaceVariant,
                 modifier = Modifier.size(64.dp)
             )
 
@@ -903,7 +1037,7 @@ private fun InsufficientRamContent(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Surface),
                 border = CardDefaults.outlinedCardBorder(enabled = true).copy(
-                    brush = androidx.compose.ui.graphics.SolidColor(PastelOrange.copy(alpha = 0.5f))
+                    brush = androidx.compose.ui.graphics.SolidColor(SurfaceVariant.copy(alpha = 0.5f))
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {

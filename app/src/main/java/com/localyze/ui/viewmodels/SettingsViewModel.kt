@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.viewmodels
+package com.localyze.ui.viewmodels
 
 import android.app.Activity
 import android.content.Context
@@ -187,7 +187,24 @@ class SettingsViewModel @Inject constructor(
         val modelSizeBytes = modelRepository.getModelFileSize()
         val modelSizeMb = if (modelSizeBytes > 0) modelSizeBytes / (1024 * 1024) else 0L
         val isLoaded = gemmaInferenceEngine.isModelLoaded()
-        _uiState.update { it.copy(modelInfo = ModelInfo(isLoaded = isLoaded, isDownloaded = isDownloaded, modelSizeMb = modelSizeMb)) }
+        val selectedModel = modelRepository.getSelectedModel()
+        val allModels = modelRepository.getAllModels()
+        val downloadedModels = allModels.filter { modelRepository.isModelDownloaded(it) }.map { it.displayName }
+        _uiState.update { it.copy(modelInfo = ModelInfo(
+            isLoaded = isLoaded,
+            isDownloaded = isDownloaded,
+            modelSizeMb = modelSizeMb,
+            modelName = selectedModel.displayName,
+            selectedModelName = selectedModel.displayName,
+            availableModels = allModels.map { m -> m.displayName },
+            downloadedModels = downloadedModels
+        )) }
+    }
+
+    fun switchModel(displayName: String) {
+        val model = modelRepository.getAllModels().find { it.displayName == displayName } ?: return
+        modelRepository.setSelectedModel(model)
+        refreshModelInfo()
     }
 
     private fun refreshStorageInfo() {

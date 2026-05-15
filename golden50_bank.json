@@ -1,0 +1,707 @@
+{
+  "questions": [
+    {
+      "id": "Q001",
+      "fingerprint": "fact_geo_capital",
+      "prompt": "What's the capital of Japan?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "Tokyo"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q031",
+      "fingerprint": "fact_science_speed_of_light",
+      "prompt": "What is the speed of light?",
+      "category": "fact_science",
+      "expected_keywords": [
+        "299",
+        "300,000",
+        "light"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q066",
+      "fingerprint": "fact_history_ww2",
+      "prompt": "When did World War 2 end?",
+      "category": "fact_history",
+      "expected_keywords": [
+        "1945"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q091",
+      "fingerprint": "fact_general_shakespeare",
+      "prompt": "Who wrote Romeo and Juliet?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Shakespeare"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q100",
+      "fingerprint": "fact_general",
+      "prompt": "Who painted Starry Night?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Van Gogh"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q121",
+      "fingerprint": "math_basic_percentage",
+      "prompt": "What is 20% of 200?",
+      "category": "math_basic",
+      "expected_keywords": [
+        "40"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q151",
+      "fingerprint": "math_word_tip",
+      "prompt": "If a meal costs $40 and I want to tip 20%, how much is the tip?",
+      "category": "math_word",
+      "expected_keywords": [
+        "8"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q171",
+      "fingerprint": "unit_convert_temp_F_to_C",
+      "prompt": "Convert 100 F to Celsius.",
+      "category": "unit_convert",
+      "expected_keywords": [
+        "37.7",
+        "37.8",
+        "38"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q196",
+      "fingerprint": "daily_life_egg",
+      "prompt": "How long should I boil an egg for medium-soft yolk?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "6",
+        "7",
+        "minute"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q226",
+      "fingerprint": "tech_howto_screenshot",
+      "prompt": "How do I take a screenshot on Android?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "power",
+        "volume",
+        "down"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q256",
+      "fingerprint": "writing_thank_you",
+      "prompt": "Write a thank-you note to my coworker for helping with a project.",
+      "category": "writing",
+      "expected_keywords": [
+        "Thank",
+        "appreciate",
+        "Dear",
+        "Best"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q281",
+      "fingerprint": "definition",
+      "prompt": "What is inflation?",
+      "category": "definitions",
+      "expected_keywords": [
+        "prices",
+        "rise",
+        "purchasing"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q311",
+      "fingerprint": "code_snippet",
+      "prompt": "How do I reverse a string in Python?",
+      "category": "code",
+      "expected_keywords": [
+        "[::-1]",
+        "reverse"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q336",
+      "fingerprint": "translation",
+      "prompt": "How do you say 'thank you' in Spanish?",
+      "category": "translation",
+      "expected_keywords": [
+        "gracias"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q351",
+      "fingerprint": "current_events",
+      "prompt": "What's the current price of Bitcoin?",
+      "category": "current_events",
+      "expected_keywords": [
+        "bitcoin",
+        "$",
+        "price"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q376",
+      "fingerprint": "fin_viz",
+      "prompt": "Show me Apple's revenue for the last 3 years.",
+      "category": "financial_visualization",
+      "expected_keywords": [
+        "Apple",
+        "revenue"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q411",
+      "fingerprint": "creative",
+      "prompt": "Tell me a short joke.",
+      "category": "creative",
+      "expected_keywords": [
+        "?"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q441",
+      "fingerprint": "personal_advice",
+      "prompt": "How can I be more productive in the morning?",
+      "category": "personal_advice",
+      "expected_keywords": [
+        "routine",
+        "morning",
+        "wake"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q471",
+      "fingerprint": "business",
+      "prompt": "How do I market my new small business?",
+      "category": "business_general",
+      "expected_keywords": [
+        "social media",
+        "market",
+        "audience"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q491",
+      "fingerprint": "edge_case",
+      "prompt": "hi",
+      "category": "edge_case",
+      "expected_keywords": [
+        "hi",
+        "hello",
+        "hey"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q501",
+      "fingerprint": "regression_kantara_movie",
+      "prompt": "Kantara movie",
+      "category": "web_search_regression",
+      "expected_keywords": [
+        "Kantara"
+      ],
+      "forbidden_keywords": [
+        "\"results\":",
+        "\"query\":",
+        "\"fetched_at\":",
+        "\"snippet\":",
+        "\"url\":"
+      ],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q502",
+      "fingerprint": "regression_oppenheimer",
+      "prompt": "Tell me about the movie Oppenheimer",
+      "category": "web_search_regression",
+      "expected_keywords": [
+        "Oppenheimer",
+        "Nolan",
+        "atomic",
+        "bomb"
+      ],
+      "forbidden_keywords": [
+        "\"results\":",
+        "\"query\":",
+        "\"fetched_at\":"
+      ],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q503",
+      "fingerprint": "regression_messi",
+      "prompt": "Who is Lionel Messi",
+      "category": "web_search_regression",
+      "expected_keywords": [
+        "Argentin",
+        "football",
+        "soccer",
+        "Barcelona",
+        "Inter Miami"
+      ],
+      "forbidden_keywords": [
+        "\"results\":",
+        "\"query\":",
+        "\"fetched_at\":"
+      ],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q504",
+      "fingerprint": "regression_rrr",
+      "prompt": "What is RRR movie about",
+      "category": "web_search_regression",
+      "expected_keywords": [
+        "RRR",
+        "Telugu",
+        "Rajamouli",
+        "India"
+      ],
+      "forbidden_keywords": [
+        "\"results\":",
+        "\"query\":",
+        "\"fetched_at\":"
+      ],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q505",
+      "fingerprint": "regression_demon_slayer",
+      "prompt": "Demon Slayer latest season",
+      "category": "web_search_regression",
+      "expected_keywords": [
+        "Demon",
+        "Slayer",
+        "Kimetsu",
+        "anime",
+        "season"
+      ],
+      "forbidden_keywords": [
+        "\"results\":",
+        "\"query\":",
+        "\"fetched_at\":"
+      ],
+      "web_dependent": true,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q002",
+      "fingerprint": "fact_geography_extra1",
+      "prompt": "What is the capital of France?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "Paris"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q003",
+      "fingerprint": "fact_geography_extra2",
+      "prompt": "What's the capital of Australia?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "Canberra"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q032",
+      "fingerprint": "fact_science_extra1",
+      "prompt": "What is the chemical symbol for gold?",
+      "category": "fact_science",
+      "expected_keywords": [
+        "Au"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q033",
+      "fingerprint": "fact_science_extra2",
+      "prompt": "How many bones are in the adult human body?",
+      "category": "fact_science",
+      "expected_keywords": [
+        "206"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q067",
+      "fingerprint": "fact_history_extra1",
+      "prompt": "When did World War 1 start?",
+      "category": "fact_history",
+      "expected_keywords": [
+        "1914"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q068",
+      "fingerprint": "fact_history_extra2",
+      "prompt": "Who was the first president of the United States?",
+      "category": "fact_history",
+      "expected_keywords": [
+        "Washington"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q092",
+      "fingerprint": "fact_general_extra1",
+      "prompt": "Who painted the Sistine Chapel ceiling?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Michelangelo"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q093",
+      "fingerprint": "fact_general_extra2",
+      "prompt": "Who composed the Ninth Symphony?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Beethoven"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q122",
+      "fingerprint": "math_basic_extra1",
+      "prompt": "What's 15% of 80?",
+      "category": "math_basic",
+      "expected_keywords": [
+        "12"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q123",
+      "fingerprint": "math_basic_extra2",
+      "prompt": "Calculate 25 times 4.",
+      "category": "math_basic",
+      "expected_keywords": [
+        "100"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q152",
+      "fingerprint": "math_word_extra1",
+      "prompt": "A shirt is $50 with 25% off. What's the discounted price?",
+      "category": "math_word",
+      "expected_keywords": [
+        "37.5",
+        "37.50"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q153",
+      "fingerprint": "math_word_extra2",
+      "prompt": "Split a $120 bill three ways. How much does each pay?",
+      "category": "math_word",
+      "expected_keywords": [
+        "40"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q172",
+      "fingerprint": "unit_convert_extra1",
+      "prompt": "How many kilometers in 10 miles?",
+      "category": "unit_convert",
+      "expected_keywords": [
+        "16.09",
+        "16.1"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q173",
+      "fingerprint": "unit_convert_extra2",
+      "prompt": "Convert 5 feet to centimeters.",
+      "category": "unit_convert",
+      "expected_keywords": [
+        "152.4",
+        "152"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "Q197",
+      "fingerprint": "daily_life_extra1",
+      "prompt": "How many hours of sleep do adults need?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "7",
+        "8",
+        "hours"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q198",
+      "fingerprint": "daily_life_extra2",
+      "prompt": "How much water should I drink a day?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "8",
+        "glasses",
+        "liters",
+        "2"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q227",
+      "fingerprint": "tech_howto_extra1",
+      "prompt": "How do I turn off Wi-Fi on my phone?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "settings",
+        "Wi-Fi",
+        "toggle"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q228",
+      "fingerprint": "tech_howto_extra2",
+      "prompt": "How do I clear browser cache in Chrome?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "settings",
+        "clear",
+        "browsing"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q257",
+      "fingerprint": "writing_extra1",
+      "prompt": "Write a short apology email for missing a meeting.",
+      "category": "writing",
+      "expected_keywords": [
+        "Subject",
+        "apologize",
+        "sorry",
+        "Best"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q258",
+      "fingerprint": "writing_extra2",
+      "prompt": "Help me write a polite email to my landlord about a leaky faucet.",
+      "category": "writing",
+      "expected_keywords": [
+        "Subject",
+        "Dear",
+        "faucet",
+        "Regards"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q282",
+      "fingerprint": "definitions_extra1",
+      "prompt": "Explain blockchain in simple terms.",
+      "category": "definitions",
+      "expected_keywords": [
+        "chain",
+        "blocks",
+        "distributed",
+        "ledger"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q283",
+      "fingerprint": "definitions_extra2",
+      "prompt": "What is machine learning?",
+      "category": "definitions",
+      "expected_keywords": [
+        "data",
+        "algorithm",
+        "learn"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q312",
+      "fingerprint": "code_extra1",
+      "prompt": "Write a Python function to check if a number is prime.",
+      "category": "code",
+      "expected_keywords": [
+        "def",
+        "prime",
+        "return"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q313",
+      "fingerprint": "code_extra2",
+      "prompt": "How do I sort a list in JavaScript?",
+      "category": "code",
+      "expected_keywords": [
+        ".sort",
+        "sort"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "Q337",
+      "fingerprint": "translation_extra1",
+      "prompt": "Translate 'good morning' to French.",
+      "category": "translation",
+      "expected_keywords": [
+        "bonjour"
+      ],
+      "forbidden_keywords": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    }
+  ],
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "The user is asking",
+    "I will answer directly",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app"
+  ]
+}

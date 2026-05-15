@@ -1,0 +1,17 @@
+{
+  "enableWebSearch": true,
+  "enableNotificationReplies": true,
+  "enableCrashReporting": true,
+  "enableMemorySystem": true,
+  "enableToolConfirmations": true,
+  "enableBilling": true,
+  "enableVoiceInput": true,
+  "maxContextWindowTokens": 10000,
+  "modelDownloadUrlOverride": "",
+  "webSearchTimeoutMs": 12000,
+  "enableChartVisualizations": true,
+  "enableCodeWorkspace": true,
+  "enablePerChatMemory": true,
+  "enableLongTermMemory": true,
+  "enableFinancialDataSearch": true
+}

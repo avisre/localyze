@@ -20,9 +20,250 @@ private data class StoreProfile(
     val products: List<ProductSeed>
 )
 
+private data class WebsiteProfile(
+    val brand: String,
+    val overline: String,
+    val headline: String,
+    val body: String,
+    val primary: String,
+    val secondary: String,
+    val accent: String,
+    val cta: String,
+    val secondaryCta: String,
+    val metrics: List<Pair<String, String>>,
+    val cards: List<Pair<String, String>>
+)
+
+internal fun buildWebsiteTemplateForInstruction(instruction: String): String {
+    val lower = instruction.lowercase()
+    val commerceKeywords = listOf(
+        "ecommerce", "e-commerce", "store", "shop", "product", "cart", "checkout",
+        "shoe", "skincare", "fashion", "coffee", "jewelry", "fitness", "pet"
+    )
+    if (commerceKeywords.any { lower.contains(it) }) {
+        return buildEcommerceLandingPageTemplate(instruction)
+    }
+
+    val profile = websiteProfileForInstruction(instruction)
+    val metrics = profile.metrics.joinToString("\n") { (value, label) ->
+        """
+        <div class="metric">
+          <strong>${escapeHtml(value)}</strong>
+          <span>${escapeHtml(label)}</span>
+        </div>
+        """.trimIndent()
+    }
+    val cards = profile.cards.joinToString("\n") { (title, copy) ->
+        """
+        <article class="feature-card">
+          <span></span>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(copy)}</p>
+        </article>
+        """.trimIndent()
+    }
+
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(profile.brand)}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    :root {
+      --primary: ${profile.primary};
+      --secondary: ${profile.secondary};
+      --accent: ${profile.accent};
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --paper: #f5f5f7;
+      --surface: rgba(255, 255, 255, 0.82);
+      --line: rgba(29, 29, 31, 0.13);
+      --shadow: 0 24px 70px rgba(20, 26, 34, 0.13);
+    }
+    body {
+      min-height: 100vh;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, var(--secondary), transparent 32rem),
+        linear-gradient(180deg, #ffffff 0%, var(--paper) 46%, #ffffff 100%);
+      line-height: 1.45;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(22px);
+    }
+    .nav-inner { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0; }
+    .mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); }
+    .links { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 0.92rem; font-weight: 650; }
+    .nav-cta, .primary-cta, .secondary-cta, .form button {
+      border: 0; border-radius: 999px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .nav-cta { padding: 9px 14px; color: #fff; background: var(--ink); }
+    .hero { min-height: calc(100vh - 64px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 0.92fr); align-items: center; gap: 38px; padding: 48px 0 42px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--primary); font-size: 0.82rem; font-weight: 800; }
+    h1 { margin-top: 18px; max-width: 740px; font-size: clamp(2.65rem, 7vw, 5.7rem); line-height: 0.96; letter-spacing: 0; }
+    .hero-copy { margin-top: 18px; max-width: 620px; color: var(--muted); font-size: clamp(1rem, 2vw, 1.18rem); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .primary-cta, .secondary-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 18px; font-weight: 800; }
+    .primary-cta { color: #fff; background: var(--primary); box-shadow: 0 16px 36px rgba(10, 132, 255, 0.22); }
+    .secondary-cta { background: rgba(255,255,255,0.8); border: 1px solid var(--line); color: var(--ink); }
+    .primary-cta:hover, .secondary-cta:hover, .nav-cta:hover, .form button:hover { transform: translateY(-2px); }
+    .device {
+      position: relative; min-height: 520px; border-radius: 8px; overflow: hidden;
+      background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.54));
+      border: 1px solid var(--line); box-shadow: var(--shadow);
+    }
+    .device::before { content: ""; position: absolute; inset: 26px; border-radius: 8px; border: 1px solid rgba(29,29,31,0.1); }
+    .orbital { position: absolute; width: 58%; aspect-ratio: 1; left: 50%; top: 42%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 34% 28%, #fff, var(--secondary)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 28px 90px rgba(0,0,0,0.16); }
+    .panel { position: absolute; left: 26px; right: 26px; bottom: 26px; padding: 18px; border-radius: 8px; background: rgba(255,255,255,0.86); border: 1px solid var(--line); backdrop-filter: blur(20px); }
+    .panel strong { display: block; font-size: 1.1rem; }
+    .panel p { margin-top: 6px; color: var(--muted); }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 6px 0 44px; }
+    .metric, .feature-card {
+      border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,0.78);
+      box-shadow: 0 12px 34px rgba(0,0,0,0.05);
+    }
+    .metric { padding: 18px; }
+    .metric strong { display: block; font-size: clamp(1.55rem, 4vw, 2.6rem); letter-spacing: 0; }
+    .metric span { color: var(--muted); font-weight: 650; }
+    .section-head { padding: 42px 0 18px; max-width: 760px; }
+    .section-head h2 { font-size: clamp(2rem, 5vw, 4rem); line-height: 1; letter-spacing: 0; }
+    .section-head p { margin-top: 12px; color: var(--muted); }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding-bottom: 42px; }
+    .feature-card { padding: 22px; min-height: 230px; display: flex; flex-direction: column; justify-content: space-between; }
+    .feature-card span { width: 42px; height: 42px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--secondary)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35); }
+    .feature-card h3 { margin-top: auto; font-size: 1.15rem; }
+    .feature-card p { margin-top: 8px; color: var(--muted); }
+    .cta-band { margin: 28px auto 52px; padding: 26px; border-radius: 8px; color: white; background: linear-gradient(135deg, var(--ink), var(--primary)); display: grid; grid-template-columns: 1fr minmax(240px, 380px); gap: 18px; align-items: center; }
+    .cta-band p { margin-top: 8px; color: rgba(255,255,255,0.72); }
+    .form { display: flex; gap: 8px; padding: 7px; border-radius: 999px; background: white; }
+    .form input { min-width: 0; flex: 1; border: 0; outline: 0; padding: 0 12px; color: var(--ink); }
+    .form button { padding: 11px 15px; background: var(--primary); color: white; font-weight: 800; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 36px; color: var(--muted); }
+    @media (max-width: 860px) {
+      .links a { display: none; }
+      .hero, .cta-band { grid-template-columns: 1fr; }
+      .hero { min-height: auto; padding-top: 38px; }
+      .device { min-height: 380px; }
+      .metrics, .features { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 24px, 1120px); }
+      h1 { font-size: clamp(2.35rem, 14vw, 4.2rem); }
+      .actions, .form { flex-direction: column; align-items: stretch; border-radius: 8px; }
+      .form input { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="shell nav-inner">
+      <a class="brand" href="#"><span class="mark"></span>${escapeHtml(profile.brand)}</a>
+      <nav class="links">
+        <a href="#features">Features</a>
+        <a href="#contact">Contact</a>
+        <button class="nav-cta" type="button" data-scroll="#contact">Start</button>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="shell hero">
+      <div>
+        <span class="eyebrow">${escapeHtml(profile.overline)}</span>
+        <h1>${escapeHtml(profile.headline)}</h1>
+        <p class="hero-copy">${escapeHtml(profile.body)}</p>
+        <div class="actions">
+          <a class="primary-cta" href="#contact">${escapeHtml(profile.cta)}</a>
+          <a class="secondary-cta" href="#features">${escapeHtml(profile.secondaryCta)}</a>
+        </div>
+      </div>
+      <div class="device" aria-label="Visual preview">
+        <div class="orbital"></div>
+        <div class="panel">
+          <strong>${escapeHtml(profile.brand)}</strong>
+          <p>Responsive, interactive, and ready to preview inside Localyze.</p>
+        </div>
+      </div>
+    </section>
+    <section class="shell metrics">
+      $metrics
+    </section>
+    <section class="shell" id="features">
+      <div class="section-head">
+        <h2>Built with clarity from the first tap.</h2>
+        <p>Every section is sized for small screens first, then expanded into a composed desktop layout.</p>
+      </div>
+      <div class="features">
+        $cards
+      </div>
+    </section>
+    <section class="shell cta-band" id="contact">
+      <div>
+        <h2>Launch the polished version.</h2>
+        <p>Leave an email and the page responds instantly, so the preview feels alive instead of static.</p>
+      </div>
+      <form class="form" id="lead-form">
+        <input id="email" type="email" placeholder="you@example.com" aria-label="Email address" required>
+        <button type="submit">Notify me</button>
+      </form>
+    </section>
+  </main>
+  <footer class="shell">2026 ${escapeHtml(profile.brand)}. Responsive single-file preview.</footer>
+  <script>
+    document.querySelectorAll('[data-scroll]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelector(button.dataset.scroll).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+    document.getElementById('lead-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const button = event.currentTarget.querySelector('button');
+      const input = document.getElementById('email');
+      button.textContent = input.value ? 'Saved' : 'Notify me';
+      input.value = '';
+      setTimeout(() => { button.textContent = 'Notify me'; }, 1800);
+    });
+  </script>
+</body>
+</html>
+    """.trimIndent()
+}
+
 internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
-    val profile = storeProfileForInstruction(instruction)
-    val products = profile.products.joinToString("\n") { product ->
+    val baseProfile = storeProfileForInstruction(instruction)
+    val brandOverride = extractExplicitBrand(instruction)
+    val profile = if (brandOverride != null) {
+        baseProfile.copy(
+            brand = brandOverride,
+            category = if (instruction.contains("sneaker", ignoreCase = true)) {
+                "performance sneakers"
+            } else {
+                baseProfile.category
+            }
+        )
+    } else {
+        baseProfile
+    }
+    val requestedProductCount = Regex("""\b(\d+)\s+product""", RegexOption.IGNORE_CASE)
+        .find(instruction)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.toIntOrNull()
+        ?.coerceIn(4, 8)
+        ?: profile.products.size
+    val displayProducts = expandProducts(profile.products, requestedProductCount)
+    val products = displayProducts.joinToString("\n") { product ->
         """
         <article class="product-card" data-category="${product.category}">
           <button class="quick-view" type="button" data-name="${escapeHtml(product.name)}" data-price="${product.price}" data-description="${escapeHtml(product.description)}">Quick view</button>
@@ -42,7 +283,7 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
         """.trimIndent()
     }
 
-    val categories = profile.products
+    val categories = displayProducts
         .map { it.category }
         .distinct()
         .joinToString("\n") { category ->
@@ -142,6 +383,17 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
     .modal.open { display: grid; }
     .modal-card { width: min(480px, 100%); background: white; border-radius: 8px; padding: 22px; box-shadow: var(--shadow); }
     .modal-card button { margin-top: 16px; }
+    .cart-overlay { position: fixed; inset: 0; display: none; background: rgba(10, 12, 11, 0.34); z-index: 35; }
+    .cart-overlay.open { display: block; }
+    .cart-sidebar { position: fixed; top: 0; right: 0; z-index: 45; width: min(390px, 100%); height: 100%; background: white; border-left: 1px solid var(--line); box-shadow: -24px 0 70px rgba(0,0,0,0.18); transform: translateX(100%); transition: transform 0.22s ease; padding: 22px; display: flex; flex-direction: column; }
+    .cart-sidebar.open { transform: translateX(0); }
+    .cart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .cart-close { border: 1px solid var(--line); background: white; border-radius: 999px; padding: 8px 11px; font-weight: 900; }
+    .cart-items { display: grid; gap: 10px; padding: 16px 0; overflow: auto; }
+    .cart-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .cart-empty { color: var(--muted); padding: 18px 0; }
+    .cart-foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 16px; }
+    .checkout { width: 100%; border: 0; border-radius: 999px; padding: 13px 16px; background: var(--primary); color: white; font-weight: 900; margin-top: 12px; }
     @media (max-width: 900px) {
       .hero, .promo { grid-template-columns: 1fr; }
       .grid, .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -170,7 +422,7 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
         <a href="#shop">Shop</a>
         <a href="#reviews">Reviews</a>
         <a href="#faq">FAQ</a>
-        <button class="cart-pill" type="button">Cart <span id="cart-count">0</span> - <span id="cart-total">${'$'}0</span></button>
+        <button class="cart-pill" id="cart-toggle" type="button">Cart <span id="cart-count">0</span> - <span id="cart-total">${'$'}0</span></button>
       </nav>
     </div>
   </header>
@@ -187,7 +439,7 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
       </div>
       <div class="hero-card" aria-label="Featured product visual">
         <div class="product-orbit"></div>
-        <div class="mock-product">${escapeHtml(profile.products.first().name)}<small>${escapeHtml(profile.category)}</small></div>
+        <div class="mock-product">${escapeHtml(displayProducts.first().name)}<small>${escapeHtml(profile.category)}</small></div>
         <div class="floating-note">Free shipping over ${'$'}75 - 30-day fit guarantee</div>
       </div>
     </section>
@@ -254,18 +506,53 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
       <button class="btn btn-primary" type="button" id="close-modal">Close</button>
     </div>
   </div>
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <aside class="cart-sidebar" id="cart-sidebar" aria-label="Shopping cart">
+    <div class="cart-head">
+      <h2>Your cart</h2>
+      <button class="cart-close" id="cart-close" type="button">Close</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <p class="cart-empty">Your cart is empty.</p>
+    </div>
+    <div class="cart-foot">
+      <strong>Total: <span id="cart-sidebar-total">${'$'}0</span></strong>
+      <button class="checkout" type="button">Checkout preview</button>
+    </div>
+  </aside>
   <script>
-    const cart = { count: 0, total: 0 };
+    const cart = { count: 0, total: 0, items: [] };
     const cartCount = document.getElementById('cart-count');
     const cartTotal = document.getElementById('cart-total');
+    const cartSidebarTotal = document.getElementById('cart-sidebar-total');
+    const cartItems = document.getElementById('cart-items');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const cartOverlay = document.getElementById('cart-overlay');
+    const openCart = () => { cartSidebar.classList.add('open'); cartOverlay.classList.add('open'); };
+    const closeCart = () => { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('open'); };
+    const renderCart = () => {
+      cartCount.textContent = cart.count;
+      cartTotal.textContent = '$' + cart.total;
+      cartSidebarTotal.textContent = '$' + cart.total;
+      cartItems.innerHTML = cart.items.length
+        ? cart.items.map((item) => '<div class="cart-line"><span>' + item.name + '</span><strong>$' + item.price + '</strong></div>').join('')
+        : '<p class="cart-empty">Your cart is empty.</p>';
+    };
+    document.getElementById('cart-toggle').addEventListener('click', openCart);
+    document.getElementById('cart-close').addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', closeCart);
     document.querySelectorAll('.add-cart').forEach((button) => {
       button.addEventListener('click', () => {
+        const card = button.closest('.product-card');
+        const name = card.querySelector('h3').textContent;
+        const price = Number(button.dataset.price);
         cart.count += 1;
-        cart.total += Number(button.dataset.price);
-        cartCount.textContent = cart.count;
-        cartTotal.textContent = '$' + cart.total;
+        cart.total += price;
+        cart.items.push({ name, price });
+        renderCart();
         button.classList.add('added');
         button.textContent = 'Added';
+        openCart();
         setTimeout(() => { button.textContent = 'Add to cart'; button.classList.remove('added'); }, 1200);
       });
     });
@@ -303,6 +590,97 @@ internal fun buildEcommerceLandingPageTemplate(instruction: String): String {
 </body>
 </html>
     """.trimIndent()
+}
+
+private fun websiteProfileForInstruction(instruction: String): WebsiteProfile {
+    val lower = instruction.lowercase()
+    return when {
+        listOf("portfolio", "developer", "designer", "resume", "personal").any { lower.contains(it) } -> WebsiteProfile(
+            brand = "Nova Hart",
+            overline = "Independent product designer",
+            headline = "Quietly precise digital work for ambitious teams.",
+            body = "A focused portfolio for case studies, selected launches, and a concise path to hire the maker behind them.",
+            primary = "#0a84ff",
+            secondary = "#a7c7ff",
+            accent = "#34c759",
+            cta = "View work",
+            secondaryCta = "Read approach",
+            metrics = listOf("24" to "selected projects", "8 yrs" to "product craft", "96%" to "client retention"),
+            cards = listOf(
+                "Case studies with pace" to "Compact project summaries make the strongest outcomes easy to scan.",
+                "Human contact flow" to "The call to action stays present without crowding the reading experience.",
+                "Polished mobile rhythm" to "The layout holds generous whitespace while staying useful on a phone."
+            )
+        )
+        listOf("restaurant", "cafe", "menu", "reservation", "food").any { lower.contains(it) } -> WebsiteProfile(
+            brand = "Maison Rue",
+            overline = "Seasonal neighborhood dining",
+            headline = "A warm room, a short menu, and a reason to stay.",
+            body = "A restaurant website with reservations, menu highlights, opening hours, and enough atmosphere to feel considered without relying on stock photos.",
+            primary = "#2f5d50",
+            secondary = "#f0bf6a",
+            accent = "#ff9f0a",
+            cta = "Reserve a table",
+            secondaryCta = "See menu",
+            metrics = listOf("5-10" to "dinner service", "18" to "seasonal plates", "4.9" to "guest rating"),
+            cards = listOf(
+                "Menu previews" to "Signature dishes are grouped by service moment, not generic categories.",
+                "Reservation ready" to "The contact section behaves like a real booking prompt in the preview.",
+                "Local warmth" to "Color, type, and copy create a calm dining mood without visual clutter."
+            )
+        )
+        listOf("dashboard", "analytics", "admin", "saas", "startup", "app").any { lower.contains(it) } -> WebsiteProfile(
+            brand = "Atlas Metrics",
+            overline = "Realtime operating system",
+            headline = "One calm dashboard for decisions that cannot wait.",
+            body = "A product website for an analytics tool, with crisp value props, proof metrics, and a preview-like hero that feels software-native.",
+            primary = "#1d1d1f",
+            secondary = "#64d2ff",
+            accent = "#0a84ff",
+            cta = "Book demo",
+            secondaryCta = "Explore product",
+            metrics = listOf("42%" to "faster reviews", "12k" to "events per minute", "99.9%" to "uptime target"),
+            cards = listOf(
+                "Executive signal" to "Summaries, alerts, and trends are presented as one clear operating layer.",
+                "Team workflows" to "Every feature card describes an action a real team would take.",
+                "Trust by default" to "The visual system feels secure, restrained, and enterprise-ready."
+            )
+        )
+        else -> WebsiteProfile(
+            brand = "Luma Studio",
+            overline = "Responsive launch page",
+            headline = "A polished website that feels finished on the first preview.",
+            body = "A complete single-file site with real structure, adaptive layout, interactive form behavior, and a refined visual system.",
+            primary = "#0a84ff",
+            secondary = "#c7e5ff",
+            accent = "#34c759",
+            cta = "Start project",
+            secondaryCta = "See details",
+            metrics = listOf("100%" to "responsive", "1 file" to "HTML CSS JS", "0" to "external assets"),
+            cards = listOf(
+                "Immediate preview" to "The generated page opens directly in the live preview pane.",
+                "Real content hierarchy" to "Hero, proof, features, and contact sections are written with usable copy.",
+                "Subtle interaction" to "Buttons, smooth scroll, and form feedback make the page feel alive."
+            )
+        )
+    }
+}
+
+private fun extractExplicitBrand(instruction: String): String? {
+    val match = Regex("""\bfor\s+([A-Z][A-Za-z0-9'.&-]{1,30})(?=\s|$)""").find(instruction)
+    val brand = match?.groupValues?.getOrNull(1)?.trim()
+    return brand?.takeIf { it.isNotBlank() && it.lowercase() !in setOf("a", "an", "the") }
+}
+
+private fun expandProducts(products: List<ProductSeed>, count: Int): List<ProductSeed> {
+    if (products.size >= count) return products.take(count)
+    val additions = listOf(
+        ProductSeed("Launch Crew Sock", "Cushioned knit support for everyday training and travel.", 22, "Accessories", "#b7c7d9"),
+        ProductSeed("City Pace Sneaker", "Street-ready cushioning with a breathable knit upper.", 132, "Shoes", "#9cc5a1"),
+        ProductSeed("All-Weather Tote", "Water-resistant carry with a laptop sleeve and easy-access pocket.", 72, "Bags", "#d6a76c"),
+        ProductSeed("Recovery Hoodie", "Soft post-session layer with a structured hood and relaxed fit.", 88, "Apparel", "#b9a7d6")
+    )
+    return (products + additions).take(count)
 }
 
 private fun storeProfileForInstruction(instruction: String): StoreProfile {

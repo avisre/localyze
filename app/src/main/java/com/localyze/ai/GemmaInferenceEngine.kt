@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
+import com.localyze.utils.AppLog
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.domain.models.Message as DomainMessage
 import com.localyze.domain.models.MessageRole
@@ -151,8 +152,35 @@ class GemmaInferenceEngine @Inject constructor(
     fun setTopK(value: Int) { topK = value.coerceAtLeast(1) }
     fun setTopP(value: Float) { topP = value.coerceIn(0f, 1f) }
 
+    // Force CPU backend on next engine init. Used when device-specific GPU
+    // artifacts garble digits/identifiers (observed on Snapdragon 8 Gen 1
+    // / QCS8275 with Gemma 4 E4B). When set true, the engine will skip GPU
+    // and load the CPU backend on the next initialize() call.
+    @Volatile private var forceCpu: Boolean = false
+    fun setForceCpu(value: Boolean) {
+        if (forceCpu != value) {
+            forceCpu = value
+            // Drop any loaded engine so the next inference triggers a fresh
+            // initialize() with the new backend choice.
+            engine = null
+            conversation = null
+            _modelLoadState.value = ModelLoadState.NotLoaded
+            AppLog.d(TAG, "force_cpu set to $value — engine reset, will reload on next inference")
+        }
+    }
+
     fun isModelLoaded(): Boolean = _modelLoadState.value is ModelLoadState.Loaded
     fun getActiveBackend(): String = activeBackendType
+
+    // Tool-result echo. The OpenApiTool wrappers used by LiteRT-LM execute
+    // entirely inside the JNI; their results never reach SendMessageUseCase
+    // through the InferenceToken stream. We capture them here so the
+    // bad-output recovery path can include real tool data in its directive
+    // instead of falling back to (often-wrong) training-only knowledge.
+    private val recentToolResults: java.util.concurrent.CopyOnWriteArrayList<Pair<String, String>> =
+        java.util.concurrent.CopyOnWriteArrayList()
+    fun snapshotRecentToolResults(): List<Pair<String, String>> = recentToolResults.toList()
+    fun clearRecentToolResults() { recentToolResults.clear() }
 
     // ── Engine & Conversation (Gallery pattern: long-lived singletons) ────
 
@@ -169,6 +197,9 @@ class GemmaInferenceEngine @Inject constructor(
 
     /** Which backend is currently active. */
     @Volatile private var activeBackendType: String = "none"
+    /** True only when EngineConfig.visionBackend was set to a non-null backend
+     *  AND Engine.initialize() succeeded with that vision backend attached. */
+    @Volatile private var visionEnabled: Boolean = false
 
     /** The Backend object used — needed for SamplerConfig decision. */
     @Volatile private var activeBackend: Backend = Backend.CPU()
@@ -195,14 +226,14 @@ class GemmaInferenceEngine @Inject constructor(
             val modelRepository = com.localyze.data.repository.ModelRepository(context, okhttp3.OkHttpClient())
             val modelFile = modelRepository.findModelFile()
                 ?: File(context.filesDir, "models/${com.localyze.data.repository.ModelRepository.MODEL_FILENAME}")
-            Log.d(TAG, "Model file: ${modelFile.absolutePath}, exists=${modelFile.exists()}, size=${modelFile.length()}")
+            AppLog.d(TAG, "Model file: ${modelFile.absolutePath}, exists=${modelFile.exists()}, size=${modelFile.length()}")
 
             if (!modelFile.exists()) {
-                _modelLoadState.value = ModelLoadState.Error("Gemma 4 E4B model file not found at ${modelFile.absolutePath}")
-                throw ModelNotFoundException("Gemma 4 E4B model file not found")
+                _modelLoadState.value = ModelLoadState.Error("Localyze.ai base model file not found at ${modelFile.absolutePath}")
+                throw ModelNotFoundException("Localyze.ai base model file not found")
             }
 
-            Log.d(TAG, "Model: ${modelFile.name} (${modelFile.length() / 1024 / 1024} MB), Gemma 4 E4B only")
+            AppLog.d(TAG, "Model: ${modelFile.name} (${modelFile.length() / 1024 / 1024} MB), Gemma 4 E4B only")
 
             val nativeLibDir = context.applicationInfo.nativeLibraryDir
 
@@ -212,7 +243,7 @@ class GemmaInferenceEngine @Inject constructor(
             // Backend.NPU(), but we set it explicitly as a safety measure.
             try {
                 android.system.Os.setenv("ADSP_LIBRARY_PATH", nativeLibDir, true)
-                Log.d(TAG, "Set ADSP_LIBRARY_PATH=$nativeLibDir")
+                AppLog.d(TAG, "Set ADSP_LIBRARY_PATH=$nativeLibDir")
             } catch (e: Exception) {
                 Log.w(TAG, "Could not set ADSP_LIBRARY_PATH: ${e.message}")
             }
@@ -230,10 +261,27 @@ class GemmaInferenceEngine @Inject constructor(
             // TODO: Once LiteRT-LM Kotlin API NPU support stabilizes
             // (see github.com/google-ai-edge/LiteRT-LM/issues/774),
             // re-enable NPU as first-priority backend.
-            val backends = listOf(
-                "gpu" to Backend.GPU(),
-                "cpu" to Backend.CPU()
-            )
+            // Read persisted force_cpu preference (set via Settings or
+            // intent extra). Persisted so it survives the engine's first
+            // background init, which would otherwise race.
+            val persistedForceCpu = runCatching {
+                settingsDataStore.forceCpuBackendBlocking()
+            }.getOrDefault(false)
+            val effectiveForceCpu = forceCpu || persistedForceCpu
+            // Always try GPU first, with CPU as fallback. Previously we skipped
+            // GPU on emulator because Android Studio's `-gpu host` passthrough
+            // has no OpenCL ICD, but the user wants the GPU path attempted
+            // everywhere — fallback to CPU still kicks in if GPU init fails.
+            val backends = when {
+                effectiveForceCpu -> {
+                    AppLog.d(TAG, "force_cpu=true (persisted=$persistedForceCpu) — skipping GPU, using CPU only")
+                    listOf("cpu" to Backend.CPU())
+                }
+                else -> listOf(
+                    "gpu" to Backend.GPU(),
+                    "cpu" to Backend.CPU()
+                )
+            }
 
             var loaded = false
             for ((name, backend) in backends) {
@@ -241,7 +289,7 @@ class GemmaInferenceEngine @Inject constructor(
                     "npu" -> 0.15f; "gpu" -> 0.35f; "cpu" -> 0.55f; else -> 0.5f
                 }
                 _modelLoadState.value = ModelLoadState.Loading(progress)
-                Log.d(TAG, "Attempting $name backend on ${Build.MANUFACTURER} ${Build.MODEL}...")
+                AppLog.d(TAG, "Attempting $name backend on ${Build.MANUFACTURER} ${Build.MODEL}...")
 
                 try {
                     // Gallery pattern: set cacheDir conditionally
@@ -251,25 +299,54 @@ class GemmaInferenceEngine @Inject constructor(
                         null
                     }
 
-                    // Gallery pattern: use separate visionBackend and audioBackend
-                    val engineConfig = EngineConfig(
-                        modelPath = modelFile.absolutePath,
-                        backend = backend,
-                        // Gallery uses GPU for vision, CPU for audio on Gemma models
-                        visionBackend = Backend.GPU(),
-                        audioBackend = Backend.CPU(),
-                        maxNumTokens = maxTokens,
-                        cacheDir = cacheDir
-                    )
-
-                    val candidateEngine = Engine(engineConfig)
-                    candidateEngine.initialize()
+                    // First attempt with vision enabled (CPU vision backend is
+                    // most reliable across devices). If the model has the
+                    // multi-signature vision encoder issue mentioned below,
+                    // we catch the failure and retry without vision.
+                    //
+                    // Historic note: leaving visionBackend=null and then
+                    // sending Content.ImageBytes deterministically SIGSEGVs
+                    // inside liblitertlm_jni.so on null-pointer dereference
+                    // when the vision encoder isn't loaded — so the cost of
+                    // the inner retry is preferable to a runtime crash.
+                    var candidateEngine: Engine? = null
+                    var attemptVision = true
+                    while (candidateEngine == null) {
+                        val cfg = EngineConfig(
+                            modelPath = modelFile.absolutePath,
+                            backend = backend,
+                            visionBackend = if (attemptVision) Backend.CPU() else null,
+                            audioBackend = null,
+                            maxNumTokens = maxTokens,
+                            cacheDir = cacheDir
+                        )
+                        try {
+                            val e2 = Engine(cfg)
+                            e2.initialize()
+                            candidateEngine = e2
+                            visionEnabled = attemptVision
+                        } catch (visionErr: Exception) {
+                            if (attemptVision) {
+                                Log.w(
+                                    TAG,
+                                    "$name backend failed with vision enabled: " +
+                                        "${visionErr.message}. Retrying without vision."
+                                )
+                                attemptVision = false
+                            } else {
+                                throw visionErr
+                            }
+                        }
+                    }
 
                     engine = candidateEngine
                     activeBackend = backend
                     activeBackendType = name
                     loaded = true
-                    Log.d(TAG, "✓ $name backend initialized successfully!")
+                    AppLog.d(
+                        TAG,
+                        "✓ $name backend initialized successfully! visionEnabled=$visionEnabled"
+                    )
                     break
                 } catch (e: Exception) {
                     Log.w(TAG, "$name backend failed: ${e.message}", e)
@@ -278,12 +355,12 @@ class GemmaInferenceEngine @Inject constructor(
             }
 
             if (!loaded) {
-                _modelLoadState.value = ModelLoadState.Error("All Gemma 4 E4B backends (GPU, CPU) failed")
+                _modelLoadState.value = ModelLoadState.Error("All Localyze.ai model backends (GPU, CPU) failed")
                 throw ModelLoadException("All model backends failed")
             }
 
             _modelLoadState.value = ModelLoadState.Loaded
-            Log.d(TAG, "Model init complete! Backend: $activeBackendType")
+            AppLog.d(TAG, "Model init complete! Backend: $activeBackendType")
         } catch (e: ModelNotFoundException) {
             throw e
         } catch (e: OutOfMemoryError) {
@@ -320,7 +397,7 @@ class GemmaInferenceEngine @Inject constructor(
              currentSupportAudio != supportAudio)
 
         if (needsReset) {
-            Log.d(TAG, "Configuration changed (mode=$capabilityMode, thinking=$enableThinking), resetting conversation")
+            AppLog.d(TAG, "Configuration changed (mode=$capabilityMode, thinking=$enableThinking), resetting conversation")
             resetConversation()
         }
 
@@ -371,7 +448,7 @@ class GemmaInferenceEngine @Inject constructor(
         val newConversation = theEngine.createConversation(conversationConfig)
         conversation = newConversation
 
-        Log.d(TAG, "Created new Conversation for mode=$capabilityMode, thinking=$enableThinking")
+        AppLog.d(TAG, "Created new Conversation for mode=$capabilityMode, thinking=$enableThinking")
         return newConversation
     }
 
@@ -423,7 +500,7 @@ class GemmaInferenceEngine @Inject constructor(
     fun stopGeneration() {
         try {
             conversation?.cancelProcess()
-            Log.d(TAG, "Cancelled ongoing generation")
+            AppLog.d(TAG, "Cancelled ongoing generation")
         } catch (e: Exception) {
             Log.w(TAG, "Error cancelling generation: ${e.message}")
         }
@@ -444,7 +521,7 @@ class GemmaInferenceEngine @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<InferenceToken> = callbackFlow {
-        Log.d(TAG, "generateResponse called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
+        AppLog.d(TAG, "generateResponse called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
 
         if (!awaitEngineReadyForInference()) {
             Log.w(TAG, "Engine unavailable after waiting, using text fallback")
@@ -459,9 +536,15 @@ class GemmaInferenceEngine @Inject constructor(
 
         var responseReceived = false
         val timeoutJob = launch(Dispatchers.Default) {
-            delay(30000) // 30 second timeout
+            // 240s on emulator OR when force_cpu is on (CPU prefill is slow),
+            // 30s on real device with GPU.
+            val isEmu = Build.PRODUCT.contains("sdk_gphone") ||
+                Build.PRODUCT.contains("generic") ||
+                Build.HARDWARE.contains("ranchu") ||
+                Build.HARDWARE.contains("goldfish")
+            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 600000L else 30000L)
             if (!responseReceived) {
-                Log.e(TAG, "Response timeout - no callback received within 30 seconds")
+                Log.e(TAG, "Response timeout - no callback received within first-token deadline")
                 trySend(InferenceToken.Error("The model is not responding. Please try again or restart the app."))
                 trySend(InferenceToken.EndOfStream)
                 close()
@@ -470,20 +553,25 @@ class GemmaInferenceEngine @Inject constructor(
 
         try {
             val conv = ensureConversation(capabilityMode, enableThinking)
-            Log.d(TAG, "Conversation ready: ${conv.hashCode()}")
+            AppLog.d(TAG, "Conversation ready: ${conv.hashCode()}")
 
             // Extract the last user message — Gallery pattern: only send the latest input
             // The Conversation already has all previous messages tracked internally
             val lastUserMessage = messages.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
-            Log.d(TAG, "Sending message to model: '${lastUserMessage.take(50)}...'")
+            // Sanitize: a literal '$' character anywhere in the input
+            // deterministically SIGSEGVs liblitertlm_jni.so (memory corruption
+            // in the tokenizer / template layer). Replace with "USD " before
+            // hand-off so the user can ask "$8M cash" without crashing.
+            val safeUserMessage = sanitizeForLiteRtLm(lastUserMessage)
+            AppLog.d(TAG, "Sending message to model: '${safeUserMessage.take(50)}...'")
 
             // Gallery pattern: sendMessageAsync with MessageCallback
             conv.sendMessageAsync(
-                Contents.of(Content.Text(lastUserMessage)),
+                Contents.of(Content.Text(safeUserMessage)),
                 object : MessageCallback {
                     override fun onMessage(message: LiteRtMessage) {
                         responseReceived = true
-                        Log.d(TAG, "onMessage callback received")
+                        AppLog.d(TAG, "onMessage callback received")
 
                         // Extract thinking content from channels (Gallery pattern)
                         val thinkingContent = message.channels["thought"]
@@ -519,9 +607,16 @@ class GemmaInferenceEngine @Inject constructor(
                             .filterIsInstance<Content.Text>()
                             .joinToString("") { it.text }
 
-                        Log.d(TAG, "Received text content: '${textContent.take(100)}...'")
+                        AppLog.d(TAG, "Received text content: '${textContent.take(100)}...'")
 
-                        if (textContent.isNotBlank() && toolCalls.isEmpty()) {
+                        // Always forward text when present. Previously we dropped
+                        // text when a tool call accompanied it; that produced
+                        // silent-empty responses for prompts where the model
+                        // narrates ("Let me check that…") and then calls a tool.
+                        // Use isNotEmpty (not isNotBlank): a delta chunk that is
+                        // a single space is meaningful — dropping it fuses
+                        // adjacent tokens, e.g. "between" + " " + "0" → "between0".
+                        if (textContent.isNotEmpty()) {
                             for (chunk in textContent.chunked(2)) {
                                 trySend(InferenceToken.TextToken(chunk))
                             }
@@ -530,7 +625,7 @@ class GemmaInferenceEngine @Inject constructor(
 
                     override fun onDone() {
                         responseReceived = true
-                        Log.d(TAG, "onDone callback received")
+                        AppLog.d(TAG, "onDone callback received")
                         timeoutJob.cancel()
                         trySend(InferenceToken.EndOfStream)
                         close()
@@ -569,7 +664,7 @@ class GemmaInferenceEngine @Inject constructor(
         // Keep the callbackFlow open until explicitly closed or cancelled
         // This prevents the 'awaitClose' error and ensures callbacks can complete
         awaitClose {
-            Log.d(TAG, "callbackFlow closing, cancelling timeout job")
+            AppLog.d(TAG, "callbackFlow closing, cancelling timeout job")
             timeoutJob.cancel()
         }
     }.flowOn(Dispatchers.Default)
@@ -588,7 +683,7 @@ class GemmaInferenceEngine @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<InferenceToken> = callbackFlow {
-        Log.d(TAG, "generateResponseWithImage called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
+        AppLog.d(TAG, "generateResponseWithImage called: capabilityMode=$capabilityMode, enableThinking=$enableThinking, engine=${engine != null}, loadState=${_modelLoadState.value}")
 
         if (!awaitEngineReadyForInference()) {
             Log.w(TAG, "Engine unavailable after waiting; cannot analyze image")
@@ -598,11 +693,29 @@ class GemmaInferenceEngine @Inject constructor(
             return@callbackFlow
         }
 
+        // If the engine initialised without a vision backend, sending
+        // Content.ImageBytes through to LiteRT-LM dereferences a null
+        // vision encoder pointer and SIGSEGVs. Refuse here with a clear
+        // message instead.
+        if (!visionEnabled) {
+            Log.w(TAG, "Vision backend not enabled; refusing image input to avoid native crash")
+            trySend(InferenceToken.Error("Image input isn't supported by the loaded model on this device. Try sending a text message instead."))
+            trySend(InferenceToken.EndOfStream)
+            close()
+            return@callbackFlow
+        }
+
         var responseReceived = false
         val timeoutJob = launch(Dispatchers.Default) {
-            delay(30000) // 30 second timeout
+            // 240s on emulator OR when force_cpu is on (CPU prefill is slow),
+            // 30s on real device with GPU.
+            val isEmu = Build.PRODUCT.contains("sdk_gphone") ||
+                Build.PRODUCT.contains("generic") ||
+                Build.HARDWARE.contains("ranchu") ||
+                Build.HARDWARE.contains("goldfish")
+            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 600000L else 30000L)
             if (!responseReceived) {
-                Log.e(TAG, "Response timeout - no callback received within 30 seconds")
+                Log.e(TAG, "Response timeout - no callback received within first-token deadline")
                 trySend(InferenceToken.Error("The model is not responding. Please try again or restart the app."))
                 trySend(InferenceToken.EndOfStream)
                 close()
@@ -611,14 +724,15 @@ class GemmaInferenceEngine @Inject constructor(
 
         try {
             val conv = ensureConversation(capabilityMode, enableThinking, supportImage = true)
-            Log.d(TAG, "Conversation ready for image: ${conv.hashCode()}")
+            AppLog.d(TAG, "Conversation ready for image: ${conv.hashCode()}")
 
-            val lastUserMessage = prompt.ifBlank {
+            val lastUserMessageRaw = prompt.ifBlank {
                 messages.lastOrNull { it.role == MessageRole.USER }?.content ?: "Describe this image"
             }
+            val lastUserMessage = sanitizeForLiteRtLm(lastUserMessageRaw)
             val imageBytes = encodeImageForVision(imageBitmap)
 
-            Log.d(
+            AppLog.d(
                 TAG,
                 "Sending image to conversation: promptChars=${lastUserMessage.length}, imageBytes=${imageBytes.size}"
             )
@@ -631,7 +745,7 @@ class GemmaInferenceEngine @Inject constructor(
                 object : MessageCallback {
                     override fun onMessage(message: LiteRtMessage) {
                         responseReceived = true
-                        Log.d(TAG, "Image onMessage callback received")
+                        AppLog.d(TAG, "Image onMessage callback received")
 
                         val thinkingContent = message.channels["thought"]
                         if (thinkingContent != null && enableThinking) {
@@ -665,9 +779,9 @@ class GemmaInferenceEngine @Inject constructor(
                             .joinToString("") { it.text }
                         val textContent = contentText.ifBlank { message.toString() }
 
-                        Log.d(TAG, "Received image text content: '${textContent.take(100)}...'")
+                        AppLog.d(TAG, "Received image text content: '${textContent.take(100)}...'")
 
-                        if (textContent.isNotBlank() && toolCalls.isEmpty()) {
+                        if (textContent.isNotBlank()) {
                             for (chunk in textContent.chunked(2)) {
                                 trySend(InferenceToken.TextToken(chunk))
                             }
@@ -676,7 +790,7 @@ class GemmaInferenceEngine @Inject constructor(
 
                     override fun onDone() {
                         responseReceived = true
-                        Log.d(TAG, "Image onDone callback received")
+                        AppLog.d(TAG, "Image onDone callback received")
                         timeoutJob.cancel()
                         trySend(InferenceToken.EndOfStream)
                         close()
@@ -712,7 +826,7 @@ class GemmaInferenceEngine @Inject constructor(
         }
 
         awaitClose {
-            Log.d(TAG, "callbackFlow closing, cancelling timeout job")
+            AppLog.d(TAG, "callbackFlow closing, cancelling timeout job")
             timeoutJob.cancel()
         }
     }.flowOn(Dispatchers.Default)
@@ -755,7 +869,7 @@ class GemmaInferenceEngine @Inject constructor(
             // LiteRT-LM's Content.AudioBytes expects WAV format, not raw PCM.
             // This matches ChatMessageAudioClip.genByteArrayForWav() in the Gallery app.
             val wavBytes = wrapPcmInWavHeader(audioBytes, SAMPLE_RATE)
-            Log.d(TAG, "Audio: raw PCM ${audioBytes.size} bytes -> WAV ${wavBytes.size} bytes")
+            AppLog.d(TAG, "Audio: raw PCM ${audioBytes.size} bytes -> WAV ${wavBytes.size} bytes")
 
             // Gallery pattern: Audio content first, then text
             conv.sendMessageAsync(
@@ -850,9 +964,14 @@ class GemmaInferenceEngine @Inject constructor(
                         val result = kotlinx.coroutines.runBlocking {
                             appTool.execute(params)
                         }
+                        // Echo to the engine-level capture so SendMessageUseCase
+                        // can see what the model actually got from this tool.
+                        recentToolResults.add(appTool.name to result)
                         result
                     } catch (e: Exception) {
-                        "Error executing tool ${appTool.name}: ${e.message}"
+                        val err = "Error executing tool ${appTool.name}: ${e.message}"
+                        recentToolResults.add(appTool.name to err)
+                        err
                     }
                 }
             })
@@ -921,10 +1040,10 @@ class GemmaInferenceEngine @Inject constructor(
         }
 
         if (_modelLoadState.value !is ModelLoadState.Loading) {
-            Log.d(TAG, "Engine not initialized, attempting lazy initialization...")
+            AppLog.d(TAG, "Engine not initialized, attempting lazy initialization...")
             try {
                 initialize()
-                Log.d(TAG, "Lazy initialization completed")
+                AppLog.d(TAG, "Lazy initialization completed")
             } catch (e: Exception) {
                 Log.e(TAG, "Lazy initialization failed", e)
             }
@@ -935,14 +1054,29 @@ class GemmaInferenceEngine @Inject constructor(
         }
 
         if (_modelLoadState.value is ModelLoadState.Loading) {
-            Log.d(TAG, "Waiting for in-flight model initialization before inference...")
+            AppLog.d(TAG, "Waiting for in-flight model initialization before inference...")
             val finalState = withTimeoutOrNull(ENGINE_READY_TIMEOUT_MS) {
                 _modelLoadState.first { it !is ModelLoadState.Loading }
             }
-            Log.d(TAG, "Model initialization wait finished with state=$finalState, engine=${engine != null}")
+            AppLog.d(TAG, "Model initialization wait finished with state=$finalState, engine=${engine != null}")
         }
 
         return engine != null && _modelLoadState.value is ModelLoadState.Loaded
+    }
+
+    /**
+     * Strip / replace characters that deterministically crash
+     * liblitertlm_jni.so on this device. Empirically '$' triggers a native
+     * SIGSEGV inside the tokenizer / template substitution path; replacing
+     * it with "USD " keeps prices / financial scenarios usable.
+     *
+     * The replacement is only applied to the model-bound copy of the
+     * message — the user-facing message saved to the database keeps the
+     * original text so the chat history reads naturally.
+     */
+    private fun sanitizeForLiteRtLm(text: String): String {
+        if (text.isEmpty()) return text
+        return text.replace("$", "USD ")
     }
 
     private fun encodeImageForVision(bitmap: Bitmap): ByteArray {
@@ -960,7 +1094,7 @@ class GemmaInferenceEngine @Inject constructor(
         }
 
         val stream = ByteArrayOutputStream()
-        source.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        source.compress(Bitmap.CompressFormat.JPEG, 85, stream)
         if (source !== bitmap) source.recycle()
         return stream.toByteArray()
     }

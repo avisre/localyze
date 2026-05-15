@@ -24,6 +24,8 @@ local.properties
 *.key
 *.keystore.backup*
 .local-release-secrets.ps1
+.local-release-secrets.sh
+local-release-secrets.sh
 local-release-secrets.ps1
 upload-key-info.txt
 .env

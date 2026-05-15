@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "tag": "Q01_capital",
+      "prompt": "What's the capital of Japan?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of Japan is Tokyo.",
+      "answer_len": 30,
+      "elapsed_s": 21.6,
+      "screenshot": "/tmp/emu10_Q01_capital.png"
+    },
+    {
+      "tag": "Q02_math",
+      "prompt": "What is 15 percent of 200?",
+      "verdict": "ANSWERED",
+      "answer": "200 \u00d7 15 \u00f7 100 = 30.",
+      "answer_len": 20,
+      "elapsed_s": 21.5,
+      "screenshot": "/tmp/emu10_Q02_math.png"
+    },
+    {
+      "tag": "Q03_convert",
+      "prompt": "Convert 100 degrees Fahrenheit to Celsius.",
+      "verdict": "ANSWERED",
+      "answer": "100 \u00b0F = 37.7778 \u00b0C.",
+      "answer_len": 20,
+      "elapsed_s": 21.5,
+      "screenshot": "/tmp/emu10_Q03_convert.png"
+    },
+    {
+      "tag": "Q04_tcs",
+      "prompt": "show TCS revenue for the last 3 fiscal years",
+      "verdict": "ANSWERED",
+      "answer": "Data grounding: I crawled the company's official investor/IR page and extracted the annual values from the retrieved financial text.\n#\nSources\nTata Consultancy Services Revenue RAG data\nTCS closes FY26 with Improving Sequential Growth Momentum and Strong Deal Wins\nMaruti Suzuki India Limited Submits Transcript of FY26 Annual Results Investor Call\nSmartworks FY26 Results: Revenue Up 31% to \u20b91,796 Cr, Analyst Meet Transcript Filed\n2022\n191.8K\n2023\n225.5K\n2024\n240.9K",
+      "answer_len": 468,
+      "elapsed_s": 21.5,
+      "screenshot": "/tmp/emu10_Q04_tcs.png"
+    }
+  ]
+}

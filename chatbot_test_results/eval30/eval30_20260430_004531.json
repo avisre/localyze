@@ -1,0 +1,557 @@
+[
+  {
+    "phase": "general",
+    "qid": 1,
+    "category": "General",
+    "question": "What is the capital of Japan, and name one famous landmark there?",
+    "answer": "MOCK MODE\nHello! I'm Localyze.ai. I'm based on Gemma 4 E4B, but my public name is Localyze.ai. All my processing happens right here on your device\n-\nno data ever leaves your phone. How can I help you today?",
+    "score": {
+      "length_score": 8.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 8.67,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q01.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q01.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 2,
+    "category": "Science",
+    "question": "Explain photosynthesis in simple terms.",
+    "answer": "MOCK MODE\nHere's a simple Python example:\npython\ndef greet(name):\n    \"\"\"Say hello to someone.\"\"\"\n    return f\"Hello, {name}! Welcome!\"\n\nif __name__ == \"__main__\":\n    print(greet(\"World\"))\nThis defines a function that takes a name and returns a greeting string.",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q02.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q02.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 3,
+    "category": "Math",
+    "question": "What is 15 percent of 240? Show the calculation.",
+    "answer": "MOCK MODE\nHere are some tips for staying productive:\n1.\nStart with your hardest task\n-\ntackle it when your energy is highest\n1.\nUse the Pomodoro technique\n-\n25 minutes focused, 5 minutes break\n1.\nMinimize distractions\n-\nput your phone on Do Not Disturb\n1.\nBatch similar tasks\n-\ngroup emails, calls, and admin together\n1.\nTake real breaks\n-\nstep away from the screen and move your body",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 10.0,
+      "honesty_score": 10.0,
+      "overall": 10.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q03.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q03.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 4,
+    "category": "History",
+    "question": "Why was the printing press important?",
+    "answer": "MOCK MODE\nThat's an interesting question. Let me think through this step by step.\n--\n-\nAfter considering the options, I'd recommend starting with the simplest approach and iterating from there. The key insight is that premature optimization often leads to overcomplicated solutions that are harder to maintain.",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q04.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q04.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 5,
+    "category": "Finance",
+    "question": "How does compound interest work, and what is the difference between APR and APY?",
+    "answer": "MOCK MODE\n-\nYou invest $1,000 at 10% per year.\n-\nAfter year 1, you earn $100, so you have $1,100.\n-\nIn year 2, the 10% is calculated on $1,100, so you earn $110.\n-\nYour money grows faster because the base keeps getting bigger.\nAPR is the stated yearly rate. APY is the real yearly return after compounding, so APY is better for comparing what you actually earn.\nSources:\n-\nhttps://www.consumerfinance.gov/ask-cfpb/what-is-compound-interest-en-154/\n-\nhttps://www.investor.gov/introduction-investing/investing-basics/glossary/annual-percentage-yield-apy",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q05.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q05.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 6,
+    "category": "Technology",
+    "question": "Explain the difference between REST and GraphQL APIs.",
+    "answer": "MOCK MODE\nREST vs GraphQL\nREST gives you fixed endpoints. GraphQL lets the app ask for exactly the fields it needs.\n| Use REST when... | Use GraphQL when... | |---|---| | The API is simple and predictable | Screens need many related pieces of data | | Caching should be straightforward | You want to avoid over-fetching data | | Teams prefer standard HTTP patterns | Client teams need more query flexibility |\nShort version: REST is simpler; GraphQL is more flexible.\nSources:\n-\nhttps://graphql.org/learn/\n-\nhttps://learn.microsoft.com/azure/architecture/best-practices/api-design",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 10.0,
+      "honesty_score": 10.0,
+      "overall": 10.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q06.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q06.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 7,
+    "category": "Programming",
+    "question": "What is a SQL injection vulnerability and how do parameterized queries prevent it?",
+    "answer": "MOCK MODE\nI'll check your calendar for you.\n{\"name\": \"calendar_read\", \"arguments\": {\"days_ahead\": 7}}\nLet me look that up for you.",
+    "score": {
+      "length_score": 5.0,
+      "clarity_score": 6.0,
+      "honesty_score": 10.0,
+      "overall": 7.0,
+      "passed": false,
+      "notes": "needs improvement"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q07.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q07.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 8,
+    "category": "Programming",
+    "question": "Explain binary search and when it can be used.",
+    "answer": "MOCK MODE\nHello! I'm Localyze.ai. I'm based on Gemma 4 E4B, but my public name is Localyze.ai. All my processing happens right here on your device\n-\nno data ever leaves your phone. How can I help you today?",
+    "score": {
+      "length_score": 8.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 8.67,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q08.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q08.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 9,
+    "category": "Culture",
+    "question": "Explain the cultural significance of Diwali.",
+    "answer": "MOCK MODE\nDiwali is the festival of lights. Its central meaning is the victory of light over darkness, knowledge over ignorance, and good over evil.\nHow people celebrate:\n-\nLight diyas and decorate homes.\n-\nPray, often to Lakshmi for prosperity.\n-\nShare sweets and visit family.\n-\nClean homes and begin new financial records in some communities.\nDifferent regions connect Diwali with different stories, including Rama's return to Ayodhya, Krishna traditions, Lakshmi worship, and Jain observances.\nSources:\n-\nhttps://www.britannica.com/topic/Diwali-Hindu-festival\n-\nhttps://en.wikipedia.org/wiki/Diwali",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q09.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q09.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 10,
+    "category": "Health",
+    "question": "What are practical ways to manage stress during a busy week?",
+    "answer": "MOCK MODE\nHere's a simple Python example:\npython\ndef greet(name):\n    \"\"\"Say hello to someone.\"\"\"\n    return f\"Hello, {name}! Welcome!\"\n\nif __name__ == \"__main__\":\n    print(greet(\"World\"))\nThis defines a function that takes a name and returns a greeting string.",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q10.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q10.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 11,
+    "category": "Writing",
+    "question": "Write a concise professional follow-up email after a job interview.",
+    "answer": "MOCK MODE\nHere are some tips for staying productive:\n1.\nStart with your hardest task\n-\ntackle it when your energy is highest\n1.\nUse the Pomodoro technique\n-\n25 minutes focused, 5 minutes break\n1.\nMinimize distractions\n-\nput your phone on Do Not Disturb\n1.\nBatch similar tasks\n-\ngroup emails, calls, and admin together\n1.\nTake real breaks\n-\nstep away from the screen and move your body",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 10.0,
+      "honesty_score": 10.0,
+      "overall": 10.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q11.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q11.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 12,
+    "category": "Environment",
+    "question": "What is climate change and why does it matter?",
+    "answer": "MOCK MODE\nWhy it matters:\n-\nMore heat waves and health risks.\n-\nStronger floods, droughts, and storms in many regions.\n-\nRising seas that threaten coastal communities.\n-\nFood, water, and infrastructure becoming less reliable.\nThe simple idea: when the atmosphere traps more heat, the systems people depend on become less stable.\nSources:\n-\nhttps://www.ipcc.ch/\n-\nhttps://www.un.org/en/climatechange/what-is-climate-change",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q12.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q12.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 13,
+    "category": "Data",
+    "question": "What is the difference between mean, median, and mode?",
+    "answer": "MOCK MODE\nThat's an interesting question. Let me think through this step by step.\n--\n-\nAfter considering the options, I'd recommend starting with the simplest approach and iterating from there. The key insight is that premature optimization often leads to overcomplicated solutions that are harder to maintain.",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q13.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q13.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 14,
+    "category": "Civics",
+    "question": "What is the Nobel Prize and how are laureates selected?",
+    "answer": "MOCK MODE\nThe Nobel Prize is a set of international awards for major contributions in physics, chemistry, medicine, literature, peace, and economic sciences.\nHow laureates are selected:\n-\nQualified people submit nominations.\n-\nExpert committees review the work.\n-\nThe responsible institution votes on the winner.\n-\nThe process is private, and nomination records stay sealed for many years.\nIn short: experts nominate, committees evaluate, and institutions choose the laureates.\nSources:\n-\nhttps://www.nobelprize.org/nomination/\n-\nhttps://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
+    "score": {
+      "length_score": 10.0,
+      "clarity_score": 8.0,
+      "honesty_score": 10.0,
+      "overall": 9.33,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q14.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q14.xml"
+  },
+  {
+    "phase": "general",
+    "qid": 15,
+    "category": "Productivity",
+    "question": "Give me a simple plan for prioritizing tasks when everything feels urgent.",
+    "answer": "MOCK MODE\nI'll check your calendar for you.\n{\"name\": \"calendar_read\", \"arguments\": {\"days_ahead\": 7}}\nLet me look that up for you.",
+    "score": {
+      "length_score": 5.0,
+      "clarity_score": 6.0,
+      "honesty_score": 10.0,
+      "overall": 7.0,
+      "passed": false,
+      "notes": "needs improvement"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/general_q15.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/general_q15.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 1,
+    "category": "Finance",
+    "question": "Search the web: what is the current Federal Funds target range set by the US Federal Reserve?",
+    "answer": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPNTZ6NE9WMjhzeGY1bUNZSVVCbUlVVkRPdFhkYm9YcGtqOGpFalhPa3NCeHBTNTVRa2c5OG5UZG56WWZKeDI4NE1RNTRBY3l4UmpoNU1fdEZRcjFXeDdvNUp0Y2tGc21qU0h5TzNSUldoQnVmeGgtNmVlRnM5OFNnRTgyTlJ4dDJQNWhrNTZobk5vRjRYTU5RR2t3?oc=5\n-\nFed votes to hold rates steady, notes 'uncertain' impacts from Iran war\nCNBC\nhttps://news.google.com/rss/articles/CBMif0FVX3lxTE8tN1dOWktQSFlYNHFWUnFTOS1jWXA2dnVTV3BsQy1HVVZtZlk3U0pua0xmRkc2cUI2R01IU2daMjNENEUydFFQY2FkRnExUDJaRU1GUXN5SU0zTzhTdHVXY1pJSUYzRjRUdm5tRUZhTE5HYUtqTWNVMGNPZk85NkXSAYQBQVVfeXFMUFJnU2hIVmpDZTl1TmRiQ21oSTJxSDhSNzQ0M2twZkVVTVRick5XYk44VktnNGZMLUpJeTRRdFMzM2dMZlU4cDF2TktlNTRhdzhoN1NUdTcxTHMxOEtWekNxSFFCZFA1VWJLaTR3ZjRjd3YwdkZOVUZ1eWhkSHl0YUtqbHBk?oc=5\nThu, Apr 30\nPhone\nMessages\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q01.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q01.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 2,
+    "category": "Finance",
+    "question": "Search the web: what is the latest US inflation CPI update?",
+    "answer": "https://news.google.com/rss/articles/CBMie0FVX3lxTFB6QThFUkJTOW9naUIycmFCdjdJQzF4cmpDUE00NktMRUE3WnZNRnFvZ3l1eEtfT0dDR0kyVzRtU24xX0NaajFMQ195eHlhZXlWakQ0aU5aWGYxR2gxYnJVUjQ0NC0tVGlOOHlyMk45VW1nXzN1SkI4azF2b9IBgAFBVV95cUxOa20zcm5jZC0teXQ3a0RkSF9XX0tJbVc2bWFrYnEwdGVpZTJDVloxWDZURW96cWpTYmI4Sk9ZeWx1UWNKMF9tck1nanA0bXJESHdqR1RyTURsNXFvdFFTeFc0RXlQR3VDSzhWMmdDM0Z3MTQzRms0MThPNjlZTEp3OQ?oc=5\n-\nAnnual inflation remains 2.7% in December, final 2025 report reveals\nUSA Today\nhttps://news.google.com/rss/articles/CBMingFBVV95cUxPWHlUQXZoUWZKUnowRzJjRjZzMUtaLUtGejAyX1B5UVFDaWlFSkFxY1FOQ3FDZ013dmZ1U2s5U0plSDNUeVRxMkxranJKVjNXRUdQOGlYRjFwUTN5ZzdlWHNIZElaOWlhckVTY2dhamN0Yk5mM0pOM2R0RkI1cUdxelNHVUhBVU94TFlaYUQ1Tk9PWTdWczEwSk1UQ2lEZw?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q02.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q02.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 3,
+    "category": "Markets",
+    "question": "Search the web: how is the US stock market performing today?",
+    "answer": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPeVcxcmtaeVJRVm9kQ2VyWmVQNG9GNDZzWkJpT01xTUFJbVhYdGF6dG1qZndCb2hFaHhCM0I5NFk2RGxhY1drcWRHVnhyNzc0RWJvTU50S0dnWENrRk1UYVQ4S25xVHBtYzJsU1dabkhWeVBCckxzTHRpS3M2dklsOF84LTJRV1RJLVFRVUdGbHh2SE5CbFVPQVpROGtRa2M?oc=5\n-\nIs a Market Correction Coming?\nU.S. Bank\nhttps://news.google.com/rss/articles/CBMipAFBVV95cUxNUVliSlNNN1JvaWszYmh4VVhGc3FBczJyOTYtbkVYdmJuc3JoUjROWGdEcjdfdnBybXlteWc1bFRCeEZDTHRxN0xHUnU4Wkg1THdnV3BWUHRKYVhVbGF4QnlwTzZjYU81SkQ2U3VXSElCNXpHQzF4bjFQTXotc3FvSnc4TGxKNlROU3c2SE1PTHM4cmNjanN6X04ydV9kZU5UQ3p1LQ?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q03.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q03.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 4,
+    "category": "Technology",
+    "question": "Search the web: what are the latest Android 16 features?",
+    "answer": "https://news.google.com/rss/articles/CBMitgFBVV95cUxOckVCNkNITHc1cHdyMWF3WWF0R2pDd003UmVkb2JYUGlDSEVrRVZjZGhSSVhUWVBqNHNkbkc5YlJWb0ROQ28xMUJwU1p3Qk5SMDZ6dm0zQ2Q1TjltYlR3MTZyajRwbXkzbUpEZnkzTEdmaTBCTl9XMkRVNWo3SVNFNjFTQWN3RndTZG1OTmRyWjRNQWp6TGM2R3Q0a2g5WWcxdWpPdVRHcHJsSXlHZWlScURGOWFvZw?oc=5\n-\n7 new Android 16 features that are coming in major free upgrade\nTech Advisor\nhttps://news.google.com/rss/articles/CBMiwgFBVV95cUxNM1RLRWZYOVNNTHpYMGh6RmFQaFZkeDZoNEZ5U3pxV2lLUU1QWDBUWkpmcXBaRXdheFlDV0Y0cGJkd0ZIN1U2eFB6WXNmSmdPSHhjWEd3eTIxanVEaTNKallVeFlxZ0NHSWI5VllKQzRhTVQzamt0QXhqbkVuT0t4SEpBUTV1WENaTUxJWkZVZGFRNkw1NmhLeHlPX0FlTUotcFVfZmdHeTJMaVNEeUtfNkhPa25vUHVOME1nNkdaZDlCQQ?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q04.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q04.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 5,
+    "category": "Technology",
+    "question": "Search the web: what are the latest OpenAI model or API updates?",
+    "answer": "-\nhttps://news.google.com/rss/articles/CBMipAFBVV95cUxOUkNmVHB1SU01QnoySVJvMWZYd1VwWnduX3llc0RGekJhVGtZYndEY2wyVWRKMFBlajE3VGVKSGplS080ZExxWDNiWkVaVTFnaVZSWHc4ZzY2TjdjN2Exb0FMaVBQQ2ZOVm9QZnJDTGpXTHNjS2ZmNWM3RksybEplMDEyY2NLa2tlWXE0SVJ1YUhjMXZFaUE5TmpCSHZhRUt1VWh1Zw?oc=5\nIntroducing gpt-realtime and Realtime API updates for production voice agents\nOpenAI\nhttps://news.google.com/rss/articles/CBMiX0FVX3lxTFBoaDZPUjB3WlNlS0Uxd3JyWi0zV0c1bGpfRWhaV0M1VEJDMVFxS2x0RDlORkdvblJQdFoxcGpTQmtDRjF1S3c0cnpBVHpIRWV4cmFOeEZJVmNncjFmREpJ?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q05.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q05.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 6,
+    "category": "Technology",
+    "question": "Search the web: what is the latest iPhone iOS update news?",
+    "answer": "-\nhttps://news.google.com/rss/articles/CBMikwFBVV95cUxPLXJobU5ILTJodmdPTi1iUzNqVHdFZ0xod25PVS1oOFg1TUJ2bWxKT0I0Z1lCVm8xc0NDQ21WNnJMSk8zUGhpdmFkeFlNOXJWc0pXb2R0MXItT0lGeFhJLUpFd0tSSVZFTUVuNEpLX2NneWFHMUM2aUsyZ2ZBRy12QUpheWZOdHFzNDgtaW5MMFptMUE?oc=5\niOS 26.5: New features, release date, more\n9to5Mac\nhttps://news.google.com/rss/articles/CBMibEFVX3lxTFBrMnV5d0d3dDlSSUxsQjBYWHhrZ3luNkhNNTAtM0lINnhHbkdCY083dlVXSUI3V3lpMW52WVkzYWRkR25PRDcwTDU4cXppejdlb3ptdHZEcmVZUHQ1ZUxPOU0tdm02aC13cElXMg?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q06.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q06.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 7,
+    "category": "Culture",
+    "question": "Search the web: who won the Oscar for Best Picture in 2026?",
+    "answer": "-\nThe 98th Academy Awards | 2026\nAcademy of Motion Picture Arts and Sciences\nhttps://news.google.com/rss/articles/CBMiWEFVX3lxTE0tVnJHMG5NV0p2b2tkWVlaYmd2X3FCbmpvRmR2dXFESEpwc2c3V1U1Y3k3MG5tQUlZdmZObEFZanZJdWlnUFZKWWU4YkNMMC1Mbmp6ZXFrVVY?oc=5\nOscars 2026: So What Did We Learn?\nby Katey Rich\nThe Ankler\nhttps://news.google.com/rss/articles/CBMiZ0FVX3lxTFBCZVA4YTh4aXhXQUZ1OW1KYjhtNTEtZkFycHNpbnZZdk01NmV2dnkwRTJFaUh0azZZYVBFcDMzcVA0OXljUzdzTWF1QXRNdWtHUldCMklBNWdHMXdzTFdHUkJ6RGVmX1k?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q07.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q07.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 8,
+    "category": "Culture",
+    "question": "Search the web: what are the top trending movies in India this week?",
+    "answer": "https://news.google.com/rss/articles/CBMigANBVV95cUxPUGdSZXhUSjhaTXZvOERqZHlDU2xVemxDV0Z3U2JiZm9HbnZTRldmdWUzLUZORWFlT0pLRWY5ZWk2cWVmV1FrVlFRZlUxdHkwYWhmcFIwTjVaMkRFN0V2SE1RMFFrbURlbl9ETzZiVFJDRGJucjRIRGlYeTJCUFQ4RzhxMFZrQ0tzMTNTYW9hZ0tYUl9FcXc4WnQ0a3NmT3pVRnVaUEprTDNGZjBUNWpRREY2aXhqRXZ1Mmw1enRSMzZ3Q084dU5qZWQ2bVNJd3VlakdnVm5aSVk3NDB4em54SFpPWS12VjZ2Q1J1a3lnRHFmSUIzMHc3c09BS2FSUXE0TFBhLXlOOHk0cFh0VG94ZXoyVG5GcHFEMnNlcnBZSHppaUF2N01mWWNacWhLc1Vac0xUaHp4YUlINzdDMDNqQUFqbHBjSXo1ekRxUGEzd2RfS0cyRWgzLWU1M2R4NmdoNWxtNDVhQ3pmZmd1dE1tdkU1cGtIY1BockpUaHFoUjE?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 7.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.0,
+      "url_count": 1.0,
+      "passed": false,
+      "notes": "needs improvement"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q08.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q08.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 9,
+    "category": "World News",
+    "question": "Search the web: what is the current status of the India-UK free trade agreement?",
+    "answer": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOWnlibFYzNlh3emZURmZyeW1ZYzVLeHZmcEN1N1d2WnBxWk8tRUFzUmg5b0pHUHlrRjRDVU5KZjFuVWpCYm9TTnY5dl9iQW1HY2FRNFpXVVhZa2NYTi13UTFwRGYxWHF6ek55UWtKZFAxRUo1U1cxZHpObjFvWW4zc3lDQVFSOG9SdTN3VFJuemVUR2sxbHJJWXhtVGhYLWFJQ0pFMFlxM0tGLV9DTHV5V3ZGck9wTFhtM2YyektHaWlJM1ZsRUlZd25QbDh5MC1JQWVjM1RYdWlYemROYjlNRUpKbkthZUHSAewBQVVfeXFMTnhKeHMwcC1KZXNHQWcyX3pFQjRRUDY1MlFkalo0aWVEaDFvaUs3bkEyeEJyUHNCT0NDU21Sb3BrZGZJZVFkMjJjMGVNRkZlVkNKdGphM25lYUppWUs2OW91WXA2d3VKeEc4cmVLZ3dYWnhmRkN3YWdYWkFMa196TmRuSVA4Rm9zeGZIR0F2UUotSG8tbmtCNG1CdU9kbXk4Q2lhNGladk9VWUhMWF9kaDA5eDV5QjNENnpwMXBjSzBRQ2R3Y2VYS0RsQ2w0N3pKbnNjdjQ4a0gtYU54aEx3b0pMVkRFNk54ZTk5Sjc?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 7.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.0,
+      "url_count": 1.0,
+      "passed": false,
+      "notes": "needs improvement"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q09.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q09.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 10,
+    "category": "Policy",
+    "question": "Search the web: what are the latest developments in AI regulation and the EU AI Act?",
+    "answer": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOMEFBS1dPVXhrQmVEZzRjdlF1VTJSaklwNjlYbXpPRFdxb19pd3JwMkNaS1RVYkZfWlgxa2x5YWFvWEFHdjZuX0N4NmRVeXBMeDRTNmt4aEFOaERxME1qZDRHcEt2ZHh1d1BHZno0NE9SX0VsUFFLYnEzMFpuVEw2Wg?oc=5\n-\nEU’s AI Act Delays Let High-Risk Systems Dodge Oversight\nTech Policy Press\nhttps://news.google.com/rss/articles/CBMihgFBVV95cUxOelhTeWh1dHhhSnpDSThCUlEtdS1TVDVHM05uTTU5SXlNYjJEZllVRkhlSGthTlZXdFRRTFBvZlhhNFV3QXphVjY4VmI3TzdZRGYtM29DNVZaTElDTHFKRnFNSjBMamw3MGJtY09Gc0V4WjIxaE1ZQkctemdER0pYUG15cUFZdw?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q10.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q10.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 11,
+    "category": "Sports",
+    "question": "Search the web: what is the latest NBA playoff news?",
+    "answer": "2026 NBA Playoff Bracket: Philly Fights Back, Stays Alive in Series vs Celtics\n-\nYahoo Sports\nhttps://news.google.com/rss/articles/CBMihAFBVV95cUxQRnFJX3B1SlltelZiSk43TE5kbkRweUlmaW1ldVNjNV9NUjBLaEZaYkh1bzUtV080bjBKXzdmLVM2NFVLaEdKSDd3dHBIZFRKN2J4ZFVxczF1RnBRaHhSSFpHSmpPSlVrX29paWNzUjc5SVFQNnB6UjBXLW5SdkRZQnBmcWQ?oc=5\n2026 NBA Play-in, Playoffs & Finals Schedule\nNBA\nhttps://news.google.com/rss/articles/CBMiYEFVX3lxTE5zWkdfa0RYQ2tGWnFJUk9IQjZDd19TTUhXd2VLQUtoUzRWVnFmUUhEUXIxckUzOTc5ZmdRakZQc2FsOGZnNHViaVFWTzhFSkJ5QUxYaXpjdDh2TU94TkU3aw?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q11.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q11.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 12,
+    "category": "Weather",
+    "question": "Search the web: what is the weather forecast for New York City today?",
+    "answer": "-\nHow much snow in NYC this weekend? Winter storm weather forecast for NJ, NY, CT\nABC7 New York\nhttps://news.google.com/rss/articles/CBMikAFBVV95cUxOZ0o1VHNOeHB5MlZhWkJ1UmdKb1g4QkVpd3pqNVVSRkxQU24xaWFzMTgyTV8wUXcxeGZXX3puZlV2TEFIRDBNUmFrSlVkVm8yTUZXcjNVZG9fYWVGOTQ4ZjE2ZXNDOXI5N2xGZVhBc09DRWpSYU9BOXhTTEpoLXRNZldNbjVoRUt2cGt0aldpZ3PSAZYBQVVfeXFMT2JPMWtzUmF0cW9VQ3BhVXh1MnRyeEVfUVEwdVBNSEQ1aFZpUUVzWEUyYWRPcjlnUmp1ZDZfRGRWLWswRmIwVEJvdDBJWFhXMDQtTGxKTExqTG5GVUdLNVJ2M0IzOUdDY0VJdmhMZkNiajAtVUhNUElWd1BpQzFMdHJtMkdzODQzYjBaLUNOMUtDM04wazdR?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 7.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.0,
+      "url_count": 1.0,
+      "passed": false,
+      "notes": "needs improvement"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q12.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q12.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 13,
+    "category": "Housing",
+    "question": "Search the web: what are the latest US mortgage rate updates today?",
+    "answer": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPMWljLXA2WVRSUTY4NFpXTGMwdHdHRTBBN1BJT0EzVjhMTFc0TkEzRW9JMzRYand2NmZfMTFlN2pHa24tbGxHSWZUd01HS1dHVmhHekQ3VmQzbEZIX1ZjVUh5VmpGZjJHckpqYjJmMG1yS3BLMEVERzBTN2tZQ2dYWWs5bHo2eHlLc1owcw?oc=5\n-\nWhat the latest war means for mortgage rates\nmpamag.com\nhttps://news.google.com/rss/articles/CBMirwFBVV95cUxPTElKMjdPdG1URjlWN21mVHBuLTdDT2xjX1oyTWdyaU9fMUVnMDJTN2dLRG01bEhaSkRRMlJSRER0RkFLcUhlaWZHb0NpYUZaZkFSamgtZUF1d0I5Xy1VZ2QwRDJiS2trWHlSX2hSSTBPeXlGZVhJM3R0ampCdlJNbjU2RWtLQ3pMczl1V0Q4Yld3UDR2LU1zajRRaUZTZnV2aGJKMk9Odmx6ajI2Zmg4?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q13.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q13.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 14,
+    "category": "Science",
+    "question": "Search the web: what are the latest space launch headlines?",
+    "answer": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBDNTkzaWZualBYSHdHelh4SGhWcU14MnBMVVRISWFFOXRqSzdvSVB4eUFvOUN4UVl2cVhSUG5NdXlnV0Q4cl9NWW1mb2lvVlpRWDBsYkJkNkVuNzU2SVpyVmpybDBKQzlmRkF6bNIBckFVX3lxTFBqN0psOEQtS1ViVXh4aVN1aWc2b1Bpalo5QzRlVXFYMk5SZko0RDRhcDZmWExaOThTZzRTYWdJRzJhb0tQd2pPbzdBSFhHNk44bEZzMENJd1pmT0xNN1B5b2ZfZnV3SnVLZ0NfOWVSbk9pUQ?oc=5\n-\nNASA’s Artemis II Mission Leaves Earth Orbit for Flight around Moon\nNASA (.gov)\nhttps://news.google.com/rss/articles/CBMiowFBVV95cUxPOEtpX1QwdjR6aGw1d21pcEJ3ZkdTeGs2QkNhRHprNThNOXBZQThpYS1uZU1pbC12aTVIekpNcS1lWTZNbDJNVHdhc3B2NU05dXNRZndhWjI3aHI0WjUwbzRhU1RBTFJLNk55RzZHaWVYZnRySlFjRUxRcDNLZDJNMl9kazZjU0RSeXp2R1lOcUJ1YjdySC1TY2RoaEZMN0NJajBV?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q14.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q14.xml"
+  },
+  {
+    "phase": "web",
+    "qid": 15,
+    "category": "Energy",
+    "question": "Search the web: what are the latest oil price and energy market updates?",
+    "answer": "-\nApril 2026 – Analysis\nIEA – International Energy Agency\nhttps://news.google.com/rss/articles/CBMiZ0FVX3lxTFBCR255QmlpVnZPWkprSm0yQ01UanYyNzhtdmdIbXZsREV3N3Y1LXAxLWJhaGpjd2dmaFVoMGk4bnl1RFllc0hUMm9BVWpLMS1Ga2lKdG1sNmplZWVZN1BqR013QU56QWs?oc=5\nOil prices rise after Trump says Iranian ship seized\nBBC\nhttps://news.google.com/rss/articles/CBMiWkFVX3lxTE8yR2laSVRwLW45ZkMyS3VXdmFMc1Z4cVBrclZjZkprdEVsYlMxMURWcW1fWUIycGR3QjQtTTRoZVBrUzBRMUdIQXJROVZsTjNzVDVmYlVQMVVidw?oc=5\nThu, Apr 30\nPhone\nMessages\nGmail\nChrome\nCamera",
+    "score": {
+      "source_score": 10.0,
+      "clarity_score": 8.0,
+      "formatting_score": 5.0,
+      "honesty_score": 10.0,
+      "completeness_score": 10.0,
+      "overall": 8.6,
+      "url_count": 2.0,
+      "passed": true,
+      "notes": "pass"
+    },
+    "screenshot": "chatbot_test_results/eval30/screenshots/web_q15.png",
+    "ui_dump": "chatbot_test_results/eval30/ui/web_q15.xml"
+  }
+]

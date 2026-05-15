@@ -1,0 +1,102 @@
+{
+  "_doc": "10 fresh English questions covering creative, code, compare, summarize, define, advice, math, writing, explain, learning. Tests the latest build with thinking-default-on + new clarifiers + runner placeholder fix.",
+  "global_forbidden_substrings": [
+    "\"results\":", "\"query\":", "\"fetched_at\":", "\"snippet\":",
+    "\"url\":", "\"source\":",
+    "<thinking>", "</thinking>", "<channel|>", "<|channel|>",
+    "I wasn't able to generate", "couldn't generate",
+    "Try rephrasing the question, or restart the app"
+  ],
+  "questions": [
+    {
+      "id": "F01",
+      "fingerprint": "creative_haiku",
+      "prompt": "Write a haiku about coffee",
+      "category": "creative",
+      "expected_keywords": ["coffee", "morning", "brew", "cup", "bean", "aroma"],
+      "must_contain": [],
+      "must_not_contain": ["\"results\":"]
+    },
+    {
+      "id": "F02",
+      "fingerprint": "code_advice",
+      "prompt": "How do I optimize a slow Python loop?",
+      "category": "code",
+      "expected_keywords": ["vectorize", "numpy", "list comprehension", "generator", "Cython"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F03",
+      "fingerprint": "compare_languages",
+      "prompt": "Compare Python and JavaScript for web backends",
+      "category": "comparison",
+      "expected_keywords": ["Python", "JavaScript", "Node", "Django", "Flask", "Express"],
+      "must_contain": ["Python", "JavaScript"],
+      "must_not_contain": []
+    },
+    {
+      "id": "F04",
+      "fingerprint": "summarize",
+      "prompt": "Summarize the plot of Hamlet in 3 sentences",
+      "category": "summarize",
+      "expected_keywords": ["Hamlet", "Denmark", "uncle", "ghost", "father", "revenge"],
+      "must_contain": ["Hamlet"],
+      "must_not_contain": []
+    },
+    {
+      "id": "F05",
+      "fingerprint": "definition_stack_queue",
+      "prompt": "What's the difference between a stack and a queue?",
+      "category": "definition",
+      "expected_keywords": ["LIFO", "FIFO", "stack", "queue", "push", "pop"],
+      "must_contain": ["stack", "queue"],
+      "must_not_contain": []
+    },
+    {
+      "id": "F06",
+      "fingerprint": "advice_sleep",
+      "prompt": "How can I sleep better?",
+      "category": "advice",
+      "expected_keywords": ["routine", "caffeine", "screen", "exercise", "dark", "schedule", "sleep"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F07",
+      "fingerprint": "math_circle_area",
+      "prompt": "Calculate the area of a circle with radius 7",
+      "category": "math",
+      "expected_keywords": ["153.9", "153.94", "49π", "49*π", "π × 49", "49 × π"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F08",
+      "fingerprint": "writing_raise_email",
+      "prompt": "Write an email asking for a raise",
+      "category": "writing",
+      "expected_keywords": ["Dear", "raise", "salary", "performance", "value", "contribution"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F09",
+      "fingerprint": "explain_simple",
+      "prompt": "Explain quantum entanglement to a child",
+      "category": "explanation",
+      "expected_keywords": ["particle", "connect", "linked", "twin", "instantly", "Einstein", "spooky"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F10",
+      "fingerprint": "learning_advice",
+      "prompt": "Best way to learn Spanish quickly",
+      "category": "advice",
+      "expected_keywords": ["immersion", "Duolingo", "vocabulary", "practice", "speak", "Spanish"],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

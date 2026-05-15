@@ -6,9 +6,17 @@ import com.localyze.data.local.MessageDao
 import com.localyze.domain.models.Conversation
 import com.localyze.domain.models.Message
 import com.localyze.domain.models.MessageRole
+import androidx.room.withTransaction
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.localyze.data.local.MessagePagingSource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val MAX_MESSAGES_IN_MEMORY = 500
 
 @Singleton
 class ChatRepositoryImpl @Inject constructor(
@@ -55,8 +63,10 @@ class ChatRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteConversation(id: Long) {
-        messageDao.deleteByConversationId(id)
-        conversationDao.deleteById(id)
+        appDatabase.withTransaction {
+            messageDao.deleteByConversationId(id)
+            conversationDao.deleteById(id)
+        }
     }
 
     override suspend fun deleteConversations(ids: Collection<Long>) {
@@ -79,6 +89,25 @@ class ChatRepositoryImpl @Inject constructor(
 
     override fun getMessagesForConversation(conversationId: Long): Flow<List<Message>> {
         return messageDao.getMessagesForConversation(conversationId)
+            .map { messages ->
+                if (messages.size > MAX_MESSAGES_IN_MEMORY) {
+                    messages.takeLast(MAX_MESSAGES_IN_MEMORY)
+                } else {
+                    messages
+                }
+            }
+    }
+
+    override fun getMessagesForConversationPaged(conversationId: Long): Flow<PagingData<Message>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                prefetchDistance = 25,
+                enablePlaceholders = false,
+                initialLoadSize = 50
+            ),
+            pagingSourceFactory = { MessagePagingSource(messageDao, conversationId) }
+        ).flow
     }
 
     override suspend fun getMessage(id: Long): Message? {

@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Localyze</string>
+    <string name="app_name">Localyze.ai</string>
     <string name="chat_label">Chat</string>
     <string name="capabilities_label">Library</string>
     <string name="settings_label">Settings</string>
-    <string name="onboarding_title">Welcome to Localyze</string>
+    <string name="onboarding_title">Welcome to Localyze.ai</string>
     <string name="onboarding_subtitle">Your private, on-device AI assistant</string>
     <string name="new_chat">New Chat</string>
     <string name="send_message">Send message</string>
-    <string name="type_a_message">Message Localyze...</string>
+    <string name="type_a_message">Message Localyze.ai...</string>
     <string name="no_conversations">No conversations yet</string>
     <string name="delete_conversation">Delete conversation</string>
     <string name="pin_conversation">Pin conversation</string>
     <string name="model_loading">Loading AI model...</string>
     <string name="model_not_loaded">AI model not loaded</string>
     <string name="permission_required">Permission required</string>
-    <string name="contacts_permission_rationale">Contacts access is needed for the contacts tool</string>
-    <string name="calendar_permission_rationale">Calendar access is needed for the calendar tool</string>
-    <string name="audio_permission_rationale">Microphone access is needed for voice input</string>
-    <string name="notification_permission_rationale">Notifications are needed for background task updates</string>
+    <string name="contacts_permission_rationale">Contacts access is used only when you ask the assistant to draft a message or look someone up by name. Contact data stays on your device.</string>
+    <string name="calendar_permission_rationale">Calendar access is used only when you ask the assistant to read or schedule events. Events stay on your device.</string>
+    <string name="audio_permission_rationale">Microphone access is used while you hold the voice input button. Audio is processed on-device and is not uploaded.</string>
+    <string name="notification_permission_rationale">Notifications keep you informed when long tasks (model downloads, scheduled reminders) finish in the background.</string>
+    <string name="storage_permission_rationale">Storage access is used only to import the AI model file you select during onboarding.</string>
+
+    <!-- Privacy policy + Terms — required for Play Store Data Safety compliance. -->
+    <string name="privacy_policy_url" translatable="false">https://localyze.ai/privacy</string>
+    <string name="terms_of_service_url" translatable="false">https://localyze.ai/terms</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_policy_subtitle">How your data is handled</string>
+    <string name="terms_of_service">Terms of service</string>
+    <string name="terms_of_service_subtitle">Conditions for using the app</string>
 </resources>

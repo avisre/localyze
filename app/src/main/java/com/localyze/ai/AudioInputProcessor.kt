@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -63,8 +62,9 @@ class AudioInputProcessor @Inject constructor(
 
     private var audioRecord: AudioRecord? = null
     private var recordingJob: Job? = null
+    private var recordingTempFile: File? = null
+    private var recordingFileOutputStream: FileOutputStream? = null
     private var lastAudioData: ByteArray? = null
-    private var lastDurationMs: Long = 0L
 
     /** Cooperative stop flag â€” set to true by stopRecording() so the recording
      *  loop exits gracefully and saves the data, rather than cancelling the
@@ -150,8 +150,10 @@ class AudioInputProcessor @Inject constructor(
         // Reset cooperative stop flag for this new recording session
         isStopping = false
 
+        recordingTempFile = File(context.cacheDir, "audio_recording_${System.currentTimeMillis()}.pcm")
+        recordingFileOutputStream = FileOutputStream(recordingTempFile)
+
         recordingJob = scope.launch(Dispatchers.IO) {
-            val outputStream = ByteArrayOutputStream()
             val readBuffer = ShortArray(bufferSize / 2) // 16-bit samples = 2 bytes each
             val byteBuffer = ByteArray(readBuffer.size * 2) // for converting shorts to bytes
             val startTime = System.currentTimeMillis()
@@ -177,7 +179,7 @@ class AudioInputProcessor @Inject constructor(
                         byteBuffer[i * 2] = (sample.toInt() and 0xFF).toByte()
                         byteBuffer[i * 2 + 1] = (sample.toInt() shr 8 and 0xFF).toByte()
                     }
-                    outputStream.write(byteBuffer, 0, numSamples * 2)
+                    recordingFileOutputStream?.write(byteBuffer, 0, numSamples * 2)
 
                     // Calculate RMS amplitude for visualization
                     var sumSquares = 0.0
@@ -231,23 +233,26 @@ class AudioInputProcessor @Inject constructor(
             }
 
             // Successfully completed recording
-            val audioData = outputStream.toByteArray()
+            recordingFileOutputStream?.close()
+            recordingFileOutputStream = null
             val totalDurationMs = System.currentTimeMillis() - startTime
+            val tempFile = recordingTempFile
+            val audioData = tempFile?.let { kotlin.runCatching { it.readBytes() }.getOrNull() } ?: ByteArray(0)
 
             if (audioData.isEmpty()) {
                 _recordingState.value = AudioRecordingState.Error("No audio data recorded")
                 _amplitudeFlow.value = 0f
                 recordingCompleted.complete(ByteArray(0))
+                tempFile?.delete()
+                recordingTempFile = null
                 return@launch
             }
 
-            lastAudioData = audioData
-            lastDurationMs = totalDurationMs
-
-            // Save to temporary file for potential replay
+            // Persist to filesDir/audio for replay
             saveToTempFile(audioData)
+            lastAudioData = audioData
 
-            android.util.Log.d("AudioInputProcessor", "Recording completed successfully: ${audioData.size} bytes, ${totalDurationMs}ms")
+            com.localyze.utils.AppLog.d("AudioInputProcessor", "Recording completed successfully: ${audioData.size} bytes, ${totalDurationMs}ms")
 
             _amplitudeFlow.value = 0f
             _recordingState.value = AudioRecordingState.Ready(
@@ -264,23 +269,23 @@ class AudioInputProcessor @Inject constructor(
      * @return the recorded PCM audio data as a ByteArray, or an empty ByteArray if nothing was recorded
      */
     suspend fun stopRecording(): ByteArray {
-        android.util.Log.d("AudioInputProcessor", "stopRecording called. isRecording=$isRecording, lastAudioData size=${lastAudioData?.size}")
+        com.localyze.utils.AppLog.d("AudioInputProcessor", "stopRecording called. isRecording=$isRecording, lastAudioData size=${lastAudioData?.size}")
 
         // Case 1: Recording already completed naturally and data is ready
         if (!isRecording && lastAudioData != null) {
-            android.util.Log.d("AudioInputProcessor", "Recording already complete, returning lastAudioData")
+            com.localyze.utils.AppLog.d("AudioInputProcessor", "Recording already complete, returning lastAudioData")
             return lastAudioData ?: ByteArray(0)
         }
 
         // Case 2: Not recording and no data
         if (!isRecording) {
-            android.util.Log.d("AudioInputProcessor", "Not recording and no data available")
+            com.localyze.utils.AppLog.d("AudioInputProcessor", "Not recording and no data available")
             return ByteArray(0)
         }
 
         // Case 3: Recording is active â€” signal it to stop
         // Cancel the recording coroutine â€” the finally block will handle cleanup
-        android.util.Log.d("AudioInputProcessor", "Cancelling recording job...")
+        com.localyze.utils.AppLog.d("AudioInputProcessor", "Cancelling recording job...")
         recordingJob?.cancel()
 
         // Wait for the recording job to complete with a timeout
@@ -289,7 +294,7 @@ class AudioInputProcessor @Inject constructor(
             recordingCompleted.await()
         }
 
-        android.util.Log.d("AudioInputProcessor", "Recording stopped. Result size=${result?.size}, lastAudioData size=${lastAudioData?.size}")
+        com.localyze.utils.AppLog.d("AudioInputProcessor", "Recording stopped. Result size=${result?.size}, lastAudioData size=${lastAudioData?.size}")
 
         recordingJob = null
         return result ?: lastAudioData ?: ByteArray(0)
@@ -327,7 +332,6 @@ class AudioInputProcessor @Inject constructor(
         automaticGainControl = null
 
         lastAudioData = null
-        lastDurationMs = 0L
         _amplitudeFlow.value = 0f
         _recordingState.value = AudioRecordingState.Idle
 

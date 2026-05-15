@@ -1,0 +1,111 @@
+{
+  "records": [
+    {
+      "id": "O04",
+      "fingerprint": "obscure_currency",
+      "prompt": "Currency of Bhutan",
+      "category": "obscure_entity",
+      "answer": "The currency of Bhutan is the Ngultrum (abbreviated as BTN).",
+      "answer_len": 60,
+      "elapsed_s": 118.9,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Ngultrum",
+        "Bhutan",
+        "BTN"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "O01",
+      "fingerprint": "obscure_regional_poet",
+      "prompt": "Da. Ra. Bendre poems",
+      "category": "obscure_entity",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 201.8,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Bendre', 'Kannada', 'poet']"
+      ],
+      "expected_keywords": [
+        "Bendre",
+        "Kannada",
+        "poet"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "O02",
+      "fingerprint": "obscure_regional_saint",
+      "prompt": "Sant Tukaram abhangs",
+      "category": "obscure_entity",
+      "answer": "Key aspects of his abhangas include:\nDevotion to Vithoba: The majority of his compositions are dedicated to Lord Vithoba (",
+      "answer_len": 122,
+      "elapsed_s": 220.9,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Tukaram",
+        "Marathi",
+        "Bhakti",
+        "abhang"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "O03",
+      "fingerprint": "obscure_history",
+      "prompt": "Tell me about Operation Polo India",
+      "category": "obscure_entity",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 201.2,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Operation Polo', 'Hyderabad', '1948', 'Nizam']"
+      ],
+      "expected_keywords": [
+        "Operation Polo",
+        "Hyderabad",
+        "1948",
+        "Nizam"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "O05",
+      "fingerprint": "obscure_geography",
+      "prompt": "Highest peak in Antarctica",
+      "category": "obscure_entity",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 200.4,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Vinson', 'Antarctica']"
+      ],
+      "expected_keywords": [
+        "Vinson",
+        "Antarctica"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

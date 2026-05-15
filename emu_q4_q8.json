@@ -1,0 +1,69 @@
+{
+  "results": [
+    {
+      "tag": "Q4_APOLOGY",
+      "q": "Draft a 3-sentence apology email to a customer whose order was delayed by 5 days due to a warehouse fire.",
+      "web_search": false,
+      "elapsed_s": 258.1,
+      "status": "OK",
+      "answer": "Subject: Sincere Apologies Regarding Your Recent Order\nPlease accept our sincerest apologies for the 5-day delay in receiving your order. Due to an unexpected warehouse fire, our fulfillment process was significantly disrupted, which caused this unfortunate setback. We are taking steps to ensure this does not happen again and appreciate your patience as we get your package to you as quickly as possible.",
+      "answer_len": 406,
+      "n_tokens": 76,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE_EMU"
+    },
+    {
+      "tag": "Q5_HASH_TABLE",
+      "q": "Explain to a beginner what a hash table is and why it is fast, with one analogy.",
+      "web_search": false,
+      "elapsed_s": 371.1,
+      "status": "OK",
+      "answer": "A hash table is a data structure that allows for very fast searching, insertion, and deletion of data. Instead of storing items in a simple list or array where you have to check every item one by one, a hash table uses a special function called a **hash function** to determine exactly where an item should be stored.\nHere is how it works:\n1.  **The Key and Value:** Every item in a hash table has a *key* (like a label or name) and a *value* (the actual data).\n2.  **The Hash Function:** When you want to save a key-value pair, the hash function takes the key (e.g., \"Alice\") and runs it through a mathematical process. This process spits out a specific, fixed-size number called a **hash code** or **index**.\n3.  **Storage:** This hash code tells the table exactly which \"slot\" or index to use in an underlying array to store the value.\n### Why is it Fast?\nIt is fast because it skips the need to search. In a standard list, if you want to find \"Alice,\" you might have to look at every name until you find her (which takes time proportional to the number of items). In a hash table, you run \"Alice\" through the hash function, get a specific number, and **go directly to that spot**. This means the time it takes to find something is, on average, the same whether you have 10 items or 10 million items.\n### Analogy\nThink of a hash table like a **Library's Book Catalog System**.\n*   **The Key:** The book's title (e.g., *Moby Dick*).\n*   **The Value:** The physical book on the shelf.\n*   **The Hash Function:** The Dewey Decimal System or a modern digital catalog. Instead of wandering through every aisle to find a book, you put \"Moby Dick\" into the catalog system, and it instantly tells you the exact shelf number (the hash code/index) where the book is located.\n---\n### Summary\n| Feature | Description |\n| :--- | :--- |\n| **Mechanism** | Uses a hash function to map keys to array indices. |\n| **Speed** | Extremely fast average time complexity, usually $O(1)$ (constant time). |\n| **Best For** | Frequent lookups, insertions, and deletions. |",
+      "answer_len": 2048,
+      "n_tokens": 514,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE_EMU"
+    },
+    {
+      "tag": "Q8_APPLES",
+      "q": "I have 3 apples. I give you 2. Then I eat 1 of mine. Then you give me back 1. How many apples does each of us have at the end?",
+      "web_search": false,
+      "elapsed_s": 263.7,
+      "status": "OK",
+      "answer": "Here is the breakdown:\n1. **You start with 3 apples.**\n2. **You give me 2:** You have $3 - 2 = 1$ apple. I have $0 + 2 = 2$ apples.\n3. **You eat 1 of yours:** You have $1 - 1 = 0$ apples. I have 2 apples.\n4. **I give you back 1:** You have $0 + 1 = 1$ apple. I have $2 - 1 = 1$ apple.\nAt the end, you have **1** apple and I have **1** apple.",
+      "answer_len": 341,
+      "n_tokens": 138,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE_EMU"
+    },
+    {
+      "tag": "Q6_PYTHON_VERSION",
+      "q": "What is the latest stable version of Python and when was it released?",
+      "web_search": true,
+      "elapsed_s": 313.2,
+      "status": "OK",
+      "answer": "The latest stable version of Python appears to be **Python 3.14.0**.\nBased on the search results, this version was announced or released around **November 2025** (specifically mentioned in a news article from that month) and is the current focus of discussions regarding the latest releases.\n### Key Details:\n*   **Latest Version:** 3.14.0\n*   **Release Context:** It is listed as the current version being discussed in late 2025.\n",
+      "answer_len": 431,
+      "n_tokens": 108,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_EMU"
+    },
+    {
+      "tag": "Q7_BTC_PRICE",
+      "q": "What is the current Bitcoin price in USD?",
+      "web_search": true,
+      "elapsed_s": 7.8,
+      "status": "OK",
+      "answer": "und $79,728.00 USD. s move continuously,linked market sourcecoin BTC price in USwww.coingecko.com/en USD live price, marhart ... - https://c.com/currencies/bitcin price today, BTC price, marketcap andnDesk - https://www.in Price and Chart \u2014 - https://www.tradiymbols/BTCUSD/",
+      "answer_len": 274,
+      "n_tokens": 14,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_EMU"
+    }
+  ]
+}

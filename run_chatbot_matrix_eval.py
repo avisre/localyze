@@ -52,11 +52,15 @@ QUESTIONS = [
 
 IGNORE_EXACT = {
     "Localyze",
+    "Localyze.ai",
     "On-device",
     "Chat",
+    "Code",
+    "Code Workspace",
     "Library",
     "Settings",
     "Message Localyze...",
+    "Message Localyze.ai...",
     "Quick actions",
     "New chat",
     "Add text file",
@@ -72,10 +76,15 @@ IGNORE_EXACT = {
     "AI runs on your device",
     "No cloud chat",
     "Gemma 4 E4B",
+    "Based on Gemma 4 E4B",
+    "Localyze.ai is loaded and ready. Based on Gemma 4 E4B.",
+    "Localyze.ai Code",
     "Hi! I'm Localyze.",
+    "Hi! I'm Localyze.ai.",
     "How can I help you today?",
     "Start a focused chat",
     "Ask locally with Gemma",
+    "Ask locally with Localyze.ai",
     "Analyze an image",
     "Attach a picture and ask",
     "Open conversations",
@@ -101,9 +110,14 @@ def adb_shell(cmd: str, timeout: int = 30, check: bool = True) -> subprocess.Com
 
 
 def adb_exec_out_to_file(shell_cmd: str, local_path: str, timeout: int = 30) -> None:
-    # Use cmd redirection for binary-safe output on Windows.
-    cmdline = f'adb exec-out {shell_cmd} > "{local_path}"'
-    run_cmd(["cmd", "/c", cmdline], timeout=timeout, check=True)
+    with open(local_path, "wb") as out:
+        subprocess.run(
+            ["adb", "exec-out", *shell_cmd.split()],
+            stdout=out,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+            check=True,
+        )
 
 
 def parse_bounds(bounds: str) -> Optional[Tuple[int, int, int, int]]:
@@ -120,6 +134,14 @@ def center_of(node: ET.Element) -> Optional[Tuple[int, int]]:
         return None
     x1, y1, x2, y2 = b
     return ((x1 + x2) // 2, (y1 + y2) // 2)
+
+
+def display_size(root: ET.Element) -> Tuple[int, int]:
+    for node in root.iter("node"):
+        bounds = parse_bounds(node.attrib.get("bounds", ""))
+        if bounds:
+            return (bounds[2] - bounds[0], bounds[3] - bounds[1])
+    return (1080, 1920)
 
 
 def tap(x: int, y: int) -> None:
@@ -201,30 +223,33 @@ def ensure_app_foreground() -> None:
 
 def go_tab(tab_text: str) -> None:
     root = dump_ui(os.path.join(UI_DIR, "tab_dump.xml"))
+    width, height = display_size(root)
     candidates = sorted(
-        find_nodes(root, text=tab_text, min_y=2600),
+        find_nodes(root, text=tab_text, min_y=int(height * 0.72)),
         key=lambda n: center_of(n)[1] if center_of(n) else 9999
     )
     if candidates:
         tap_node(candidates[0])
         return
-    # Fallback bottom nav coordinates.
-    if tab_text == "Chat":
-        tap(220, 2920)
-    elif tab_text == "Library":
-        tap(720, 2920)
-    elif tab_text == "Settings":
-        tap(1220, 2920)
+    nav_centers = {
+        "Chat": 0.125,
+        "Code": 0.375,
+        "Library": 0.625,
+        "Settings": 0.875,
+    }
+    if tab_text in nav_centers:
+        tap(int(width * nav_centers[tab_text]), int(height * 0.9))
 
 
 def open_new_conversation() -> None:
     go_tab("Chat")
     root = dump_ui(os.path.join(UI_DIR, "newconv_dump.xml"))
+    width, height = display_size(root)
     candidates = find_nodes(root, content_desc="New conversation")
     if candidates and tap_node(candidates[0]):
         time.sleep(0.9)
         return
-    tap(1260, 280)
+    tap(int(width * 0.9), int(height * 0.13))
     time.sleep(0.9)
 
 
@@ -287,7 +312,9 @@ def ensure_web_search_off() -> None:
                     tap_node(web_toggle)
                     time.sleep(1.0)
                 break
-        swipe(720, 2300, 720, 900, 300)
+        root = dump_ui(os.path.join(UI_DIR, "web_off_settings_scroll_dump.xml"))
+        width, height = display_size(root)
+        swipe(width // 2, int(height * 0.78), width // 2, int(height * 0.36), 300)
 
     go_tab("Chat")
     open_new_conversation()

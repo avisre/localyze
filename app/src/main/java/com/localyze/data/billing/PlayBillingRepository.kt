@@ -17,20 +17,27 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PlayBillingRepository @Inject constructor(
-    @ApplicationContext context: Context
+    @ApplicationContext context: Context,
+    private val integrityVerifier: PurchaseIntegrityVerifier,
+    private val purchaseTokenVerifier: PurchaseTokenVerifier
 ) : PurchasesUpdatedListener {
 
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val productId = BillingConstants.PREMIUM_SUBSCRIPTION_PRODUCT_ID
 
     private val billingClient: BillingClient = BillingClient.newBuilder(appContext)
@@ -304,6 +311,67 @@ class PlayBillingRepository @Inject constructor(
             }
         )
 
+        val activePurchase = purchases.firstOrNull {
+            productId in it.products && it.purchaseState == Purchase.PurchaseState.PURCHASED
+        }
+
+        // Perform server-side token verification and integrity checks
+        if (activePurchase != null && snapshot.hasActiveEntitlement) {
+            coroutineScope.launch {
+                verifyPurchaseSecurely(activePurchase)
+            }
+        } else {
+            updatePurchaseState(snapshot, fromPurchaseFlow, restoredByUser, isVerified = true)
+        }
+    }
+
+    private suspend fun verifyPurchaseSecurely(purchase: Purchase) {
+        val currentState = _state.value
+        val tokenVerified = try {
+            purchaseTokenVerifier.verifyPurchaseToken(purchase.purchaseToken, productId)
+        } catch (_: Exception) {
+            false
+        }
+        val integrityVerified = try {
+            integrityVerifier.verifyLocalIntegrity()
+        } catch (_: Exception) {
+            false
+        }
+        val fullyVerified = tokenVerified || integrityVerified
+        val snapshot = resolvePremiumEntitlement(
+            productId = productId,
+            purchases = listOf(listOf(productId) to PlayPurchaseState.Purchased)
+        )
+        _state.update {
+            it.copy(
+                isBillingAvailable = true,
+                isLoading = false,
+                isPurchaseInProgress = false,
+                isPremiumActive = snapshot.hasActiveEntitlement && fullyVerified,
+                isPending = snapshot.hasPendingPurchase,
+                isVerified = fullyVerified,
+                statusMessage = when {
+                    snapshot.hasActiveEntitlement && fullyVerified -> "Premium active"
+                    snapshot.hasActiveEntitlement -> "Premium active (verification pending)"
+                    snapshot.hasPendingPurchase -> "Purchase pending in Google Play"
+                    currentState.isPremiumActive -> "Premium active"
+                    else -> "Premium is not available in Google Play"
+                },
+                errorMessage = if (!fullyVerified && snapshot.hasActiveEntitlement) {
+                    "Purchase could not be fully verified. Some premium features may be restricted."
+                } else {
+                    null
+                }
+            )
+        }
+    }
+
+    private fun updatePurchaseState(
+        snapshot: PurchaseEntitlementSnapshot,
+        fromPurchaseFlow: Boolean,
+        restoredByUser: Boolean,
+        isVerified: Boolean
+    ) {
         _state.update {
             it.copy(
                 isBillingAvailable = true,
@@ -311,6 +379,7 @@ class PlayBillingRepository @Inject constructor(
                 isPurchaseInProgress = false,
                 isPremiumActive = snapshot.hasActiveEntitlement,
                 isPending = snapshot.hasPendingPurchase,
+                isVerified = isVerified,
                 statusMessage = when {
                     snapshot.hasActiveEntitlement && fromPurchaseFlow -> "Premium activated"
                     snapshot.hasActiveEntitlement -> "Premium active"

@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "tag": "S01_capital",
+      "prompt": "What's the capital of Italy?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of Italy is Rome.",
+      "answer_len": 29,
+      "elapsed_s": 101.4
+    },
+    {
+      "tag": "S02_math",
+      "prompt": "What is 12 times 7?",
+      "verdict": "THIN",
+      "answer": "12\u00d77 = 84.",
+      "answer_len": 10,
+      "elapsed_s": 23.1
+    },
+    {
+      "tag": "S03_temp",
+      "prompt": "Convert 32 degrees Fahrenheit to Celsius.",
+      "verdict": "THIN",
+      "answer": "32 \u00b0F = 0 \u00b0C.",
+      "answer_len": 13,
+      "elapsed_s": 22.8
+    },
+    {
+      "tag": "S04_advice",
+      "prompt": "Give me 3 quick tips for staying focused.",
+      "verdict": "ANSWERED",
+      "answer": "1m ago\nHere are 3 quick tips for staying focused:\nMinimize Distractions: Turn off notifications from your phone and close unnecessary browser tabs to reduce visual and auditory interruptions.\nUse the Pomodoro Technique: Work in focused bursts (like 25 minutes) followed by short breaks to maintain high concentration.\nDefine a Single Task: Before you start, identify one main task and commit to working only on that until it is complete or the allotted time is up.",
+      "answer_len": 464,
+      "elapsed_s": 122.1
+    },
+    {
+      "tag": "S05_explain",
+      "prompt": "Explain WiFi in simple terms.",
+      "verdict": "ANSWERED",
+      "answer": "What it is: Think of WiFi as a set of invisible radio waves. Your device sends data (like a webpage or a video) to a router, which then sends that data through the internet using these radio waves to your device.\nHow it works:\n1.\nYour device broadcasts a request to connect to the WiFi network.\n2.\nA router (which is a device you plug into your modem) receives the request.\n3.\nThe router translates the data and sends it onto the wider internet.\n4.\nThe internet sends the requested information back to the router, which sends it back to your device.\nKey Components: You need a router to create the WiFi signal and a device (like a phone) to receive it.\nIn short, WiFi is the invisible bridge that lets your devices access the internet without needing physical cables.",
+      "answer_len": 767,
+      "elapsed_s": 160.6
+    }
+  ]
+}

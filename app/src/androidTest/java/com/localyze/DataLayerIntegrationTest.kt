@@ -91,7 +91,11 @@ class DataLayerIntegrationTest {
         modelsDir.mkdirs()
         val modelFile = File(modelsDir, "gemma-4-E4B-it.litertlm")
         modelFile.writeText("placeholder")
-        assertTrue("Model should be detected as downloaded", modelRepository.isModelDownloaded())
+        if (BuildConfig.USE_TEST_DOWNLOAD) {
+            assertTrue("Test-download builds accept placeholder files", modelRepository.isModelDownloaded())
+        } else {
+            assertFalse("Tiny placeholder should not be treated as a complete model", modelRepository.isModelDownloaded())
+        }
         // Clean up
         modelFile.delete()
     }

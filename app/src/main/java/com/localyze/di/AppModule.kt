@@ -17,7 +17,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val cacheDir = File(context.cacheDir, "http_cache").also { it.mkdirs() }
+        val cacheSize = 50L * 1024 * 1024 // 50 MB
         return OkHttpClient.Builder()
             // Extended timeouts for large file downloads
             .connectTimeout(60, TimeUnit.SECONDS)
@@ -28,6 +30,8 @@ object AppModule {
             // Follow redirects
             .followRedirects(true)
             .followSslRedirects(true)
+            // Disk cache for HTTP responses (web search, model metadata, etc.)
+            .cache(okhttp3.Cache(cacheDir, cacheSize))
             // Larger buffer for faster transfers
             .protocols(listOf(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1))
             .build()

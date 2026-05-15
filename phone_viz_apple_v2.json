@@ -1,0 +1,15 @@
+{
+  "r": {
+    "tag": "Q_VIZ_APPLE",
+    "q": "Show me Apple's annual revenue for the last 3 years",
+    "web_search": true,
+    "elapsed_s": 8.3,
+    "status": "ERROR",
+    "answer": "",
+    "answer_len": 0,
+    "n_tokens": 0,
+    "path": "gemma",
+    "error": "LiteRT-LM error",
+    "mode": "ONLINE_PHONE_VIZ_v2"
+  }
+}

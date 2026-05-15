@@ -1,0 +1,60 @@
+{
+  "results": [
+    {
+      "tag": "Q2_CODE_EDGES",
+      "prompt": "Write a Python function that returns the second-largest unique element in a list, or None if there isn't one. Handle empty list, single element, and all-duplicates cases.",
+      "expected": "code w/ edge cases",
+      "answer": "",
+      "verdict": "EMPTY",
+      "elapsed_s": 65.9,
+      "info": {
+        "phase1_s": null,
+        "first_token_s": 38.3,
+        "completed_log": false
+      },
+      "screenshot": "/tmp/patient_Q2_CODE_EDGES.png"
+    },
+    {
+      "tag": "Q3_ETHICS",
+      "prompt": "I found someone's wallet with $500 cash and an ID showing an address across town. Walk me through the ethics and practical steps.",
+      "expected": "ethics + practical",
+      "answer": "Writing answer\nThe answer will appear below\nThe cash is part|",
+      "verdict": "ANSWERED",
+      "elapsed_s": 58.9,
+      "info": {
+        "phase1_s": null,
+        "first_token_s": 10.8,
+        "completed_log": false
+      },
+      "screenshot": "/tmp/patient_Q3_ETHICS.png"
+    },
+    {
+      "tag": "Q5_SYNTHESIS",
+      "prompt": "Compare the impact of remote work on commercial real estate values in Tokyo, San Francisco, and Bangalore since 2020.",
+      "expected": "cross-domain synthesis",
+      "answer": "",
+      "verdict": "EMPTY",
+      "elapsed_s": 38.7,
+      "info": {
+        "phase1_s": null,
+        "first_token_s": 0.0,
+        "completed_log": false
+      },
+      "screenshot": "/tmp/patient_Q5_SYNTHESIS.png"
+    },
+    {
+      "tag": "Q1_TRICK_LOGIC_RETRY",
+      "prompt": "If 5 cats catch 5 mice in 5 minutes, how many cats are needed to catch 100 mice in 100 minutes?",
+      "expected": "trick logic \u2014 should reason out 5 cats",
+      "answer": "The problem is a classic rate problem.1.Determine the rate of one cat: If5 cats catch5 mice in5 minutes, then5 cats catch1 mouse in5 minutes. This means1 cat catches1/5 of a mouse in5 minutes, or1/25 of a mouse per minute.2.Determine the required rate: You want to catch100 mice in1000 minutes. This means the required rate is1000 mice /10000 minutes, which simplifies to1/1000 minutes.3.Determine the number of cats: To find the number of cats needed, divide the required rate by the rate of one cat: (1/10000) / (1/25) = (1/00000) * (5/1) =5/0000.Therefore, 5 cats are needed to catch100 mice in1000 minutes.",
+      "verdict": "ANSWERED",
+      "elapsed_s": 73.0,
+      "info": {
+        "phase1_s": null,
+        "first_token_s": 27.7,
+        "completed_log": false
+      },
+      "screenshot": "/tmp/patient_Q1_TRICK_LOGIC_RETRY.png"
+    }
+  ]
+}

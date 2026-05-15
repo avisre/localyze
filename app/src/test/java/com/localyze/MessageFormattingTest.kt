@@ -32,6 +32,47 @@ class MessageFormattingTest {
     }
 
     @Test
+    fun markdownParserKeepsTablesAsTableBlocks() {
+        val blocks = parseMarkdownBlocks(
+            """
+            | Fiscal year | Revenue (USD billions) |
+            |---|---:|
+            | 2023 | 383.3 |
+            | 2024 | 391.0 |
+            | 2025 | 416.2 |
+            """.trimIndent()
+        )
+
+        val table = blocks.single() as MarkdownBlock.Table
+        assertEquals(listOf("Fiscal year", "Revenue (USD billions)"), table.headers)
+        assertEquals(3, table.rows.size)
+        assertEquals(listOf("2025", "416.2"), table.rows.last())
+    }
+
+    @Test
+    fun markdownParserDoesNotLetFiscalYearSentenceSwallowFollowingTable() {
+        val blocks = parseMarkdownBlocks(
+            """
+            ## Apple Revenue (Last 3 Fiscal Years)
+
+            Apple's latest three completed fiscal years show revenue rising from ${'$'}383.3B in FY2023 to ${'$'}416.2B in FY2025.
+
+            | Fiscal year | Revenue (USD billions) |
+            |---|---:|
+            | 2023 | 383.3 |
+            | 2024 | 391.0 |
+            | 2025 | 416.2 |
+            """.trimIndent()
+        )
+
+        assertTrue(blocks.any { it is MarkdownBlock.Table })
+        assertTrue(blocks.none { block ->
+            block is MarkdownBlock.NumberedList &&
+                block.items.any { it.contains("Fiscal year") }
+        })
+    }
+
+    @Test
     fun searchQueryNormalizerRemovesPromptySearchPhrasesAndAddsYearForCurrentQueries() {
         val queries = normalizeWebSearchQueries(
             query = "Please search the web for latest Android Compose release notes?",

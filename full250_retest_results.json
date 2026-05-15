@@ -1,0 +1,114 @@
+{
+  "records": [
+    {
+      "id": "F002",
+      "fingerprint": "fact_geography",
+      "prompt": "Capital of Brazil?",
+      "category": "fact_geography",
+      "answer": "The capital of Brazil is Bras\u00edlia.",
+      "answer_len": 34,
+      "elapsed_s": 131.9,
+      "completed_log": false,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Brasilia"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F015",
+      "fingerprint": "fact_geography",
+      "prompt": "Which country has the most time zones?",
+      "category": "fact_geography",
+      "answer": "Gallery\nPhone\nMessaging\nWebView Browser Tester\nCamera\n  Search apps\nCalendar\nClock\nContacts\nFiles\nLeaks\nopportunity_ledger\nSearch\nStockPortfolio Pro\nTMoble",
+      "answer_len": 155,
+      "elapsed_s": 117.3,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['France', 'Russia']"
+      ],
+      "expected_keywords": [
+        "France",
+        "Russia"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F024",
+      "fingerprint": "fact_geography",
+      "prompt": "Which country has the largest population?",
+      "category": "fact_geography",
+      "answer": "Gallery\nPhone\nMessaging\nWebView Browser Tester\nCamera\n  Search apps\nCalendar\nClock\nContacts\nFiles\nLeaks\nopportunity_ledger\nSearch\nStockPortfolio Pro\nTMoble",
+      "answer_len": 155,
+      "elapsed_s": 116.9,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['India', 'China']"
+      ],
+      "expected_keywords": [
+        "India",
+        "China"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F049",
+      "fingerprint": "fact_science",
+      "prompt": "What is the powerhouse of the cell?",
+      "category": "fact_science",
+      "answer": "The powerhouse of the cell is the mitochondrion (or mitochondria).",
+      "answer_len": 66,
+      "elapsed_s": 118.3,
+      "completed_log": false,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "mitochondria"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F072",
+      "fingerprint": "fact_history",
+      "prompt": "Who discovered America in 1492?",
+      "category": "fact_history",
+      "answer": "Christopher Columbus is credited with discovering America in 1492.",
+      "answer_len": 66,
+      "elapsed_s": 188.5,
+      "completed_log": false,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Columbus"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "F081",
+      "fingerprint": "fact_general",
+      "prompt": "Who painted the Persistence of Memory?",
+      "category": "fact_general",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 187.8,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Dali']"
+      ],
+      "expected_keywords": [
+        "Dali"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

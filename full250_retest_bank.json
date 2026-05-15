@@ -1,0 +1,641 @@
+{
+  "_doc": "Retest of 23 fails from full250 + finish remaining 23.",
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app"
+  ],
+  "questions": [
+    {
+      "id": "F002",
+      "fingerprint": "fact_geography",
+      "prompt": "Capital of Brazil?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "Brasilia"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F015",
+      "fingerprint": "fact_geography",
+      "prompt": "Which country has the most time zones?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "France",
+        "Russia"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F024",
+      "fingerprint": "fact_geography",
+      "prompt": "Which country has the largest population?",
+      "category": "fact_geography",
+      "expected_keywords": [
+        "India",
+        "China"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F049",
+      "fingerprint": "fact_science",
+      "prompt": "What is the powerhouse of the cell?",
+      "category": "fact_science",
+      "expected_keywords": [
+        "mitochondria"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F072",
+      "fingerprint": "fact_history",
+      "prompt": "Who discovered America in 1492?",
+      "category": "fact_history",
+      "expected_keywords": [
+        "Columbus"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F081",
+      "fingerprint": "fact_general",
+      "prompt": "Who painted the Persistence of Memory?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Dali"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F094",
+      "fingerprint": "fact_general",
+      "prompt": "Who sang Bohemian Rhapsody?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Queen",
+        "Mercury"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F096",
+      "fingerprint": "fact_general",
+      "prompt": "Who sang Imagine?",
+      "category": "fact_general",
+      "expected_keywords": [
+        "Lennon"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F117",
+      "fingerprint": "math_basic",
+      "prompt": "What is 2 plus 2 times 3?",
+      "category": "math_basic",
+      "expected_keywords": [
+        "8"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "F127",
+      "fingerprint": "math_word",
+      "prompt": "A jacket is $80, marked down 40%. Sale price?",
+      "category": "math_word",
+      "expected_keywords": [
+        "48"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "F139",
+      "fingerprint": "math_word",
+      "prompt": "If I save $200 a month, how much in 18 months?",
+      "category": "math_word",
+      "expected_keywords": [
+        "3600"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "F159",
+      "fingerprint": "unit_convert",
+      "prompt": "How many milliliters in a cup?",
+      "category": "unit_convert",
+      "expected_keywords": [
+        "240",
+        "236"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": true
+    },
+    {
+      "id": "F172",
+      "fingerprint": "daily_life",
+      "prompt": "How long does it take to cook rice on the stove?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "18",
+        "20",
+        "minute"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F178",
+      "fingerprint": "daily_life",
+      "prompt": "How long do hard boiled eggs last in the fridge?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "week",
+        "7"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F181",
+      "fingerprint": "daily_life",
+      "prompt": "How often should I water indoor plants?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "week",
+        "soil",
+        "dry"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F183",
+      "fingerprint": "daily_life",
+      "prompt": "How long to bake chicken breast at 400 F?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "20",
+        "25",
+        "minute"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F184",
+      "fingerprint": "daily_life",
+      "prompt": "How long can leftovers stay in the fridge?",
+      "category": "daily_life",
+      "expected_keywords": [
+        "3",
+        "4",
+        "day"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F192",
+      "fingerprint": "tech_howto",
+      "prompt": "How do I change the default browser on Android?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "settings",
+        "apps",
+        "default"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F196",
+      "fingerprint": "tech_howto",
+      "prompt": "How do I sync my Google contacts?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "account",
+        "sync",
+        "contacts"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F203",
+      "fingerprint": "tech_howto",
+      "prompt": "How do I enable dark mode on my phone?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "settings",
+        "display",
+        "dark"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F205",
+      "fingerprint": "tech_howto",
+      "prompt": "How do I set up an out of office email?",
+      "category": "tech_howto",
+      "expected_keywords": [
+        "vacation",
+        "responder",
+        "auto"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F210",
+      "fingerprint": "writing",
+      "prompt": "Draft an introductory email to a new client.",
+      "category": "writing",
+      "expected_keywords": [
+        "Subject",
+        "Dear",
+        "introduce",
+        "Regards"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F223",
+      "fingerprint": "writing",
+      "prompt": "Draft a sympathy message for a friend who lost a pet.",
+      "category": "writing",
+      "expected_keywords": [
+        "sorry",
+        "loss",
+        "pet"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F228",
+      "fingerprint": "definitions",
+      "prompt": "What is machine learning?",
+      "category": "definitions",
+      "expected_keywords": [
+        "data",
+        "algorithm",
+        "learn"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F229",
+      "fingerprint": "definitions",
+      "prompt": "What's a black hole?",
+      "category": "definitions",
+      "expected_keywords": [
+        "gravity",
+        "space",
+        "light"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F230",
+      "fingerprint": "definitions",
+      "prompt": "Define democracy.",
+      "category": "definitions",
+      "expected_keywords": [
+        "people",
+        "government",
+        "vote"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F231",
+      "fingerprint": "definitions",
+      "prompt": "Explain blockchain in simple terms.",
+      "category": "definitions",
+      "expected_keywords": [
+        "chain",
+        "blocks",
+        "distributed",
+        "ledger"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F232",
+      "fingerprint": "definitions",
+      "prompt": "Define irony.",
+      "category": "definitions",
+      "expected_keywords": [
+        "opposite",
+        "expected",
+        "meaning"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F233",
+      "fingerprint": "definitions",
+      "prompt": "What does HTTP stand for?",
+      "category": "definitions",
+      "expected_keywords": [
+        "hypertext",
+        "transfer",
+        "protocol"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F234",
+      "fingerprint": "definitions",
+      "prompt": "Define osmosis.",
+      "category": "definitions",
+      "expected_keywords": [
+        "water",
+        "membrane",
+        "concentration"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F235",
+      "fingerprint": "definitions",
+      "prompt": "What is empathy?",
+      "category": "definitions",
+      "expected_keywords": [
+        "feelings",
+        "understand",
+        "others"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F236",
+      "fingerprint": "definitions",
+      "prompt": "What is the metaverse?",
+      "category": "definitions",
+      "expected_keywords": [
+        "virtual",
+        "world",
+        "digital"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F237",
+      "fingerprint": "definitions",
+      "prompt": "Define ecosystem.",
+      "category": "definitions",
+      "expected_keywords": [
+        "organisms",
+        "environment",
+        "interact"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F238",
+      "fingerprint": "definitions",
+      "prompt": "What is a placebo?",
+      "category": "definitions",
+      "expected_keywords": [
+        "fake",
+        "treatment",
+        "effect"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F239",
+      "fingerprint": "definitions",
+      "prompt": "Define photosynthesis.",
+      "category": "definitions",
+      "expected_keywords": [
+        "plants",
+        "sunlight",
+        "energy"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F240",
+      "fingerprint": "definitions",
+      "prompt": "What is venture capital?",
+      "category": "definitions",
+      "expected_keywords": [
+        "funding",
+        "startup",
+        "investor"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F241",
+      "fingerprint": "definitions",
+      "prompt": "What is a startup?",
+      "category": "definitions",
+      "expected_keywords": [
+        "company",
+        "new",
+        "growth"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F242",
+      "fingerprint": "definitions",
+      "prompt": "What does API stand for?",
+      "category": "definitions",
+      "expected_keywords": [
+        "application",
+        "programming",
+        "interface"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F243",
+      "fingerprint": "definitions",
+      "prompt": "What is a meme?",
+      "category": "definitions",
+      "expected_keywords": [
+        "image",
+        "internet",
+        "joke"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F244",
+      "fingerprint": "definitions",
+      "prompt": "What is a sonnet?",
+      "category": "definitions",
+      "expected_keywords": [
+        "14 lines",
+        "poem",
+        "rhyme"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F245",
+      "fingerprint": "code",
+      "prompt": "How do I remove duplicates from a Python list?",
+      "category": "code",
+      "expected_keywords": [
+        "set",
+        "list"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F246",
+      "fingerprint": "code",
+      "prompt": "How do I print to console in JavaScript?",
+      "category": "code",
+      "expected_keywords": [
+        "console.log"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F247",
+      "fingerprint": "code",
+      "prompt": "What is a lambda function in Python?",
+      "category": "code",
+      "expected_keywords": [
+        "lambda",
+        "anonymous",
+        "function"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F248",
+      "fingerprint": "code",
+      "prompt": "Write a regex to match a phone number.",
+      "category": "code",
+      "expected_keywords": [
+        "regex",
+        "\\d",
+        "[0-9"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F249",
+      "fingerprint": "code",
+      "prompt": "How do I add to a JavaScript array?",
+      "category": "code",
+      "expected_keywords": [
+        "push",
+        "array"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    },
+    {
+      "id": "F250",
+      "fingerprint": "code",
+      "prompt": "What does a 404 error mean?",
+      "category": "code",
+      "expected_keywords": [
+        "not found",
+        "page"
+      ],
+      "must_not_contain": [],
+      "web_dependent": false,
+      "deterministic_path": false
+    }
+  ]
+}

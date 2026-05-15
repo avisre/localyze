@@ -167,6 +167,16 @@ class ConversationsViewModel @Inject constructor(
         _uiState.update { it.copy(selectedIds = emptySet()) }
     }
 
+    /**
+     * Select every conversation currently visible under the active filter
+     * + folder + search query, so the bulk action row can act on the
+     * full list at once.
+     */
+    fun selectAllFiltered() {
+        val ids = getFilteredConversations().map { it.id }.toSet()
+        _uiState.update { it.copy(selectedIds = ids) }
+    }
+
     fun bulkArchiveSelected(archived: Boolean) {
         viewModelScope.launch {
             val ids = _uiState.value.selectedIds

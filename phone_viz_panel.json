@@ -1,0 +1,56 @@
+{
+  "results": [
+    {
+      "tag": "VIZ_MSFT_5Y",
+      "q": "Show me Microsoft revenue for the last 5 years",
+      "web_search": true,
+      "elapsed_s": 11.9,
+      "status": "OK",
+      "answer": "e data for Microsoftoft Revenue (Last 5  from $168.1B in FY27B in FY2025. The laer-year change was 1cal year | Revenue (he company's officiaR page for context, ructured SEC XBRL anor the numeric RAG tdata](https://www.mien-us/Investor/sec-f\n(https://www.sec.govwse-edgar?action=get0000789019&type=10-K of Microsoft](httpsdia.org/?curid=42400soft](https://en.wikcurid=19001)",
+      "answer_len": 373,
+      "n_tokens": 20,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_PHONE_VIZ"
+    },
+    {
+      "tag": "VIZ_NVDA_4Y",
+      "q": "Plot NVIDIA revenue over the last 4 years",
+      "web_search": true,
+      "elapsed_s": 11.9,
+      "status": "OK",
+      "answer": "venue (Last 4 FiscalDIA's revenue increa.0B in FY2023 to $2126. The latest year- Revenue (USD billiod the company's offir/IR page for contex structured SEC XBRLs for the numeric RAdata](https://investm/financial-info/finL company facts](htt.gov/cgi-bin/browse-=getcompany&CIK=0001pedia.org/?curid=391A Announces Financiar Fourth Quarter and](https://news.googlticles/CBMipgFBVV95cmdvaFlhVjRTR3d3TE5qSjJNQm9YSF9jOXpfaldkT3NMZzE2ZWowcVFERk9RMmJlb0Q5Z0V6TXhKdXFUZERKTUI5bXFYbGI3YkNiRXRuazVVUEVsUW9tOXUwTExYRGJQU093?oc=5)",
+      "answer_len": 517,
+      "n_tokens": 26,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_PHONE_VIZ"
+    },
+    {
+      "tag": "VIZ_TSLA_NETINC",
+      "q": "Tesla net income last 3 fiscal years as a chart",
+      "web_search": true,
+      "elapsed_s": 9.9,
+      "status": "OK",
+      "answer": "come data for Tesla.et income (Last 3 Fi\nm $15.0B in FY2023 tY2025. The latest year | Net income (USD\ngrounding: I used st XBRL annual facts reb search for the nuble; no official com excerpt was availabcome RAG data](httpsov/cgi-bin/browse-edetcompany&CIK=000131ikipedia.org/?curid=Anaergia Inc. Scheduarter 2026 Earnings Conference Call](httogle.com/rss/article95cUxObldWNG1QQzNQMC92RERuSGJrT1ZwenJaUkw0cXR4cHU0UDAxQXdmNHVBVXRqTEpmRFlqUk9TTmNuaXBaajJRbXR4ZkxWa0VYZU16SWdYREZJcWJtVmNsVllQU1dfaW12NFZBZW1pMGpKd3QyTTRvSGNHQ3tiWGJmVEhCOS1Da0Vjdkenue growth after twers. Why the stock ittps://news.google.cles/CBMie0FVX3lxTE1HaTA5TzNsdVFTZUpjVFRNMUk1X0d6LVRoMS12ZHBWUkVnd210eTFPSGJwR1M1QnRWUU5lRUxHWE1Gd0t0VlUxbzNSZk5HVdIBgAFBN1YtdEJJb01FREhWWDBsQXJ5bzJWcnE5WFB5X2gwZExfZGFtZ25ySTRoSGZxbWF0UkRoaTdSOEVEMUVaTnlhNkMwU212Nmc0dGNOc=5)",
+      "answer_len": 826,
+      "n_tokens": 44,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_PHONE_VIZ"
+    },
+    {
+      "tag": "VIZ_AAPL_GOOG",
+      "q": "Compare Apple and Google revenue over the last 3 years",
+      "web_search": true,
+      "elapsed_s": 11.8,
+      "status": "OK",
+      "answer": "fic annual revenue de increased from $3823 to $416.2B in FY2est year-over-year crawled the company'svestor/IR page for c used structured SEC facts for the numer increased from $3073 to $402.8B in FY20st year-over-year chrawled the company'svestor/IR page for c used structured SEC facts for the numerRAG data](https://in.com/sec-filings/def [AAPL SEC XBRL compttps://www.sec.gov/ce-edgar?action=getcoRevenue RAG data](htompany facts](https:v/cgi-bin/browse-edgtcompany&CIK=0001652K)",
+      "answer_len": 482,
+      "n_tokens": 25,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_PHONE_VIZ"
+    }
+  ]
+}

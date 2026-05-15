@@ -67,7 +67,10 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DropdownMenuItem
@@ -117,10 +120,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.localyze.ai.AudioRecordingState
@@ -131,11 +137,10 @@ import com.localyze.ui.components.AudioWaveform
 import com.localyze.ui.components.GenerationFeedback
 import com.localyze.ui.components.HandleToolConfirmation
 import com.localyze.ui.components.ReferenceHeader
-import com.localyze.ui.components.ReferenceQuickActionCard
-import com.localyze.ui.components.ReferenceSectionTitle
-import com.localyze.ui.components.StatusChip
+import com.localyze.ui.components.SourceCardsRow
 import com.localyze.ui.components.ThinkingBubble
 import com.localyze.ui.components.ToolIndicator
+import com.localyze.ui.components.parseSourceCards
 import com.localyze.ui.components.UserMessageBubble
 import com.localyze.ui.components.rememberToolConfirmationState
 import com.localyze.ui.theme.Background
@@ -143,7 +148,7 @@ import com.localyze.ui.theme.Error
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
 import com.localyze.ui.theme.Primary
-import com.localyze.ui.theme.Secondary
+import com.localyze.ui.theme.Surface as SurfaceColor
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
 import com.localyze.ui.viewmodels.ChatUiState
@@ -209,8 +214,8 @@ fun ChatScreen(
         }
     }
 
-    // Input field state
-    var inputText by remember { mutableStateOf("") }
+    // Input field state — rememberSaveable survives config changes (rotation)
+    var inputText by rememberSaveable { mutableStateOf("") }
     val isInputValid = inputText.isNotBlank()
 
     val isRecording = recordingState is AudioRecordingState.Recording
@@ -252,7 +257,10 @@ fun ChatScreen(
             }
             onSharedContentConsumed()
         } else if (hasSharedText) {
-            viewModel.sendMessage(sharedText!!.trim())
+            viewModel.sendMessageInNewConversation(
+                text = sharedText!!.trim(),
+                capabilityModeOverride = "chat"
+            )
             onSharedContentConsumed()
         }
     }
@@ -309,6 +317,17 @@ fun ChatScreen(
         }
     }
 
+    // Show context-reset notice snackbar
+    LaunchedEffect(uiState.contextResetNotice) {
+        uiState.contextResetNotice?.let { notice ->
+            snackbarHostState.showSnackbar(
+                message = notice,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearContextResetNotice()
+        }
+    }
+
     // Handle tool confirmations
     val confirmationState = rememberToolConfirmationState()
     HandleToolConfirmation(
@@ -348,7 +367,7 @@ fun ChatScreen(
         }
     }
 
-    // Image picker launcher
+    // Image picker launcher (gallery)
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -372,10 +391,97 @@ fun ChatScreen(
         }
     }
 
+    // Camera capture: a content:// URI created via FileProvider that the
+    // external camera app writes the JPEG to. We hold it in a ref so the
+    // launcher result callback can read the file back.
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        val uri = pendingCameraUri
+        pendingCameraUri = null
+        if (success && uri != null) {
+            try {
+                val bitmap = loadBitmapFromUri(context, uri)
+                viewModel.sendImageMessage(
+                    text = inputText.ifBlank { "Describe this image" },
+                    imageBitmap = bitmap
+                )
+                inputText = ""
+            } catch (e: Exception) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Failed to load photo: ${e.message}",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+    }
+
+    fun launchCameraCapture() {
+        try {
+            val capturesDir = File(context.cacheDir, "camera_captures").apply { mkdirs() }
+            val photoFile = File(capturesDir, "capture_${System.currentTimeMillis()}.jpg")
+            val authority = "${context.packageName}.fileprovider"
+            val uri = FileProvider.getUriForFile(context, authority, photoFile)
+            pendingCameraUri = uri
+            cameraLauncher.launch(uri)
+        } catch (e: Exception) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Couldn't open camera: ${e.message}",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCameraCapture()
+        } else {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Camera permission is needed to take photos",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    // Attach-menu sheet state. The paperclip button now opens a bottom
+    // sheet offering "Take photo" or "Choose from gallery" instead of
+    // jumping straight to the gallery picker.
+    var showAttachMenu by remember { mutableStateOf(false) }
+    val attachSheetState = rememberModalBottomSheetState()
+
+    val onAttachClick: () -> Unit = { showAttachMenu = true }
+    val onChooseFromGallery: () -> Unit = {
+        showAttachMenu = false
+        imagePickerLauncher.launch("image/*")
+    }
+    val onTakePhoto: () -> Unit = {
+        showAttachMenu = false
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            launchCameraCapture()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     // Message action dropdown state
     var showActionMenu by remember { mutableStateOf(false) }
     var actionMenuMessageIndex by remember { mutableStateOf(-1) }
     var showEditMessageDialog by remember { mutableStateOf(false) }
+
+    // In-thread message search state
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     val hasMessages = uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()
 
@@ -392,29 +498,24 @@ fun ChatScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Mock mode banner
-                if (uiState.isMockMode) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFFFF9C4))
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "MOCK MODE",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFF7B6800)
-                        )
-                    }
-                }
-
                 ReferenceHeader(
-                    title = "Localyze",
-                    subtitle = if (uiState.isStreaming || uiState.isThinking) "On-device thinking" else "On-device",
+                    title = "Localyze.ai",
+                    subtitle = when {
+                        uiState.isThinking -> "Thinking..."
+                        uiState.isStreaming -> "Generating..."
+                        uiState.isUsingThreadContext -> "On-device • Context aware"
+                        else -> "On-device"
+                    },
                     actions = {
+                        if (hasMessages) {
+                            IconButton(onClick = { isSearching = !isSearching; if (!isSearching) searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = if (isSearching) "Close search" else "Search messages",
+                                    tint = if (isSearching) Primary else TextSecondary
+                                )
+                            }
+                        }
                         IconButton(onClick = { /* Privacy status is shown in the chips below. */ }) {
                             Icon(
                                 imageVector = Icons.Outlined.Security,
@@ -445,6 +546,41 @@ fun ChatScreen(
                     }
                 )
 
+                // Search bar
+                if (isSearching && hasMessages) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search in this chat...") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = "Search",
+                                tint = TextSecondary
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotBlank()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = "Clear search",
+                                        tint = TextSecondary
+                                    )
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Background,
+                            unfocusedContainerColor = Background
+                        )
+                    )
+                }
+
                 // Message list
                 if (!hasMessages) {
                     ChatHomeContent(
@@ -455,7 +591,7 @@ fun ChatScreen(
                         recordingState = recordingState,
                         allowWebSearch = uiState.allowWebSearch,
                         voiceAmplitudes = voiceAmplitudes,
-                        onAttachImage = { imagePickerLauncher.launch("image/*") },
+                        onAttachImage = onAttachClick,
                         onStartRecording = {
                             if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
                                 == PackageManager.PERMISSION_GRANTED
@@ -487,6 +623,7 @@ fun ChatScreen(
                 } else {
                     ChatMessageList(
                         uiState = uiState,
+                        searchQuery = searchQuery,
                         expandedThinking = expandedThinking,
                         onToggleThinking = viewModel::toggleThinkingExpanded,
                         onCopyMessage = { content ->
@@ -516,7 +653,7 @@ fun ChatScreen(
                         isInputValid = isInputValid,
                         recordingState = recordingState,
                         voiceAmplitudes = voiceAmplitudes,
-                        onAttachImage = { imagePickerLauncher.launch("image/*") },
+                        onAttachImage = onAttachClick,
                         onStartRecording = {
                             if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
                                 == PackageManager.PERMISSION_GRANTED
@@ -614,6 +751,43 @@ fun ChatScreen(
         }
     }
 
+    // Attach picker sheet (camera vs gallery)
+    if (showAttachMenu) {
+        ModalBottomSheet(
+            onDismissRequest = { showAttachMenu = false },
+            sheetState = attachSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Outlined.PhotoCamera,
+                            contentDescription = null,
+                            tint = Primary
+                        )
+                    },
+                    text = { Text("Take photo") },
+                    onClick = onTakePhoto
+                )
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Outlined.PhotoLibrary,
+                            contentDescription = null,
+                            tint = Primary
+                        )
+                    },
+                    text = { Text("Choose from gallery") },
+                    onClick = onChooseFromGallery
+                )
+            }
+        }
+    }
+
     val messageBeingEdited = uiState.messages.getOrNull(actionMenuMessageIndex)
     if (showEditMessageDialog && messageBeingEdited != null) {
         var editedText by remember(messageBeingEdited.id) { mutableStateOf(messageBeingEdited.content) }
@@ -662,6 +836,7 @@ fun ChatScreen(
 @Composable
 fun ChatMessageList(
     uiState: ChatUiState,
+    searchQuery: String = "",
     expandedThinking: Set<Int>,
     onToggleThinking: (Int) -> Unit,
     onCopyMessage: (String) -> Unit,
@@ -669,6 +844,18 @@ fun ChatMessageList(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
+    val filteredMessages = remember(uiState.messages, searchQuery) {
+        if (searchQuery.isBlank()) {
+            uiState.messages.mapIndexed { i, m -> i to m }
+        } else {
+            val query = searchQuery.lowercase()
+            uiState.messages.mapIndexed { i, m -> i to m }.filter { (_, message) ->
+                message.content.lowercase().contains(query) ||
+                message.thinkingContent?.lowercase()?.contains(query) == true ||
+                message.toolResult?.lowercase()?.contains(query) == true
+            }
+        }
+    }
     val scope = rememberCoroutineScope()
     val hasDisplayItems = uiState.messages.isNotEmpty() ||
             uiState.streamingText.isNotEmpty() ||
@@ -788,20 +975,22 @@ fun ChatMessageList(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             itemsIndexed(
-                items = uiState.messages,
-                key = { index, message ->
+                items = filteredMessages,
+                key = { _, pair ->
+                    val (index, message) = pair
                     if (message.id > 0L) {
                         "message-${message.id}"
                     } else {
                         "message-${message.role}-${message.timestamp}-$index"
                     }
                 }
-            ) { index, message ->
+            ) { _, pair ->
+                val (originalIndex, message) = pair
                 when (message.role) {
                     MessageRole.USER -> {
                         SwipeableMessageItem(
                             onSwipeLeft = { onCopyMessage(message.content) },
-                            onLongClick = { onLongClickMessage(index) }
+                            onLongClick = { onLongClickMessage(originalIndex) }
                         ) {
                             UserMessageBubble(
                                 message = message.content,
@@ -815,14 +1004,14 @@ fun ChatMessageList(
                         if (!message.thinkingContent.isNullOrBlank()) {
                             ThinkingBubble(
                                 thinkingContent = message.thinkingContent,
-                                isExpanded = expandedThinking.contains(index),
-                                onToggle = { onToggleThinking(index) }
+                                isExpanded = expandedThinking.contains(originalIndex),
+                                onToggle = { onToggleThinking(originalIndex) }
                             )
                         }
 
                         SwipeableMessageItem(
                             onSwipeLeft = { onCopyMessage(message.content) },
-                            onLongClick = { onLongClickMessage(index) }
+                            onLongClick = { onLongClickMessage(originalIndex) }
                         ) {
                             AssistantMessageBubble(
                                 message = message.content,
@@ -860,10 +1049,24 @@ fun ChatMessageList(
                 items = uiState.activeToolCalls,
                 key = { index, toolCall -> "tool-${toolCall.toolName}-$index" }
             ) { _, toolCall ->
-                ToolIndicator(
-                    toolName = toolCall.toolName,
-                    isExecuting = toolCall.isExecuting
-                )
+                val cards = if (!toolCall.isExecuting && toolCall.toolName == "web_search") {
+                    parseSourceCards(toolCall.result)
+                } else emptyList()
+                val detail = when {
+                    toolCall.toolName == "web_search" && !toolCall.isExecuting && cards.isNotEmpty() ->
+                        "Read ${cards.size} ${if (cards.size == 1) "source" else "sources"}"
+                    else -> null
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    ToolIndicator(
+                        toolName = toolCall.toolName,
+                        isExecuting = toolCall.isExecuting,
+                        detail = detail
+                    )
+                    if (cards.isNotEmpty()) {
+                        SourceCardsRow(cards = cards)
+                    }
+                }
             }
 
             if (uiState.streamingText.isNotEmpty()) {
@@ -933,33 +1136,6 @@ private fun LazyListState.toChatListViewportSnapshot(): ChatListViewportSnapshot
     )
 }
 
-/**
- * Small inline prompt that makes the web-search permission state visible.
- */
-@Composable
-private fun WebSearchNotice(
-    onEnable: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Web search is off",
-            color = TextSecondary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.weight(1f)
-        )
-        TextButton(onClick = onEnable) {
-            Text("Enable")
-        }
-    }
-}
-
 @Composable
 private fun ChatHomeContent(
     inputText: String,
@@ -986,31 +1162,30 @@ private fun ChatHomeContent(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 18.dp)
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            StatusChip(text = "On-device", selected = true)
-            StatusChip(text = "Gemma 4 E4B")
-            StatusChip(text = if (allowWebSearch) "Web search on" else "Web search off")
-            StatusChip(text = "No cloud chat")
-        }
+        Spacer(modifier = Modifier.height(64.dp))
 
-        if (!allowWebSearch) {
-            WebSearchNotice(
-                onEnable = onEnableWebSearch,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
+        Text(
+            text = "Localyze.ai",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.sp
+            ),
+            color = OnBackground
+        )
 
-        PrivacyReadyCard(modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        GreetingBlock(modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp))
+        Text(
+            text = "How can I help?",
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextSecondary
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         HomePromptCard(
             inputText = inputText,
@@ -1025,138 +1200,7 @@ private fun ChatHomeContent(
             onCancelRecording = onCancelRecording,
             onSend = onSend,
             onStopGeneration = onStopGeneration,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
-        )
-
-        ReferenceSectionTitle(title = "Quick actions")
-        Column(
-            modifier = Modifier.padding(horizontal = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReferenceQuickActionCard(
-                    icon = Icons.Filled.Add,
-                    title = "New chat",
-                    modifier = Modifier.weight(1f),
-                    onClick = onNewChat
-                )
-                ReferenceQuickActionCard(
-                    icon = Icons.Outlined.Description,
-                    title = "Add text file",
-                    modifier = Modifier.weight(1f),
-                    onClick = onOpenAttachments
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReferenceQuickActionCard(
-                    icon = Icons.Outlined.EditNote,
-                    title = "What do you remember?",
-                    modifier = Modifier.weight(1f),
-                    onClick = { onPrompt("What do you remember about me?") }
-                )
-                ReferenceQuickActionCard(
-                    icon = Icons.Outlined.Public,
-                    title = if (allowWebSearch) "Search web" else "Enable web",
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (allowWebSearch) {
-                            onPrompt("Search the web for today's top technology headlines and summarize them with sources.")
-                        } else {
-                            onEnableWebSearch()
-                        }
-                    }
-                )
-            }
-        }
-
-        ReferenceSectionTitle(
-            title = "Recent conversations",
-            trailing = "See all",
-            onTrailingClick = onOpenConversations,
-            modifier = Modifier.padding(top = 10.dp)
-        )
-        Column(modifier = Modifier.padding(horizontal = 18.dp)) {
-            RecentConversationPreviewRow(
-                icon = Icons.Outlined.StarBorder,
-                title = "Start a focused chat",
-                subtitle = "Ask locally with Gemma",
-                onClick = { onPrompt("Let's start a focused chat.") }
-            )
-            RecentConversationPreviewRow(
-                icon = Icons.Outlined.Image,
-                title = "Analyze an image",
-                subtitle = "Attach a picture and ask",
-                onClick = onAttachImage
-            )
-            RecentConversationPreviewRow(
-                icon = Icons.Outlined.History,
-                title = "Open saved chats",
-                subtitle = "Browse, resume, archive",
-                onClick = onOpenConversations
-            )
-        }
-    }
-}
-
-@Composable
-private fun PrivacyReadyCard(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        color = Primary.copy(alpha = 0.08f),
-        border = BorderStroke(1.dp, Primary.copy(alpha = 0.16f))
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "AI runs on your device",
-                    color = OnBackground,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                )
-                Text(
-                    text = "Gemma 4 E4B is loaded and ready.",
-                    color = TextSecondary,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            Surface(
-                modifier = Modifier.size(30.dp),
-                shape = CircleShape,
-                color = Primary
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Outlined.Security,
-                        contentDescription = null,
-                        tint = OnPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun GreetingBlock(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = "Hi! I'm Localyze.",
-            color = OnBackground,
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-        )
-        Text(
-            text = "How can I help you today?",
-            color = TextSecondary,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 6.dp)
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -1184,10 +1228,10 @@ private fun HomePromptCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 142.dp),
-        shape = RoundedCornerShape(22.dp),
+            .heightIn(min = 120.dp),
+        shape = RoundedCornerShape(16.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, SurfaceVariant),
+        border = BorderStroke(0.5.dp, SurfaceVariant),
         shadowElevation = 0.dp
     ) {
         Column(
@@ -1213,7 +1257,7 @@ private fun HomePromptCard(
                 onValueChange = onInputTextChange,
                 placeholder = {
                     Text(
-                        text = "Message Localyze...",
+                        text = "Message Localyze.ai...",
                         color = TextSecondary,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -1284,64 +1328,6 @@ private fun HomePromptCard(
     }
 }
 
-@Composable
-private fun RecentConversationPreviewRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        color = Color.Transparent
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(38.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, SurfaceVariant)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = OnBackground,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    color = TextSecondary,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = TextSecondary,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-    }
-}
 
 @Composable
 private fun ChatComposer(
@@ -1365,9 +1351,10 @@ private fun ChatComposer(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 10.dp,
-        shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
+        color = SurfaceColor,
+        shadowElevation = 0.dp,
+        border = BorderStroke(0.5.dp, SurfaceVariant),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1408,16 +1395,16 @@ private fun ChatComposer(
                     modifier = Modifier
                         .weight(1f)
                         .heightIn(min = 52.dp, max = 148.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    border = BorderStroke(1.dp, SurfaceVariant)
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White,
+                    border = BorderStroke(0.5.dp, SurfaceVariant)
                 ) {
                     TextField(
                         value = inputText,
                         onValueChange = onInputTextChange,
                         placeholder = {
                             Text(
-                                text = "Message Localyze...",
+                                text = "Message Localyze.ai...",
                                 color = TextSecondary,
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -1515,7 +1502,7 @@ private fun VoiceInputStrip(
                 modifier = Modifier
                     .size(8.dp)
                     .background(
-                        color = if (recordingState is AudioRecordingState.Error) Error else Secondary,
+                        color = if (recordingState is AudioRecordingState.Error) Error else Primary,
                         shape = CircleShape
                     )
             )
@@ -1619,21 +1606,26 @@ private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap {
         BitmapFactory.decodeStream(stream, null, options)
     }
 
-    // Calculate inSampleSize to downscale to max 1024x1024
+    // Downscale via inSampleSize until both dimensions fit under maxDimension.
+    // Note the `||` here: previously this loop used `&&`, which stopped
+    // shrinking as soon as either dimension fit — leaving e.g. a portrait
+    // 4000x6000 camera shot at 2000x3000, oversize for the vision encoder
+    // and reliably crashing liblitertlm_jni.so with a SIGSEGV.
     val maxDimension = 1024
     var inSampleSize = 1
     if (options.outHeight > maxDimension || options.outWidth > maxDimension) {
-        val halfHeight = options.outHeight / 2
-        val halfWidth = options.outWidth / 2
-        while ((halfHeight / inSampleSize) >= maxDimension && (halfWidth / inSampleSize) >= maxDimension) {
+        var h = options.outHeight
+        var w = options.outWidth
+        while (h / inSampleSize > maxDimension || w / inSampleSize > maxDimension) {
             inSampleSize *= 2
         }
     }
 
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    val decoded = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         val source = ImageDecoder.createSource(context.contentResolver, uri)
         ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
             decoder.isMutableRequired = true
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             if (inSampleSize > 1) {
                 val targetWidth = options.outWidth / inSampleSize
                 val targetHeight = options.outHeight / inSampleSize
@@ -1644,11 +1636,30 @@ private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap {
         @Suppress("DEPRECATION")
         val decodeOptions = BitmapFactory.Options().apply {
             this.inSampleSize = inSampleSize
+            inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         context.contentResolver.openInputStream(uri)?.use { stream ->
             BitmapFactory.decodeStream(stream, null, decodeOptions)
         } ?: throw IllegalArgumentException("Could not open input stream for URI: $uri")
     }
+
+    // Belt-and-suspenders: if the decoder still produced something larger
+    // than maxDimension (rounding effects, decoder ignoring target size),
+    // do a final scale here.
+    val w = decoded.width
+    val h = decoded.height
+    val needsFurtherScale = w > maxDimension || h > maxDimension
+    val targetConfig = decoded.config ?: Bitmap.Config.ARGB_8888
+    val argb = if (targetConfig != Bitmap.Config.ARGB_8888) {
+        decoded.copy(Bitmap.Config.ARGB_8888, false).also { decoded.recycle() }
+    } else decoded
+    if (!needsFurtherScale) return argb
+    val ratio = maxDimension.toFloat() / maxOf(w, h)
+    val newW = (w * ratio).toInt().coerceAtLeast(1)
+    val newH = (h * ratio).toInt().coerceAtLeast(1)
+    val scaled = Bitmap.createScaledBitmap(argb, newW, newH, true)
+    if (scaled !== argb) argb.recycle()
+    return scaled
 }
 
 /**

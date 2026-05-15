@@ -1,4 +1,4 @@
-﻿package com.localyze.data.repository
+package com.localyze.data.repository
 
 import android.app.ActivityManager
 import android.content.Context
@@ -14,11 +14,20 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class ModelEntry(
+    val name: String,
+    val displayName: String,
+    val filename: String,
+    val url: String,
+    val sizeBytes: Long,
+    val description: String,
+    val sha256Hash: String = ""
+)
 
 @Singleton
 class ModelRepository @Inject constructor(
@@ -29,20 +38,49 @@ class ModelRepository @Inject constructor(
         const val MODEL_DIR = "models"
         private const val TAG = "ModelRepository"
 
-        // The app intentionally supports one model: Gemma 4 E4B.
+        // Gemma 4 E4B (original default)
+        // SHA-256 hashes must be populated with the actual checksums of the published model files.
+        // Compute with: shasum -a 256 gemma-4-E4B-it.litertlm
+        val MODEL_E4B = ModelEntry(
+            name = "gemma-4-E4B",
+            displayName = "Gemma 4 E4B",
+            filename = "gemma-4-E4B-it.litertlm",
+            url = "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/main/gemma-4-E4B-it.litertlm?download=true",
+            sizeBytes = 3_654_467_584L,
+            description = "Gemma 4 E4B – best quality, ~3.6 GB",
+            sha256Hash = "" // TODO: populate with real hash before release
+        )
+
+        val MODEL_E2B = ModelEntry(
+            name = "gemma-4-E2B",
+            displayName = "Gemma 4 E2B",
+            filename = "gemma-4-E2B-it.litertlm",
+            url = "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true",
+            sizeBytes = 2_590_000_000L,
+            description = "Gemma 4 E2B – lighter, faster, ~2.6 GB",
+            sha256Hash = "" // TODO: populate with real hash before release
+        )
+
+        val ALL_MODELS = listOf(MODEL_E4B, MODEL_E2B)
+
+        // Legacy constants for backward compatibility
         const val MODEL_FILENAME = "gemma-4-E4B-it.litertlm"
-        const val MODEL_URL = "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/9695417f248178c63a9f318c6e0c56cb917cb837/gemma-4-E4B-it.litertlm?download=true"
+        const val MODEL_URL = "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/main/gemma-4-E4B-it.litertlm?download=true"
         const val MODEL_SIZE_BYTES = 3_654_467_584L
 
         const val TEST_DOWNLOAD_URL = "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
         const val TEST_FILE_SIZE_BYTES = 700_000L
 
+        /** @deprecated Use per-model sha256Hash in ModelEntry instead. */
+        @Deprecated("Use per-model sha256Hash")
         const val SHA256_HASH = ""
         const val MIN_RAM_BYTES = 8L * 1024 * 1024 * 1024
 
         private const val TEMP_FILENAME = "model_download.tmp"
         private const val BUFFER_SIZE = 524_288
         private const val STORAGE_BUFFER_BYTES = 500L * 1024 * 1024
+        private const val MIN_MODEL_FILE_COMPLETENESS = 0.95
+        private const val MIN_LEGACY_MODEL_BYTES = 100L * 1024 * 1024
 
         const val DEMO_MODE = false
         var isTestModel: Boolean = false
@@ -53,6 +91,7 @@ class ModelRepository @Inject constructor(
         private const val PREF_DOWNLOAD_URL = "download_url"
         private const val PREF_DOWNLOADED_BYTES = "downloaded_bytes"
         private const val PREF_TOTAL_BYTES = "total_bytes"
+        private const val PREF_SELECTED_MODEL = "selected_model"
     }
 
     private val prefs: SharedPreferences by lazy {
@@ -65,9 +104,33 @@ class ModelRepository @Inject constructor(
     private val tempFile: File
         get() = File(modelDir, TEMP_FILENAME)
 
+    fun getSelectedModel(): ModelEntry {
+        val selectedName = prefs.getString(PREF_SELECTED_MODEL, MODEL_E4B.name) ?: MODEL_E4B.name
+        return ALL_MODELS.find { it.name == selectedName } ?: MODEL_E4B
+    }
+
+    fun setSelectedModel(model: ModelEntry) {
+        prefs.edit().putString(PREF_SELECTED_MODEL, model.name).apply()
+    }
+
+    fun getAllModels(): List<ModelEntry> = ALL_MODELS
+
+    fun getModelEntry(filename: String): ModelEntry? {
+        return ALL_MODELS.find { it.filename == filename }
+    }
+
     fun getDownloadConfig(): Triple<String, String, Long> {
-        android.util.Log.d(TAG, "Using Gemma 4 E4B only")
-        return Triple(MODEL_FILENAME, MODEL_URL, MODEL_SIZE_BYTES)
+        val model = getSelectedModel()
+        com.localyze.utils.AppLog.d(TAG, "Using model: ${model.displayName}")
+        return Triple(model.filename, model.url, model.sizeBytes)
+    }
+
+    /**
+     * Gets download config for a specific model.
+     */
+    fun getDownloadConfigFor(model: ModelEntry): Triple<String, String, Long> {
+        com.localyze.utils.AppLog.d(TAG, "Getting download config for: ${model.displayName}")
+        return Triple(model.filename, model.url, model.sizeBytes)
     }
 
     fun isModelDownloaded(): Boolean {
@@ -75,27 +138,64 @@ class ModelRepository @Inject constructor(
         return findModelFile() != null
     }
 
+    fun isModelDownloaded(model: ModelEntry): Boolean {
+        val file = File(modelDir, model.filename)
+        return isUsableModelFile(file, model)
+    }
+
     fun findModelFile(): File? {
-        val file = File(modelDir, MODEL_FILENAME)
-        if (file.exists() && file.length() > 0L) {
-            android.util.Log.d(TAG, "Found model: ${file.name} (${file.length() / 1024 / 1024} MB)")
+        val selectedModel = getSelectedModel()
+        val file = File(modelDir, selectedModel.filename)
+        if (isUsableModelFile(file, selectedModel)) {
+            com.localyze.utils.AppLog.d(TAG, "Found model: ${file.name} (${file.length() / 1024 / 1024} MB)")
             return file
         }
-        // Fallback: Qualcomm NPU-optimized variant (backwards-compatible on GPU)
+        // Check all models as fallback
+        for (model in ALL_MODELS) {
+            val f = File(modelDir, model.filename)
+            if (isUsableModelFile(f, model)) {
+                com.localyze.utils.AppLog.d(TAG, "Found fallback model: ${f.name} (${f.length() / 1024 / 1024} MB)")
+                return f
+            }
+        }
+        // Legacy Qualcomm fallback
         val qualcommFile = File(modelDir, "gemma-4-E2B-it_qualcomm_qcs8275.litertlm")
-        if (qualcommFile.exists() && qualcommFile.length() > 0L) {
-            android.util.Log.d(TAG, "Found Qualcomm model: ${qualcommFile.name} (${qualcommFile.length() / 1024 / 1024} MB)")
+        if (qualcommFile.exists() && qualcommFile.length() >= MIN_LEGACY_MODEL_BYTES) {
+            com.localyze.utils.AppLog.d(TAG, "Found Qualcomm model: ${qualcommFile.name} (${qualcommFile.length() / 1024 / 1024} MB)")
             return qualcommFile
         }
         return null
     }
 
+    private fun isUsableModelFile(file: File, model: ModelEntry): Boolean {
+        if (!file.exists()) return false
+        val length = file.length()
+        if (length <= 0L) return false
+        if (com.localyze.BuildConfig.USE_TEST_DOWNLOAD) return true
+
+        val minimumExpectedBytes = (model.sizeBytes * MIN_MODEL_FILE_COMPLETENESS).toLong()
+        val usable = length >= minimumExpectedBytes
+        if (!usable) {
+            android.util.Log.w(
+                TAG,
+                "Ignoring incomplete model ${file.name}: ${length / 1024 / 1024} MB " +
+                    "of expected ${model.sizeBytes / 1024 / 1024} MB"
+            )
+        }
+        return usable
+    }
+
     fun isTestModelFile(): Boolean = isTestModel
 
     fun getModelFilePath(): String = findModelFile()?.absolutePath
-        ?: File(modelDir, MODEL_FILENAME).absolutePath
+        ?: File(modelDir, getSelectedModel().filename).absolutePath
 
     fun getModelFileSize(): Long = findModelFile()?.length() ?: 0L
+
+    /**
+     * Gets the name of the currently downloaded model file.
+     */
+    fun getDownloadedModelName(): String? = findModelFile()?.name
 
     /**
      * Checks if there's an incomplete download that can be resumed.
@@ -112,7 +212,7 @@ class ModelRepository @Inject constructor(
      */
     fun getResumableDownloadProgress(): Pair<Long, Long> {
         val downloaded = tempFile.length()
-        val total = prefs.getLong(PREF_TOTAL_BYTES, MODEL_SIZE_BYTES)
+        val total = prefs.getLong(PREF_TOTAL_BYTES, getSelectedModel().sizeBytes)
         return Pair(downloaded, total)
     }
 
@@ -144,17 +244,38 @@ class ModelRepository @Inject constructor(
         }.apply()
     }
 
+    /**
+     * Downloads the currently selected model.
+     */
     fun downloadModel(resume: Boolean = true): Flow<DownloadProgress> = flow {
+        val config = getDownloadConfig()
+        val model = getSelectedModel()
+        downloadModelImpl(config.first, config.second, config.third, resume, model.sha256Hash)
+    }.flowOn(Dispatchers.IO)
+
+    /**
+     * Downloads a specific model.
+     */
+    fun downloadModel(model: ModelEntry, resume: Boolean = true): Flow<DownloadProgress> = flow {
+        val config = getDownloadConfigFor(model)
+        setSelectedModel(model)
+        downloadModelImpl(config.first, config.second, config.third, resume, model.sha256Hash)
+    }.flowOn(Dispatchers.IO)
+
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<DownloadProgress>.downloadModelImpl(
+        targetFilename: String,
+        downloadUrl: String,
+        totalSizeHint: Long,
+        resume: Boolean,
+        expectedSha256: String = ""
+    ) {
         val useTestDownload = com.localyze.BuildConfig.USE_TEST_DOWNLOAD
 
-        val (targetFilename, downloadUrl, totalSizeHint) = if (useTestDownload) {
-            Triple(MODEL_FILENAME, TEST_DOWNLOAD_URL, TEST_FILE_SIZE_BYTES)
-        } else {
-            getDownloadConfig()
-        }
+        val actualUrl = if (useTestDownload) TEST_DOWNLOAD_URL else downloadUrl
+        val actualSizeHint = if (useTestDownload) TEST_FILE_SIZE_BYTES else totalSizeHint
 
         if (DEMO_MODE) {
-            val totalBytes = totalSizeHint
+            val totalBytes = actualSizeHint
             val steps = 20
             val delayPerStep = 100L
             for (i in 1..steps) {
@@ -175,19 +296,18 @@ class ModelRepository @Inject constructor(
             emit(DownloadProgress.Verifying(percent = 1f))
             kotlinx.coroutines.delay(200)
             emit(DownloadProgress.Complete)
-            return@flow
+            return
         }
 
         modelDir.mkdirs()
 
-        // Check for resumable download
         var startByte = 0L
         val canResumeExistingDownload = resume && canResumeDownload()
         if (canResumeExistingDownload) {
             val (downloaded, total) = getResumableDownloadProgress()
             if (downloaded < total) {
                 startByte = downloaded
-                android.util.Log.d(TAG, "Resuming download from byte $startByte")
+                com.localyze.utils.AppLog.d(TAG, "Resuming download from byte $startByte")
                 emit(DownloadProgress.Resuming(startByte, total))
             }
         } else if (shouldDeleteStaleTempFile(resume, canResumeExistingDownload, tempFile.exists())) {
@@ -195,22 +315,21 @@ class ModelRepository @Inject constructor(
             clearDownloadProgress()
         }
 
-        if (!hasEnoughStorageForDownload(startByte)) {
+        if (!hasEnoughStorageForDownload(actualSizeHint, startByte)) {
             emit(
                 DownloadProgress.Error(
-                    "Not enough storage space. Need ~${formatFileSize(totalSizeHint + STORAGE_BUFFER_BYTES - startByte)} free.",
+                    "Not enough storage space. Need ~${formatFileSize(actualSizeHint + STORAGE_BUFFER_BYTES - startByte)} free.",
                     false
                 )
             )
-            return@flow
+            return
         }
 
         val requestBuilder = Request.Builder()
-            .url(downloadUrl)
+            .url(actualUrl)
             .header("Accept-Encoding", "identity")
             .header("Connection", "keep-alive")
 
-        // Add Range header if resuming
         if (startByte > 0) {
             requestBuilder.header("Range", "bytes=$startByte-")
         }
@@ -218,30 +337,30 @@ class ModelRepository @Inject constructor(
         val request = requestBuilder.build()
 
         try {
+            com.localyze.utils.AppLog.d(TAG, "Starting download from: $actualUrl")
             val response = okHttpClient.newCall(request).execute()
+            com.localyze.utils.AppLog.d(TAG, "Response code: ${response.code}, contentLength: ${response.body?.contentLength()}")
             if (!response.isSuccessful) {
                 val retryable = response.code in 500..599 || response.code == 429
                 emit(DownloadProgress.Error("Server returned ${response.code}: ${response.message}", retryable))
                 response.close()
-                return@flow
+                return
             }
 
             val responseBody = response.body ?: run {
                 emit(DownloadProgress.Error("Empty response body from server.", true))
-                return@flow
+                return
             }
 
             val contentLength = responseBody.contentLength()
-            // For resumed downloads, add the existing file size to get total
             val totalBytes = if (contentLength > 0) {
                 startByte + contentLength
             } else {
-                totalSizeHint
+                actualSizeHint
             }
 
             val inputStream = responseBody.byteStream()
 
-            // Use RandomAccessFile for resume support
             val raf = RandomAccessFile(tempFile, "rw")
             if (startByte > 0) {
                 raf.seek(startByte)
@@ -282,9 +401,8 @@ class ModelRepository @Inject constructor(
                         lastSpeedCalculationBytes = bytesDownloaded
                     }
 
-                    // Save progress periodically (every 5 seconds)
                     if (currentTime - lastProgressSaveTime >= 5000) {
-                        saveDownloadProgress(downloadUrl, bytesDownloaded, totalBytes)
+                        saveDownloadProgress(actualUrl, bytesDownloaded, totalBytes)
                         lastProgressSaveTime = currentTime
                     }
 
@@ -305,22 +423,21 @@ class ModelRepository @Inject constructor(
                         lastEmitTime = currentTime
                     }
 
-                    if (!hasEnoughStorageForDownload(bytesDownloaded)) {
+                    if (!hasEnoughStorageForDownload(actualSizeHint, bytesDownloaded)) {
                         emit(DownloadProgress.Error("Not enough storage space.", true))
                         raf.close()
                         inputStream.close()
                         response.close()
                         tempFile.delete()
                         clearDownloadProgress()
-                        return@flow
+                        return
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 raf.close()
                 inputStream.close()
                 response.close()
-                // Save progress for resume instead of deleting
-                saveDownloadProgress(downloadUrl, bytesDownloaded, totalBytes)
+                saveDownloadProgress(actualUrl, bytesDownloaded, totalBytes)
                 throw e
             }
 
@@ -332,23 +449,18 @@ class ModelRepository @Inject constructor(
                 tempFile.delete()
                 clearDownloadProgress()
                 emit(DownloadProgress.Error("Downloaded file is empty.", true))
-                return@flow
+                return
             }
 
-            if (SHA256_HASH.isNotEmpty()) {
+            if (expectedSha256.isNotBlank()) {
                 emit(DownloadProgress.Verifying(percent = 0f))
-                val verified = verifySha256(tempFile, SHA256_HASH) {}
+                val verified = verifySha256(tempFile, expectedSha256) {}
                 if (!verified) {
                     tempFile.delete()
                     clearDownloadProgress()
-                    emit(DownloadProgress.Error("File integrity check failed.", true))
-                    return@flow
+                    emit(DownloadProgress.Error("File integrity check failed. The downloaded model does not match the expected checksum.", true))
+                    return
                 }
-            } else {
-                emit(DownloadProgress.Verifying(percent = 0.5f))
-                kotlinx.coroutines.delay(100)
-                emit(DownloadProgress.Verifying(percent = 1f))
-                kotlinx.coroutines.delay(100)
             }
 
             val destinationFile = File(modelDir, targetFilename)
@@ -359,36 +471,34 @@ class ModelRepository @Inject constructor(
                     tempFile.delete()
                 } catch (e: Exception) {
                     emit(DownloadProgress.Error("Failed to finalize model file: ${e.message}", true))
-                    return@flow
+                    return
                 }
             }
 
-            // Clear download progress on success
             clearDownloadProgress()
 
-            android.util.Log.d(
+            com.localyze.utils.AppLog.d(
                 TAG,
                 "Model downloaded: ${destinationFile.name} (${destinationFile.length() / 1024 / 1024} MB)"
             )
             emit(DownloadProgress.Complete)
             if (useTestDownload) isTestModel = true
         } catch (e: kotlinx.coroutines.CancellationException) {
-            // Progress already saved in the inner catch block
             throw e
         } catch (e: java.net.SocketTimeoutException) {
-            // Keep temp file for resume
-            savePartialDownloadProgress(downloadUrl, totalSizeHint)
+            savePartialDownloadProgress(actualUrl, actualSizeHint)
+            android.util.Log.e(TAG, "Download socket timeout", e)
             emit(DownloadProgress.Error("Connection timed out. Download will resume when possible.", true))
         } catch (e: java.net.UnknownHostException) {
-            // Keep temp file for resume
-            savePartialDownloadProgress(downloadUrl, totalSizeHint)
+            savePartialDownloadProgress(actualUrl, actualSizeHint)
+            android.util.Log.e(TAG, "Download unknown host", e)
             emit(DownloadProgress.Error("Could not connect to server. Download will resume when connection is restored.", true))
         } catch (e: Exception) {
-            // For other errors, keep temp file for potential resume
-            savePartialDownloadProgress(downloadUrl, totalSizeHint)
+            savePartialDownloadProgress(actualUrl, actualSizeHint)
+            android.util.Log.e(TAG, "Download error", e)
             emit(DownloadProgress.Error("Download failed: ${e.message ?: "Unknown error"}. Progress saved for resume.", true))
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
     private fun savePartialDownloadProgress(downloadUrl: String, totalSizeHint: Long) {
         val bytesDownloaded = tempFile.length()
@@ -436,9 +546,10 @@ class ModelRepository @Inject constructor(
         return context.filesDir.usableSpace > (MODEL_SIZE_BYTES + STORAGE_BUFFER_BYTES)
     }
 
-    /**
-     * Checks if the device is connected to WiFi.
-     */
+    fun hasEnoughStorageFor(model: ModelEntry): Boolean {
+        return context.filesDir.usableSpace > (model.sizeBytes + STORAGE_BUFFER_BYTES)
+    }
+
     fun isWifiConnected(): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
         val network = connectivityManager.activeNetwork ?: return false
@@ -446,9 +557,6 @@ class ModelRepository @Inject constructor(
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 
-    /**
-     * Checks if the device is connected to cellular data.
-     */
     fun isCellularConnected(): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
         val network = connectivityManager.activeNetwork ?: return false
@@ -456,18 +564,12 @@ class ModelRepository @Inject constructor(
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
     }
 
-    /**
-     * Checks if large downloads should be allowed based on network type.
-     */
     fun shouldAllowDownload(allowOnCellular: Boolean): Boolean {
         if (isWifiConnected()) return true
         if (allowOnCellular && isCellularConnected()) return true
         return false
     }
 
-    /**
-     * Gets a human-readable description of the current network state.
-     */
     fun getNetworkStatus(): String {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return "Unknown"
         val network = connectivityManager.activeNetwork ?: return "No Connection"
@@ -481,8 +583,8 @@ class ModelRepository @Inject constructor(
         }
     }
 
-    private fun hasEnoughStorageForDownload(bytesSoFar: Long): Boolean {
-        return context.filesDir.usableSpace > (MODEL_SIZE_BYTES - bytesSoFar + STORAGE_BUFFER_BYTES)
+    private fun hasEnoughStorageForDownload(modelSize: Long, bytesSoFar: Long): Boolean {
+        return context.filesDir.usableSpace > (modelSize - bytesSoFar + STORAGE_BUFFER_BYTES)
     }
 
     private fun formatFileSize(bytes: Long): String {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.localyze">
+
+    <application>
+        <receiver
+            android:name=".CodeTestReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.localyze.CODE_TEST" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.viewmodels
+package com.localyze.ui.viewmodels
 
 import com.localyze.domain.models.Memory
 import com.localyze.data.billing.PremiumSubscriptionState
@@ -28,9 +28,12 @@ data class ModelInfo(
     val isLoaded: Boolean = false,
     val isDownloaded: Boolean = false,
     val modelSizeMb: Long = 0L,
-    val modelName: String = "Gemma 4 E4B",
+    val modelName: String = "Localyze.ai",
     val quantization: String = "INT4",
-    val contextWindow: String = "4096 tokens configured"
+    val contextWindow: String = "4096 tokens configured",
+    val selectedModelName: String = "Gemma 4 E4B",
+    val availableModels: List<String> = listOf("Gemma 4 E4B", "Gemma 4 E2B"),
+    val downloadedModels: List<String> = emptyList()
 )
 
 data class StorageInfo(

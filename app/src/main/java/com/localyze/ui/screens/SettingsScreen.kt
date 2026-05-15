@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.screens
+package com.localyze.ui.screens
 
 import android.Manifest
 import android.app.Activity
@@ -75,6 +75,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.localyze.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,7 +97,6 @@ import com.localyze.ui.theme.Background
 import com.localyze.ui.theme.Nunito
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
-import com.localyze.ui.theme.PastelGreen
 import com.localyze.ui.theme.Primary
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
@@ -159,6 +160,7 @@ fun SettingsScreen(
         microphoneStatus = microphoneStatus,
         notificationStatus = notificationStatus,
         onOpenModelInfo = { showModelInfoDialog = true },
+        onSwitchModel = { viewModel.switchModel(it) },
         onDeleteModel = { viewModel.showDeleteModelDialog() },
         onOpenPermissions = { showPermissionsDialog = true },
         onOpenAbout = { showAboutDialog = true },
@@ -200,6 +202,7 @@ fun SettingsScreen(
     if (showModelInfoDialog) {
         ModelInfoDialog(
             uiState = uiState,
+            onSwitchModel = { viewModel.switchModel(it) },
             onDismiss = { showModelInfoDialog = false },
             onDeleteModel = {
                 viewModel.showDeleteModelDialog()
@@ -246,6 +249,7 @@ private fun SettingsReferenceContent(
     microphoneStatus: String,
     notificationStatus: String,
     onOpenModelInfo: () -> Unit,
+    onSwitchModel: (String) -> Unit,
     onDeleteModel: () -> Unit,
     onOpenPermissions: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -273,6 +277,7 @@ private fun SettingsReferenceContent(
     onNavigateToPerformance: () -> Unit,
     onNavigateToBackups: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -289,17 +294,17 @@ private fun SettingsReferenceContent(
             ReferenceSettingsRow(
                 icon = Icons.Outlined.PhoneAndroid,
                 title = "Model",
-                subtitle = uiState.modelInfo.modelName,
+                subtitle = uiState.modelInfo.selectedModelName,
                 value = if (uiState.modelInfo.isDownloaded) "Installed" else "Missing",
                 onClick = onOpenModelInfo
             )
             ReferenceDivider()
             ReferenceSettingsRow(
-                icon = Icons.Outlined.Delete,
-                title = "Delete model",
-                subtitle = "Free up storage by removing the local model",
-                danger = true,
-                onClick = onDeleteModel
+                icon = Icons.Outlined.Tune,
+                title = "Switch model",
+                subtitle = "Choose between Gemma 4 E4B and E2B",
+                value = uiState.modelInfo.selectedModelName,
+                onClick = onOpenModelInfo
             )
         }
 
@@ -364,6 +369,36 @@ private fun SettingsReferenceContent(
                 subtitle = "No chats are sent to our servers",
                 value = "Local AI",
                 onClick = onOpenAbout
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Security,
+                title = stringResource(R.string.privacy_policy),
+                subtitle = stringResource(R.string.privacy_policy_subtitle),
+                onClick = {
+                    val url = context.getString(R.string.privacy_policy_url)
+                    runCatching {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }
+                }
+            )
+            ReferenceDivider()
+            ReferenceSettingsRow(
+                icon = Icons.Outlined.Security,
+                title = stringResource(R.string.terms_of_service),
+                subtitle = stringResource(R.string.terms_of_service_subtitle),
+                onClick = {
+                    val url = context.getString(R.string.terms_of_service_url)
+                    runCatching {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }
+                }
             )
         }
 
@@ -514,7 +549,7 @@ private fun AvatarSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Localyze",
+            text = "Localyze.ai",
             fontFamily = Nunito,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
@@ -821,10 +856,12 @@ private fun KeywordChip(keyword: String) {
 @Composable
 private fun ModelInfoDialog(
     uiState: SettingsUiState,
+    onSwitchModel: (String) -> Unit,
     onDismiss: () -> Unit,
     onDeleteModel: () -> Unit
 ) {
     val modelInfo = uiState.modelInfo
+    var selectedModel by remember { mutableStateOf(modelInfo.selectedModelName) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -839,7 +876,7 @@ private fun ModelInfoDialog(
         },
         text = {
             Column {
-                ModelInfoRow("Model name", modelInfo.modelName)
+                ModelInfoRow("Active model", modelInfo.modelName)
                 ModelInfoRow("Quantization", modelInfo.quantization)
                 ModelInfoRow("Context window", modelInfo.contextWindow)
                 ModelInfoRow("Model size", if (modelInfo.modelSizeMb > 0) "${modelInfo.modelSizeMb} MB" else "Not downloaded")
@@ -848,7 +885,66 @@ private fun ModelInfoDialog(
                     modelInfo.isDownloaded -> "Downloaded (not loaded)"
                     else -> "Not downloaded"
                 })
-                ModelInfoRow("Downloaded", if (modelInfo.isDownloaded) "Yes" else "No")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Switch Model",
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    color = OnBackground
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                modelInfo.availableModels.forEach { modelName ->
+                    val isSelected = modelName == selectedModel
+                    val isDownloaded = modelName in modelInfo.downloadedModels
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isSelected) Primary.copy(alpha = 0.1f) else SurfaceColor
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedModel = modelName
+                                    onSwitchModel(modelName)
+                                }
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = modelName,
+                                    fontFamily = Nunito,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 14.sp,
+                                    color = if (isSelected) Primary else OnBackground
+                                )
+                                Text(
+                                    text = if (isDownloaded) "Downloaded" else "Not downloaded",
+                                    fontFamily = Nunito,
+                                    fontSize = 12.sp,
+                                    color = TextSecondary
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = "Selected",
+                                    tint = Primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
@@ -1108,7 +1204,7 @@ private fun PermissionsDialog(
                                 fontFamily = Nunito,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp,
-                                color = PastelGreen
+                                color = Primary
                             )
                         } else {
                             Text(
@@ -1164,7 +1260,7 @@ private fun AboutDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "About Localyze",
+                text = "About Localyze.ai",
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -1184,7 +1280,7 @@ private fun AboutDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "A private, on-device AI assistant powered by Google's Gemma 4 E4B model. All processing happens locally, and your data stays on your device.",
+                    text = "Localyze.ai is a private, on-device AI assistant based on Google's Gemma 4 E4B model. All processing happens locally, and your data stays on your device.",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,

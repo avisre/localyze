@@ -1,0 +1,254 @@
+{
+  "results": [
+    {
+      "tag": "Q01_dog_age",
+      "category": "fact",
+      "prompt": "How long do dogs usually live?",
+      "verdict": "ANSWERED",
+      "answer": "Read 6 sources\nSources\nE\nen.wikipedia.org\nAging in dogs\nE\nen.wikipedia.org\nWorldwide usage of police dogs\nIn law enforcement work, police dogs are used worldwide for a variety of purposes that include apprehension, detection, and search and rescue. The Australian Last indexed: 2026-02-11T16:07:24Z",
+      "answer_len": 298,
+      "elapsed_s": 20.6,
+      "screenshot": "/tmp/r25_Q01_dog_age.png"
+    },
+    {
+      "tag": "Q02_cup_oz",
+      "category": "fact",
+      "prompt": "How many ounces are in a cup?",
+      "verdict": "ANSWERED",
+      "answer": "Google\nMeet\nGame Assistant\nPlay Store\nGoogle\nTheme Store",
+      "answer_len": 56,
+      "elapsed_s": 22.3,
+      "screenshot": "/tmp/r25_Q02_cup_oz.png"
+    },
+    {
+      "tag": "Q03_capital_aus",
+      "category": "fact",
+      "prompt": "What's the capital of Australia?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of Australia is Canberra.",
+      "answer_len": 37,
+      "elapsed_s": 46.0,
+      "screenshot": "/tmp/r25_Q03_capital_aus.png"
+    },
+    {
+      "tag": "Q04_year_today",
+      "category": "fact",
+      "prompt": "What year is it?",
+      "verdict": "ANSWERED",
+      "answer": "The current year is 202026.",
+      "answer_len": 27,
+      "elapsed_s": 27.6,
+      "screenshot": "/tmp/r25_Q04_year_today.png"
+    },
+    {
+      "tag": "Q05_sleep_hours",
+      "category": "fact",
+      "prompt": "How many hours of sleep do adults need?",
+      "verdict": "ANSWERED",
+      "answer": "Adults generally need between 7 and 9 hours of sleep per night.",
+      "answer_len": 63,
+      "elapsed_s": 27.1,
+      "screenshot": "/tmp/r25_Q05_sleep_hours.png"
+    },
+    {
+      "tag": "Q06_tip",
+      "category": "math",
+      "prompt": "If a meal costs $48, what is a 20 percent tip?",
+      "verdict": "ANSWERED",
+      "answer": "48 \u00d7 20 \u00f7 100 = 9.6.",
+      "answer_len": 20,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/r25_Q06_tip.png"
+    },
+    {
+      "tag": "Q07_split_bill",
+      "category": "math",
+      "prompt": "Split a $135 bill three ways.",
+      "verdict": "THIN",
+      "answer": "135 \u00f7 3 = 45.",
+      "answer_len": 13,
+      "elapsed_s": 19.5,
+      "screenshot": "/tmp/r25_Q07_split_bill.png"
+    },
+    {
+      "tag": "Q08_discount",
+      "category": "math",
+      "prompt": "A jacket is $80 with 25 percent off. What's the sale price?",
+      "verdict": "ANSWERED",
+      "answer": "80 \u00d7 (1\n25\u00f7100) = 60.",
+      "answer_len": 21,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/r25_Q08_discount.png"
+    },
+    {
+      "tag": "Q09_weight_conv",
+      "category": "convert",
+      "prompt": "How many pounds is 70 kilograms?",
+      "verdict": "ANSWERED",
+      "answer": "70 kg = 154.324 lb.",
+      "answer_len": 19,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/r25_Q09_weight_conv.png"
+    },
+    {
+      "tag": "Q10_distance",
+      "category": "convert",
+      "prompt": "How many kilometers is 50 miles?",
+      "verdict": "ANSWERED",
+      "answer": "50 mi = 80.4672 km.",
+      "answer_len": 19,
+      "elapsed_s": 19.6,
+      "screenshot": "/tmp/r25_Q10_distance.png"
+    },
+    {
+      "tag": "Q11_boil_egg",
+      "category": "lifestyle",
+      "prompt": "How long do I boil an egg for it to be soft-boiled?",
+      "verdict": "ANSWERED",
+      "answer": "To boil an egg for a soft-boiled egg, you should boil it for approximately 6 to 7 minutes.\nReasonable Defaults:\nEgg Size: Standard large egg size is assumed.\nStarting Point: Eggs are assumed to be added to boiling water, not cold water.\nDisclaimer: Cooking times can vary based on the specific egg size and desired texture.",
+      "answer_len": 323,
+      "elapsed_s": 39.3,
+      "screenshot": "/tmp/r25_Q11_boil_egg.png"
+    },
+    {
+      "tag": "Q12_chicken_temp",
+      "category": "lifestyle",
+      "prompt": "What internal temperature is chicken safe to eat at?",
+      "verdict": "ANSWERED",
+      "answer": "The safe internal temperature for cooked chicken is generally considered to be 165\u00b0F.",
+      "answer_len": 85,
+      "elapsed_s": 40.3,
+      "screenshot": "/tmp/r25_Q12_chicken_temp.png"
+    },
+    {
+      "tag": "Q13_fluffy_rice",
+      "category": "lifestyle",
+      "prompt": "How do I cook fluffy white rice on the stove?",
+      "verdict": "ANSWERED",
+      "answer": "Combine Ingredients: Place the rinsed rice in a saucepan with the water. A good rule of thumb is to use a 1:1.5 ratio of rice to water (e.g., 1 cup of rice to 1.5 cups of water). Add a pinch of salt to the water for flavor.\n3.\nBoil: Bring the water to a boil over medium-high heat. Once boiling, reduce the heat to low.\n4.\nSimmer: Cover the saucepan with a tight-fitting lid. Simmer the rice for 15 to 20 minutes. Do not lift the lid during this time.\n5.\nRest: Remove the saucepan from the heat. Let the rice rest, covered, for 10 minutes. This allows the steam to finish cooking the rice evenly.\n6.\nFluff: Remove the lid. Fluff the rice gently with a fork before serving.\nThis method should yield fluffy, separate grains of rice.",
+      "answer_len": 730,
+      "elapsed_s": 59.9,
+      "screenshot": "/tmp/r25_Q13_fluffy_rice.png"
+    },
+    {
+      "tag": "Q14_caffeine",
+      "category": "lifestyle",
+      "prompt": "How long does caffeine stay in your system?",
+      "verdict": "ANSWERED",
+      "answer": "The half-life of caffeine in the human body varies between individuals, but generally ranges from 3 to 7 hours.\nThis means that after about 3 to 7 hours, half of the caffeine you consumed will have been eliminated from your system.\nDefault Assumption: This answer assumes an average adult human metabolism.\nDisclaimer: Individual factors such as genetics, body weight, and metabolism can significantly alter how long caffeine stays in your system.",
+      "answer_len": 447,
+      "elapsed_s": 39.8,
+      "screenshot": "/tmp/r25_Q14_caffeine.png"
+    },
+    {
+      "tag": "Q15_wifi_pw",
+      "category": "tech",
+      "prompt": "How do I find my Wi-Fi password on Android?",
+      "verdict": "ANSWERED",
+      "answer": "3.\nTap Wi-Fi.\n4.\nTap the gear icon next to the network you are currently connected to.\n5.\nTap Share or QR code.\n6.\nYour Wi-Fi password will be displayed below the QR code.\nFor older Android versions:\n1.\nGo to Settings.\n2.\nTap Network &amp; Internet or Connections.\n3.\nTap Wi-Fi.\n4.\nTap on the network name you are connected to.\n5.\nLook for an option like Password or Security.\n6.\nYou may need to enter your device PIN or pattern to view the password.\nIf you are unable to find the password, you may need to use a computer or router to find the password.",
+      "answer_len": 553,
+      "elapsed_s": 60.6,
+      "screenshot": "/tmp/r25_Q15_wifi_pw.png"
+    },
+    {
+      "tag": "Q16_screenshot",
+      "category": "tech",
+      "prompt": "How do I take a screenshot on an iPhone 15?",
+      "verdict": "ANSWERED",
+      "answer": "To take a screenshot on an iPhone 5, you need to press and hold the Power button and the Volume Up button at the same time.",
+      "answer_len": 123,
+      "elapsed_s": 27.4,
+      "screenshot": "/tmp/r25_Q16_screenshot.png"
+    },
+    {
+      "tag": "Q17_battery",
+      "category": "tech",
+      "prompt": "Why does my phone battery drain so fast?",
+      "verdict": "ANSWERED",
+      "answer": "Phone battery drain can be caused by several factors. Here are some common reasons:\nScreen Brightness: A high screen brightness level uses more power.\nApp Usage: Certain apps, especially those that run in the background, can drain the battery quickly.\nSignal Strength: Poor cellular signal strength forces the phone to use more power to find a connection.\nLocation Services: GPS and other location services constantly searching for your location.\nOutdated Software: Outdated operating system or app software can have bugs that cause inefficient power use.\nTo help you further, I can check your phone system information if you want.",
+      "answer_len": 631,
+      "elapsed_s": 40.9,
+      "screenshot": "/tmp/r25_Q17_battery.png"
+    },
+    {
+      "tag": "Q18_resume_tip",
+      "category": "advice",
+      "prompt": "Give me 3 quick tips for writing a better resume.",
+      "verdict": "ANSWERED",
+      "answer": "Here are 3 quick tips for writing a better resume:\nTailor to the Job Description: Customize your resume for each specific job application by using keywords from the job description.\nFocus on Achievements, Not Just Duties: Instead of listing job duties, use bullet points to describe accomplishments and the positive results you achieved in your previous roles.\nKeep it Concise and Clear: Aim for a one-page resume if you have less than 10 years of experience, and use clear, professional formatting that is easy to read.",
+      "answer_len": 520,
+      "elapsed_s": 36.5,
+      "screenshot": "/tmp/r25_Q18_resume_tip.png"
+    },
+    {
+      "tag": "Q19_hangover",
+      "category": "advice",
+      "prompt": "What is a good way to get rid of a hangover?",
+      "verdict": "ANSWERED",
+      "answer": "A good way to get rid of a hangover involves a combination of hydration, rest, and nutrition.\nHere are some common strategies:\nHydrate: Drink plenty of water, electrolyte solutions (like sports drinks or oral rehydration salts), or clear broths to replace fluids lost during alcohol consumption.\nRest: Allow your body time to recover. Sleep is crucial for your body to repair itself.\nEat: Consume bland, starchy foods like toast, crackers, or bananas to help stabilize blood sugar levels and soothe an upset stomach.\nAvoid: Steer clear of more alcohol, caffeine, and sugary drinks, as these can worsen symptoms.\nSources: General health advice.",
+      "answer_len": 643,
+      "elapsed_s": 41.5,
+      "screenshot": "/tmp/r25_Q19_hangover.png"
+    },
+    {
+      "tag": "Q20_save_money",
+      "category": "advice",
+      "prompt": "How can I save money on groceries each month?",
+      "verdict": "ANSWERED",
+      "answer": "Shop Sales and Coupons: Check weekly flyers and apps for store sales before you go shopping. Use digital coupons and look for store-brand alternatives, which are often cheaper than name-brand items.\nBuy in Bulk (Wisely): Purchase non-perishable staples like rice, pasta, and canned goods in bulk when they are on sale. However, only buy fresh produce or meat in bulk if you are certain you will use it all before it spoils.\nReduce Food Waste: Store food properly to extend its life. Learn how to freeze leftovers and use up ingredients that are nearing their expiration date in creative ways.\nConsider Alternatives: Swap expensive cuts of meat for cheaper proteins like beans, lentils, or eggs. Also, try buying produce that is in season, as it is generally cheaper and tastes better.",
+      "answer_len": 784,
+      "elapsed_s": 56.5,
+      "screenshot": "/tmp/r25_Q20_save_money.png"
+    },
+    {
+      "tag": "Q21_email_sick",
+      "category": "writing",
+      "prompt": "Write a short email to my boss saying I'm sick today and won't be in.",
+      "verdict": "ANSWERED",
+      "answer": "Subject: Absence Today\n[Your Name]\nDear [Boss's Name],\nPlease accept this email as notification that I am unable to come to work today, [Date], as I am feeling unwell. I will be taking the day to rest and recover. I will check my email periodically for urgent matters if possible.\nBest regards,\n[Your Name]\nDisclaimer: This is a general template; please fill in the bracketed information with your specific details.",
+      "answer_len": 415,
+      "elapsed_s": 40.2,
+      "screenshot": "/tmp/r25_Q21_email_sick.png"
+    },
+    {
+      "tag": "Q22_thx_note",
+      "category": "writing",
+      "prompt": "Write a 2-sentence thank-you note for a wedding gift.",
+      "verdict": "ANSWERED",
+      "answer": "Thank you so much for the incredibly thoughtful wedding gift; we were so touched by your generosity. We are so excited to celebrate this new chapter with you and hope to see you soon!",
+      "answer_len": 183,
+      "elapsed_s": 30.1,
+      "screenshot": "/tmp/r25_Q22_thx_note.png"
+    },
+    {
+      "tag": "Q23_inflation",
+      "category": "explain",
+      "prompt": "What is inflation in simple terms?",
+      "verdict": "ANSWERED",
+      "answer": "Inflation, in simple terms, is the rate at which the general level of prices for goods and services is rising, and consequently, the purchasing power of money is falling.\nHere is a breakdown:\nRising Prices: It means that things cost more over time. For example, if a loaf of bread cost $2.0000 last year and costs $2.20000 this year, that is inflation.\nFalling Purchasing Power: It means that your money buys less. If your salary stays the same, but prices go up, you can buy fewer things with the same amount of money.\nEssentially, inflation is a measure of how much your money is losing value over time.",
+      "answer_len": 605,
+      "elapsed_s": 41.2,
+      "screenshot": "/tmp/r25_Q23_inflation.png"
+    },
+    {
+      "tag": "Q24_protein",
+      "category": "advice",
+      "prompt": "How much protein should I eat per day?",
+      "verdict": "ANSWERED",
+      "answer": "The recommended daily protein intake depends on several factors, including your age, weight, activity level, and overall health goals.\nFor a general, sedentary adult, the recommended daily allowance is typically around 0.8 grams of protein per kilogram of body weight.\nFor individuals who are more active, such as athletes or those who are trying to build muscle, the recommendation is often higher, ranging from 1.2 to 2.2 grams of protein per kilogram of body weight.\nFor the elderly, the recommendation is often slightly higher to help maintain muscle mass, around 1.0 to 1.2 grams of protein per kilogram of body weight.\nTo get a more precise recommendation for you, I would need to know your weight and activity level.",
+      "answer_len": 723,
+      "elapsed_s": 47.5,
+      "screenshot": "/tmp/r25_Q24_protein.png"
+    },
+    {
+      "tag": "Q25_passwd",
+      "category": "advice",
+      "prompt": "Give me 3 rules for picking a strong password.",
+      "verdict": "ANSWERED",
+      "answer": "Here are 3 rules for picking a strong password:\nLength: Make it long. Aim for at least 12 characters or more. Longer passwords are significantly harder for computers to guess.\nComplexity: Use a mix of character types. Include uppercase letters, lowercase letters, numbers, and symbols (like !@#$).\nUniqueness: Never reuse passwords. Do not use the same password for multiple accounts. If one account is compromised, all your other accounts are at risk.",
+      "answer_len": 452,
+      "elapsed_s": 36.9,
+      "screenshot": "/tmp/r25_Q25_passwd.png"
+    }
+  ]
+}

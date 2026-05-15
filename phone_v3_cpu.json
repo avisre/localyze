@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "tag": "Q2_TRAIN_MATH",
+      "q": "A train leaves City A at 9:00 AM going 60 mph east. Another leaves City B at 9:30 AM going 75 mph west. The cities are 300 miles apart. When do they meet?",
+      "force_cpu": true,
+      "web": false,
+      "status": "ERROR",
+      "elapsed_s": 40.0,
+      "answer": "",
+      "answer_len": 0,
+      "path": "gemma",
+      "error": "Response timeout"
+    },
+    {
+      "tag": "Q3_CODE_RUN",
+      "q": "Write a Python function longest_run(nums) that returns the length of the longest run of consecutive equal numbers in a list. Include one example call with output.",
+      "force_cpu": true,
+      "web": false,
+      "status": "OK",
+      "elapsed_s": 41.4,
+      "answer": "",
+      "answer_len": 0,
+      "path": "curator",
+      "error": "Response timeout"
+    }
+  ]
+}

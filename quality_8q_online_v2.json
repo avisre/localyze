@@ -1,0 +1,108 @@
+{
+  "online": [
+    {
+      "tag": "Q1_TCP_UDP",
+      "q": "Explain the difference between TCP and UDP and when to use each, in 4 short bullets.",
+      "web_search": true,
+      "elapsed_s": 43.1,
+      "status": "OK",
+      "answer": "The difference between TCP and UDP lies in their approach to data transmission:\n*   **TCP (Transmission Control Protocol):** Is connection-oriented, meaning it establishes a formal connection before sending data. It guarantees reliable delivery, ordering, and error checking.\n*   **UDP (User Datagram Protocol):** Is connectionless, meaning it sends data packets without establishing a formal connection. It is faster but does not guarantee delivery or order.\n*   **When to use TCP:** Use TCP when data integrity is critical, such as for web browsing (HTTP), email (SMTP), or file transfers (FTP).\n*   **When to use UDP:** Use UDP when speed is more important than perfect reliability, such as for live video streaming, online gaming, or DNS lookups.",
+      "answer_len": 750,
+      "n_tokens": 159,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q2_TRAIN_MATH",
+      "q": "A train leaves City A at 9:00 AM going 60 mph east. Another leaves City B at 9:30 AM going 75 mph west. The cities are 300 miles apart. When do they meet?",
+      "web_search": true,
+      "elapsed_s": 82.9,
+      "status": "OK",
+      "answer": "The problem as stated is physically impossible as written.\nHere is the reasoning:\n1.  **Train A** starts at City A at 9:0 AM, traveling East at 6 mph.\n2.  **Train B** starts at City B at 9:30 AM, traveling West at 7.5 mph.\n3.  The cities are 0 miles apart.\nSince the cities are 0 miles apart, they are at the same location at the start. Train A is traveling East, and Train B is traveling West. They are moving away from each other immediately.\nIf the cities were 3 miles apart, they would meet.\nAssuming the cities are 3 miles apart, here is the calculation:\n*   **Train A** travels for 0.5 hours (from 9:0 AM to 9:30 AM) at 6 mph.\n    *   Distance A = 6 mph * 0.5 hours = 3 miles.\n*   At 9:30 AM, Train A is 3 miles East of City A.\n*   Train B starts at City B (which is 3 miles West of City A) and travels West at 7.5 mph.\n*   The initial distance between them at 9:30 AM is 3 miles.\n*   Their combined speed (relative speed) is 6 mph + 7.5 mph = 13.5 mph.\n*   Time to meet = Distance / Speed = 3 miles / 1.5 mph = 2 hours.\nThey would meet at 111:30 PM.",
+      "answer_len": 1056,
+      "n_tokens": 348,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q3_CODE_RUN",
+      "q": "Write a Python function longest_run(nums) that returns the length of the longest run of consecutive equal numbers in a list. Include one example call with output.",
+      "web_search": true,
+      "elapsed_s": 110.4,
+      "status": "OK",
+      "answer": "Here is the Python function `longest_run(nums)` that returns the length of the longest run of consecutive equal numbers in a list, along with an example usage.\n```python\ndef longest_run(nums):\n    \"\"\"\n    Returns the length of the longest run of consecutive equal numbers in a list.\n    Args:\n        :nums: A list of numbers.\n    Returns:       : The length of the longest run of consecutive equal numbers.\n    \"\"\"\n    if not nums:\n        return 0\n    max_run = 1\n    current_run = 1\n    for i in range(1, len(nums)):\n        if nums[i] == nums[i-1]]:\n            \n            current_run += 1\n        else:\n            max_run = max(maxrun, currentrun)\n            currentrun = 1\n    \n    # Handle the case where the longest run is at the end of the list\n    return max(maxrun, currentrun)\n# Example Usage:\nnumbers = [1, 2, 2, 2, 3, 3, 3, 3, 3, 4]\nresult = longest_run(numbers)\nprint(f\"The length of the longest run is: {result}\")\n```\n### Explanation\n1. **Initialization**: The function first checks if the input list `nums` is empty. If so, it returns 0. Otherwise, it initializes `max_run` and `current_run` to 1, assuming the first element is a run of length 1.\n2. **Iteration**: It iterates through the list starting from the second element (index 1).\n3. **Comparison**: In each step, it compares the current element `nums[i]` with the previous element `nums[i-1]]`.\n    *   If they are equal, `current_run` is incremented.\n    *   If they are not equal, it means the current run has ended. The function updates `max_run` to be the maximum of its current value and the just finished `current_run`. Then, `current_run` is reset to 1 to start counting the new run.\n4. **Final Check**: After the loop finishes, the function returns the maximum of `max_run` and `current_run` because the longest run might be at the very end of the list and the `max_run` update logic only triggers when a run breaks.\n### Example Output\n```\nThe length of the longest run is: 5\n```",
+      "answer_len": 1966,
+      "n_tokens": 555,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q4_APOLOGY",
+      "q": "Draft a 3-sentence apology email to a customer whose order was delayed by 5 days due to a warehouse fire.",
+      "web_search": true,
+      "elapsed_s": 28.8,
+      "status": "OK",
+      "answer": "Subject: Sincere Apologies Regarding Your Order Delay\nPlease accept our sincerest apologies for the 5-day delay in receiving your order due to an unexpected warehouse fire. We understand this is frustrating, and we are working diligently to ensure your package reaches you as quickly as possible. Thank you for your patience and understanding as we resolve this situation.",
+      "answer_len": 372,
+      "n_tokens": 70,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q5_HASH_TABLE",
+      "q": "Explain to a beginner what a hash table is and why it is fast, with one analogy.",
+      "web_search": true,
+      "elapsed_s": 105.1,
+      "status": "OK",
+      "answer": "A hash table is a data structure that stores data in the form of **key-value pairs**. Think of it like a highly organized library catalog system.\n### What It Is\nInstead of storing all the books (data) in one long, messy pile on the floor, a hash table uses a special function called a **hash function**. This function takes a key (like a book title) and instantly calculates a specific location (like a shelf number) where the corresponding value (the book itself) should be stored.\n### Why It Is Fast\nThe speed comes from this direct mapping. When you want to find a book, you don't have to look through every single book on the floor. Instead, you take the title, run it through the hash function, and it tells you exactly which shelf to go to. This means you can find, insert, or delete data in nearly constant time, regardless of how much data you have.\n### Analogy: The Mail Sorter\nImagine a massive post office.\n*   **The Data:** All the letters.\n*   **The Key:** The recipient's address (e.g., \"12000 Main St\").\n*   **The Hash Function:** A machine that takes the address and instantly calculates a specific bin number (e.g., \"Bin 427\").\n*   **The Hash Table:** The set of bins.\nWhen a letter arrives, the machine tells you to put it in Bin 47. When you want to find a letter for \"100 Main St,\" you run the address through the machine, it tells you Bin 47, and you go straight to Bin 7 to get it. You don't have to check every single bin!\n***\n**In summary:** A hash table is fast because it uses a mathematical trickery (the hash function) to turn a key into a direct address, allowing you to jump straight to the data without searching through everything.",
+      "answer_len": 1663,
+      "n_tokens": 410,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q6_PYTHON_VERSION",
+      "q": "What is the latest stable version of Python and when was it released?",
+      "web_search": true,
+      "elapsed_s": 37.8,
+      "status": "OK",
+      "answer": "The latest stable version of Python appears to be **Python 3.14.0**, which was released in **November 20225**.\n### Key Details\n*   **Latest Version:** Python 3.140\n*   **Release",
+      "answer_len": 177,
+      "n_tokens": 55,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q7_BTC_PRICE",
+      "q": "What is the current Bitcoin price in USD?",
+      "web_search": true,
+      "elapsed_s": 13.1,
+      "status": "OK",
+      "answer": "und $80,011.00 USD. s move continuously,linked market sourcecoin BTC price in USwww.coingecko.com/en USD live price, marhart ... - https://c.com/currencies/bitcin USD Price (BTC-USinance - https://fine today, BTC to USD marketcap and chart  https://www.coindesbitcoin",
+      "answer_len": 267,
+      "n_tokens": 14,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE"
+    },
+    {
+      "tag": "Q8_APPLES",
+      "q": "I have 3 apples. I give you 2. Then I eat 1 of mine. Then you give me back 1. How many apples does each of us have at the end?",
+      "web_search": true,
+      "elapsed_s": 48.5,
+      "status": "OK",
+      "answer": "Here is the breakdown of the apples:\n*   **You:** You started with 3 apples. You gave away 2, leaving you with 1. You then ate 1, leaving you with 0. You received 1 back, so you have **1 apple**.\n*   **Me:** I started with 2 apples. I gave 1 back, so I have **1 apple**.\nAt the end, you have 1 apple and I have 1 apple.",
+      "answer_len": 319,
+      "n_tokens": 101,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE"
+    }
+  ]
+}

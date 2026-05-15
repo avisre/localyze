@@ -37,10 +37,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.localyze.R
+import com.localyze.ui.theme.Hairline
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
 import com.localyze.ui.theme.Primary
+import com.localyze.ui.theme.Surface
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
 
@@ -53,7 +56,7 @@ fun AssistantMark(
         painter = painterResource(id = R.drawable.localyze_logo_mark),
         contentDescription = "Localyze",
         modifier = modifier
-            .size(36.dp)
+            .size(32.dp)
             .alpha(if (active) 1f else 0.45f),
         contentScale = ContentScale.Fit
     )
@@ -74,7 +77,7 @@ fun ReferenceHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 14.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AssistantMark()
@@ -83,7 +86,7 @@ fun ReferenceHeader(
             Text(
                 text = title,
                 color = OnBackground,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -266,18 +269,18 @@ fun ReferenceSettingsGroup(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = title,
+            text = title.uppercase(),
             color = TextSecondary,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 8.dp)
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = 0.sp),
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 10.dp)
         )
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, SurfaceVariant)
+                .padding(horizontal = 16.dp),
+            color = Surface,
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(0.5.dp, Hairline)
         ) {
             Column(content = { content() })
         }
@@ -301,31 +304,31 @@ fun ReferenceSettingsRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(if (subtitle == null) 58.dp else 70.dp)
+            .height(if (subtitle == null) 56.dp else 68.dp)
             .clickable(enabled = rowClick != null) { rowClick?.invoke() }
-            .padding(start = 14.dp, end = 8.dp),
+            .padding(start = 16.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            modifier = Modifier.size(34.dp),
-            shape = RoundedCornerShape(10.dp),
-            color = if (danger) MaterialTheme.colorScheme.error.copy(alpha = 0.08f) else Primary.copy(alpha = 0.1f)
+            modifier = Modifier.size(32.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = if (danger) MaterialTheme.colorScheme.error.copy(alpha = 0.10f) else SurfaceVariant.copy(alpha = 0.65f)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (danger) MaterialTheme.colorScheme.error else Primary,
-                    modifier = Modifier.size(19.dp)
+                    tint = if (danger) MaterialTheme.colorScheme.error else TextSecondary,
+                    modifier = Modifier.size(17.dp)
                 )
             }
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 color = if (danger) MaterialTheme.colorScheme.error else OnBackground,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -354,10 +357,10 @@ fun ReferenceSettingsRow(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedTrackColor = Primary,
-                    checkedThumbColor = OnPrimary,
+                    checkedTrackColor = Color(0xFF34C759),
+                    checkedThumbColor = Color.White,
                     uncheckedTrackColor = SurfaceVariant,
-                    uncheckedThumbColor = Color.White
+                    uncheckedThumbColor = TextSecondary
                 )
             )
         } else if (showChevron) {
@@ -365,7 +368,7 @@ fun ReferenceSettingsRow(
                 imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
                 tint = TextSecondary,
-                modifier = Modifier.size(23.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -374,8 +377,8 @@ fun ReferenceSettingsRow(
 @Composable
 fun ReferenceDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
-        modifier = modifier.padding(start = 60.dp, end = 12.dp),
-        color = SurfaceVariant,
-        thickness = 1.dp
+        modifier = modifier.padding(start = 62.dp, end = 12.dp),
+        color = Hairline,
+        thickness = 0.5.dp
     )
 }

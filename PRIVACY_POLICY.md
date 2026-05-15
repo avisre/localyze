@@ -20,7 +20,8 @@ Depending on the features you choose to use, Localyze may access:
 - Photos or files that you explicitly select with Android system pickers or share into the app
 - Contacts for the contact-search tool
 - Calendar data for reading or creating calendar events
-- Notifications if you enable notification-related features
+- Notification content if you enable the notification reply-drafts feature (the app reads notification text to suggest quick replies)
+- Exact alarms if you enable alarm or reminder features
 - Local app data such as chats, memories, tasks, attachments, reply drafts, backups, and model files
 
 ## How data is handled
@@ -29,7 +30,11 @@ Depending on the features you choose to use, Localyze may access:
 
 Localyze is designed so that assistant inference happens locally on your device. Your chat prompts, generated responses, selected images, and audio inputs are processed on-device by the local model for the app's core assistant features.
 
-### 2. Local storage
+### 2. Notification content access
+
+If you enable the notification reply-drafts feature, the app uses a `NotificationListenerService` to read the text content of incoming notifications. This is used only to generate draft replies and stays entirely on your device. You can disable this feature at any time in Settings, and the listener service will stop collecting notification content.
+
+### 3. Local storage
 
 The app stores data locally on your device to provide its features. This can include:
 
@@ -67,6 +72,7 @@ Localyze may request permissions only for features you use:
 - `READ_CONTACTS` for contact search
 - `READ_CALENDAR` and `WRITE_CALENDAR` for calendar features
 - `POST_NOTIFICATIONS` for notification features on supported Android versions
+- `SCHEDULE_EXACT_ALARM` for alarm and reminder features
 
 Photo and file selection uses Android system picker/share flows where possible.
 

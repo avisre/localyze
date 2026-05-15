@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "tag": "Q04_math_div",
+      "prompt": "What is 144 divided by 12?",
+      "verdict": "THIN",
+      "answer": "144\u00f712 = 12.",
+      "answer_len": 12,
+      "elapsed_s": 19.7
+    },
+    {
+      "tag": "Q13_temp",
+      "prompt": "Convert 100 degrees Fahrenheit to Celsius.",
+      "verdict": "ANSWERED",
+      "answer": "100 \u00b0F = 37.7778 \u00b0C.",
+      "answer_len": 20,
+      "elapsed_s": 19.3
+    },
+    {
+      "tag": "Q21_pct",
+      "prompt": "What is 20 percent of 250?",
+      "verdict": "ANSWERED",
+      "answer": "250 \u00d7 20 \u00f7 100 = 50.",
+      "answer_len": 20,
+      "elapsed_s": 19.2
+    },
+    {
+      "tag": "Q22_speed",
+      "prompt": "If I drive 240 miles in 4 hours, what is my average speed?",
+      "verdict": "THIN",
+      "answer": "240\u00f74 = 60.",
+      "answer_len": 11,
+      "elapsed_s": 19.2
+    },
+    {
+      "tag": "Q25_sql",
+      "prompt": "Write a SQL query to get the second highest salary from a table named Employee with a column salary.",
+      "verdict": "ANSWERED",
+      "answer": "If you are using a database system that supports window functions (like SQL Server, PostgreSQL, Oracle), this method is often preferred for its clarity:\nsql\nWITH RankedSalaries AS (&#10;    SELECT&#10;        salary,&#10;        DENSE_RANK() OVER (ORDER BY salary DESC) as salary_rank&#10;    FROM Employee&#10;)&#10;SELECT salary&#10;FROM RankedSalaries&#10;WHERE salary_rank = 2;\nNote: The first query using LIMIT is the most common and works across MySQL, PostgreSQL, and SQLite. The second query using `D",
+      "answer_len": 508,
+      "elapsed_s": 67.3
+    }
+  ]
+}

@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.localyze.ui.theme.OnBackground
-import com.localyze.ui.theme.Secondary
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
 
@@ -103,7 +102,7 @@ fun ThinkingBubble(
                     )
                     .border(
                         width = 1.dp,
-                        color = Secondary.copy(alpha = 0.4f),
+                        color = SurfaceVariant.copy(alpha = 0.4f),
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(12.dp)

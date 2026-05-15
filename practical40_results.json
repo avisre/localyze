@@ -1,0 +1,364 @@
+{
+  "results": [
+    {
+      "tag": "Q01_NEWS_TOP10",
+      "category": "news",
+      "prompt": "top 10 news",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nAbout what topic? *(finance / tech / sports / politics / culture / world)\n2. From which region? *(US / India / UK / EU / global)\n3. What time window? *(today / this week / this month)",
+      "answer_len": 238,
+      "screenshot": "/tmp/p40_Q01_NEWS_TOP10.png"
+    },
+    {
+      "tag": "Q02_NEWS_TECH",
+      "category": "news",
+      "prompt": "biggest tech news this week",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nAbout what topic? *(finance / tech / sports / politics / culture / world)\n2. From which region? *(US / India / UK / EU / global)\n3. What time window? *(today / this week / this month)",
+      "answer_len": 238,
+      "screenshot": "/tmp/p40_Q02_NEWS_TECH.png"
+    },
+    {
+      "tag": "Q03_NEWS_FED",
+      "category": "news",
+      "prompt": "did the Fed change rates this week",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nAbout what topic? *(finance / tech / sports / politics / culture / world)\n2. From which region? *(US / India / UK / EU / global)\n3. What time window? *(today / this week / this month)",
+      "answer_len": 238,
+      "screenshot": "/tmp/p40_Q03_NEWS_FED.png"
+    },
+    {
+      "tag": "Q04_NEWS_UKRAINE",
+      "category": "news",
+      "prompt": "latest update on Ukraine",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nAbout what topic? *(finance / tech / sports / politics / culture / world)\n2. From which region? *(US / India / UK / EU / global)\n3. What time window? *(today / this week / this month)",
+      "answer_len": 238,
+      "screenshot": "/tmp/p40_Q04_NEWS_UKRAINE.png"
+    },
+    {
+      "tag": "Q05_NEWS_POLLS",
+      "category": "news",
+      "prompt": "current US election polls",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nAbout what topic? *(finance / tech / sports / politics / culture / world)\n2. From which region? *(US / India / UK / EU / global)\n3. What time window? *(today / this week / this month)",
+      "answer_len": 238,
+      "screenshot": "/tmp/p40_Q05_NEWS_POLLS.png"
+    },
+    {
+      "tag": "Q06_SPORTS_F1",
+      "category": "sports",
+      "prompt": "when is the next F1 race",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhich sport / league? *(F1 / NBA / NFL / MLB / EPL / tennis / cricket / other)\n2. Region? *(US / UK / India / global)\n3. Time window? *(today / this week / this season)",
+      "answer_len": 223,
+      "screenshot": "/tmp/p40_Q06_SPORTS_F1.png"
+    },
+    {
+      "tag": "Q07_SPORTS_NBA",
+      "category": "sports",
+      "prompt": "who won the NBA games last night",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhich sport / league? *(F1 / NBA / NFL / MLB / EPL / tennis / cricket / other)\n2. Region? *(US / UK / India / global)\n3. Time window? *(today / this week / this season)",
+      "answer_len": 223,
+      "screenshot": "/tmp/p40_Q07_SPORTS_NBA.png"
+    },
+    {
+      "tag": "Q08_SPORTS_EPL",
+      "category": "sports",
+      "prompt": "when does the next Premier League season start",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhich sport / league? *(F1 / NBA / NFL / MLB / EPL / tennis / cricket / other)\n2. Region? *(US / UK / India / global)\n3. Time window? *(today / this week / this season)",
+      "answer_len": 223,
+      "screenshot": "/tmp/p40_Q08_SPORTS_EPL.png"
+    },
+    {
+      "tag": "Q09_FIN_ENERGY",
+      "category": "finance",
+      "prompt": "where are energy stocks today",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhich sector / index? *(S&amp;P 500 / NASDAQ / energy / tech / finance / healthcare / specific stock)\n2. Region? *(US / India / Europe / Asia / global)\n3. What do you want to know? *(current price / today's move / YTD performance / outlook)",
+      "answer_len": 295,
+      "screenshot": "/tmp/p40_Q09_FIN_ENERGY.png"
+    },
+    {
+      "tag": "Q10_FIN_GDP",
+      "category": "finance",
+      "prompt": "GDP growth of India and US right now, opportunities short and medium term",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q10_FIN_GDP.png"
+    },
+    {
+      "tag": "Q11_FIN_INDEX",
+      "category": "finance",
+      "prompt": "good index fund mix for a 35 year old with $50K",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q11_FIN_INDEX.png"
+    },
+    {
+      "tag": "Q12_FIN_BTC",
+      "category": "finance",
+      "prompt": "Bitcoin price now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhy are you asking? *(buying now / selling now / investing / just curious)\n2. Region / market? *(US / India / UK / global spot)\n3. Time horizon? *(today / next month / long-term)",
+      "answer_len": 233,
+      "screenshot": "/tmp/p40_Q12_FIN_BTC.png"
+    },
+    {
+      "tag": "Q13_FIN_MORTGAGE",
+      "category": "finance",
+      "prompt": "30-year mortgage rates this month",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhy are you asking? *(buying now / selling now / investing / just curious)\n2. Region / market? *(US / India / UK / global spot)\n3. Time horizon? *(today / next month / long-term)",
+      "answer_len": 233,
+      "screenshot": "/tmp/p40_Q13_FIN_MORTGAGE.png"
+    },
+    {
+      "tag": "Q14_TECH_AI_CODING",
+      "category": "tech",
+      "prompt": "best AI coding tools right now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q14_TECH_AI_CODING.png"
+    },
+    {
+      "tag": "Q15_TECH_LAPTOP",
+      "category": "tech",
+      "prompt": "best laptop for video editing under $2000",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nBudget range? *(under $500 / $500\u20131000 / $1000\u20132000 / $2000+)\n2. Primary use? *(work / gaming / travel / video editing / general)\n3. Region? *(US / UK / India / EU / global)",
+      "answer_len": 228,
+      "screenshot": "/tmp/p40_Q15_TECH_LAPTOP.png"
+    },
+    {
+      "tag": "Q16_TECH_AI_COMPARE",
+      "category": "tech",
+      "prompt": "ChatGPT vs Claude vs Gemini in real use",
+      "verdict": "THIN",
+      "answer": "The",
+      "answer_len": 3,
+      "screenshot": "/tmp/p40_Q16_TECH_AI_COMPARE.png"
+    },
+    {
+      "tag": "Q17_TECH_IPHONE",
+      "category": "tech",
+      "prompt": "should I upgrade from iPhone 13 to iPhone 16",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:1. What is your primary use case for your phone? (e.e., basic calls/texts, social media, gaming, professional use)2. What is your budget for the upgrade? (e.g., under $20, $20-$5000, over $50000)3. What is the current condition of your iPhone3? (e.g., works fine, battery is bad, screen is cracked)Once I have this information, I can give you a much more specific advice.",
+      "answer_len": 422,
+      "screenshot": "/tmp/p40_Q17_TECH_IPHONE.png"
+    },
+    {
+      "tag": "Q18_MUSIC_INSTRUMENT",
+      "category": "music",
+      "prompt": "best instruments for a 10 year old to start",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q18_MUSIC_INSTRUMENT.png"
+    },
+    {
+      "tag": "Q19_MUSIC_GUITAR",
+      "category": "music",
+      "prompt": "starter acoustic guitar under $400",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q19_MUSIC_GUITAR.png"
+    },
+    {
+      "tag": "Q20_MUSIC_ALBUMS",
+      "category": "music",
+      "prompt": "top 10 albums released this year",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q20_MUSIC_ALBUMS.png"
+    },
+    {
+      "tag": "Q21_ART_EXHIBITS",
+      "category": "art",
+      "prompt": "art exhibitions in New York and London this month",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q21_ART_EXHIBITS.png"
+    },
+    {
+      "tag": "Q22_ART_BANKSY",
+      "category": "art",
+      "prompt": "Banksy auction sales last year",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q22_ART_BANKSY.png"
+    },
+    {
+      "tag": "Q23_ART_CANNES",
+      "category": "art",
+      "prompt": "must-see Cannes films this year",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q23_ART_CANNES.png"
+    },
+    {
+      "tag": "Q24_BOOKS_NONFIC",
+      "category": "books",
+      "prompt": "top nonfiction books this year",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q24_BOOKS_NONFIC.png"
+    },
+    {
+      "tag": "Q25_BOOKS_SIMILAR",
+      "category": "books",
+      "prompt": "books similar to Project Hail Mary",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:1. What genre are you looking for? (Sci-Fi / Thriller / Literary Fiction / Dystopian)?2. What tone do you prefer? (Optimistic / Dark / Realistic)?3. What aspect of\nProject Hail Mary\ndid you like most? (The Science / The Humor / The Character Relationships)?",
+      "answer_len": 308,
+      "screenshot": "/tmp/p40_Q25_BOOKS_SIMILAR.png"
+    },
+    {
+      "tag": "Q26_TRAVEL_NYC_TKY",
+      "category": "travel",
+      "prompt": "cheapest flights New York to Tokyo next 3 months",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nFrom which country / passport? *(US / India / UK / EU / other)\n2. When are you traveling? *(this month / next 3 months / this year / flexible)\n3. Trip purpose? *(vacation / business / family / study / stopover)",
+      "answer_len": 265,
+      "screenshot": "/tmp/p40_Q26_TRAVEL_NYC_TKY.png"
+    },
+    {
+      "tag": "Q27_TRAVEL_JAPAN",
+      "category": "travel",
+      "prompt": "good time to visit Japan now and cherry blossom forecast",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nFrom which country / passport? *(US / India / UK / EU / other)\n2. When are you traveling? *(this month / next 3 months / this year / flexible)\n3. Trip purpose? *(vacation / business / family / study / stopover)",
+      "answer_len": 265,
+      "screenshot": "/tmp/p40_Q27_TRAVEL_JAPAN.png"
+    },
+    {
+      "tag": "Q28_TRAVEL_EUROPE",
+      "category": "travel",
+      "prompt": "underrated European cities for a September trip under $2000",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:1. What kind of trip are you looking for? (e. Culture/History / Nature/Adventure/Relaxation)2. What is your preferred region in Europe? (e. Western Europe / Eastern Europe / Southern Europe)3. What is your preferred travel style? (e. Budget-friendly / Mid-range / Luxury)",
+      "answer_len": 322,
+      "screenshot": "/tmp/p40_Q28_TRAVEL_EUROPE.png"
+    },
+    {
+      "tag": "Q29_FOOD_SF",
+      "category": "food",
+      "prompt": "trending restaurants in San Francisco right now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q29_FOOD_SF.png"
+    },
+    {
+      "tag": "Q30_FOOD_DINNER",
+      "category": "food",
+      "prompt": "30 minute weeknight dinner for two",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:1. What kind of dinner are you looking for? (Quick &amp; Easy / Healthy / Fancy / International)2. What cuisine do you prefer? (Italian / Mexican / Asian / American / Other)3. What is your budget? (Under $20 / $2-$10 / $10+)",
+      "answer_len": 275,
+      "screenshot": "/tmp/p40_Q30_FOOD_DINNER.png"
+    },
+    {
+      "tag": "Q31_FOOD_PROTEIN",
+      "category": "food",
+      "prompt": "best protein powder right now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q31_FOOD_PROTEIN.png"
+    },
+    {
+      "tag": "Q32_CAREER_ENTRY",
+      "category": "career",
+      "prompt": "highest paying entry level tech jobs without a CS degree",
+      "verdict": "THIN",
+      "answer": "The",
+      "answer_len": 3,
+      "screenshot": "/tmp/p40_Q32_CAREER_ENTRY.png"
+    },
+    {
+      "tag": "Q33_CAREER_MBA",
+      "category": "career",
+      "prompt": "is an MBA still worth it in 2026",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat's your situation? *(starting out / comparing options / considering switching / doing research)\n2. What matters most? *(cost / quality / long-term ROI / speed / simplicity)\n3. Region / context? *(US / India / UK / global / n/a)",
+      "answer_len": 286,
+      "screenshot": "/tmp/p40_Q33_CAREER_MBA.png"
+    },
+    {
+      "tag": "Q34_HEALTH_CREATINE",
+      "category": "health",
+      "prompt": "should I take creatine over 40",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q34_HEALTH_CREATINE.png"
+    },
+    {
+      "tag": "Q35_HEALTH_RUNNING",
+      "category": "health",
+      "prompt": "8 week running plan for a 42 year old desk worker",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "screenshot": "/tmp/p40_Q35_HEALTH_RUNNING.png"
+    },
+    {
+      "tag": "Q36_MUSIC_SPOTIFY",
+      "category": "music",
+      "prompt": "most streamed songs on Spotify right now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q36_MUSIC_SPOTIFY.png"
+    },
+    {
+      "tag": "Q37_FIN_GOLD",
+      "category": "finance",
+      "prompt": "gold price today and is it a good time to buy",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhy are you asking? *(buying now / selling now / investing / just curious)\n2. Region / market? *(US / India / UK / global spot)\n3. Time horizon? *(today / next month / long-term)",
+      "answer_len": 233,
+      "screenshot": "/tmp/p40_Q37_FIN_GOLD.png"
+    },
+    {
+      "tag": "Q38_TECH_EV",
+      "category": "tech",
+      "prompt": "best EVs in 2026 under $40K",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nBudget range? *(under $500 / $500\u20131000 / $1000\u20132000 / $2000+)\n2. Primary use? *(work / gaming / travel / video editing / general)\n3. Region? *(US / UK / India / EU / global)",
+      "answer_len": 228,
+      "screenshot": "/tmp/p40_Q38_TECH_EV.png"
+    },
+    {
+      "tag": "Q39_TRAVEL_VISA",
+      "category": "travel",
+      "prompt": "visa free countries for Indian passport right now",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nFrom which country / passport? *(US / India / UK / EU / other)\n2. When are you traveling? *(this month / next 3 months / this year / flexible)\n3. Trip purpose? *(vacation / business / family / study / stopover)",
+      "answer_len": 265,
+      "screenshot": "/tmp/p40_Q39_TRAVEL_VISA.png"
+    },
+    {
+      "tag": "Q40_LANG_ASIA",
+      "category": "language",
+      "prompt": "best language to learn for Southeast Asia travel",
+      "verdict": "CLARIFIED",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat for? *(personal use / work / kids/family / gift / specific project)\n2. Budget? *(free / under $50 / $50\u2013200 / $200+)\n3. Skill level? *(beginner / intermediate / advanced / any)",
+      "answer_len": 236,
+      "screenshot": "/tmp/p40_Q40_LANG_ASIA.png"
+    }
+  ]
+}

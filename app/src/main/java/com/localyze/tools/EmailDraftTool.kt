@@ -17,7 +17,13 @@ class EmailDraftTool @Inject constructor(
 ) : Tool {
 
     override val name = "email_draft"
-    override val description = "Open an email compose draft for user review. This never sends automatically."
+    override val description =
+        "Open the system Email composer with a pre-filled draft. " +
+            "Use ONLY when the user has provided a specific recipient address " +
+            "(e.g. 'send to alice@example.com') OR explicitly asks to open the email app. " +
+            "Do NOT call this when the user asks you to write or draft email text inline — " +
+            "for that, write the email body directly in your reply as plain text. " +
+            "This never sends automatically."
 
     override fun getParameterSchema(): JsonObject = buildJsonObject {
         put("type", "object")

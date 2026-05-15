@@ -1,0 +1,114 @@
+{
+  "results": [
+    {
+      "tag": "Q01_dog_age",
+      "category": "fact",
+      "prompt": "How long do dogs usually live?",
+      "verdict": "ANSWERED",
+      "answer": "Read 6 sources\nSources\nE\nen.wikipedia.org\nWorldwide usage of police dogs\nIn law enforcement work, police dogs are used worldwide for a variety of purposes that include apprehension, detection, and search and rescue. The Australian Last indexed: 2026-02-11T16:07:24Z\nE\nen.wikipedia.org\nAging in dogs",
+      "answer_len": 298,
+      "elapsed_s": 20.6,
+      "screenshot": "/tmp/r25_Q01_dog_age.png"
+    },
+    {
+      "tag": "Q02_cup_oz",
+      "category": "fact",
+      "prompt": "How many ounces are in a cup?",
+      "verdict": "ANSWERED",
+      "answer": "Google\nMeet\nGame Assistant\nPlay Store\nGoogle\nTheme Store",
+      "answer_len": 56,
+      "elapsed_s": 21.9,
+      "screenshot": "/tmp/r25_Q02_cup_oz.png"
+    },
+    {
+      "tag": "Q03_capital_aus",
+      "category": "fact",
+      "prompt": "What's the capital of Australia?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of Australia is Canberra.",
+      "answer_len": 37,
+      "elapsed_s": 45.8,
+      "screenshot": "/tmp/r25_Q03_capital_aus.png"
+    },
+    {
+      "tag": "Q04_year_today",
+      "category": "fact",
+      "prompt": "What year is it?",
+      "verdict": "ANSWERED",
+      "answer": "The current year is 202026.",
+      "answer_len": 27,
+      "elapsed_s": 29.3,
+      "screenshot": "/tmp/r25_Q04_year_today.png"
+    },
+    {
+      "tag": "Q05_sleep_hours",
+      "category": "fact",
+      "prompt": "How many hours of sleep do adults need?",
+      "verdict": "ANSWERED",
+      "answer": "Adults generally need between 7 and 9 hours of sleep per night.",
+      "answer_len": 63,
+      "elapsed_s": 27.1,
+      "screenshot": "/tmp/r25_Q05_sleep_hours.png"
+    },
+    {
+      "tag": "Q06_tip",
+      "category": "math",
+      "prompt": "If a meal costs $48, what is a 20 percent tip?",
+      "verdict": "ANSWERED",
+      "answer": "A 20 percent tip on a meal costing USD48 is USD1.999.6.",
+      "answer_len": 55,
+      "elapsed_s": 33.8,
+      "screenshot": "/tmp/r25_Q06_tip.png"
+    },
+    {
+      "tag": "Q07_split_bill",
+      "category": "math",
+      "prompt": "Split a $135 bill three ways.",
+      "verdict": "ANSWERED",
+      "answer": "The split of a USD 35 bill into three ways is $16.667.",
+      "answer_len": 54,
+      "elapsed_s": 33.7,
+      "screenshot": "/tmp/r25_Q07_split_bill.png"
+    },
+    {
+      "tag": "Q08_discount",
+      "category": "math",
+      "prompt": "A jacket is $80 with 25 percent off. What's the sale price?",
+      "verdict": "ANSWERED",
+      "answer": "The sale price of the jacket is $7.60.\nThis calculation assumes the original price is $8.\nDisclaimer: This answer is based on the provided figures and general knowledge; if the original price or discount percentage were different, the sale price would change.",
+      "answer_len": 259,
+      "elapsed_s": 33.0,
+      "screenshot": "/tmp/r25_Q08_discount.png"
+    },
+    {
+      "tag": "Q09_weight_conv",
+      "category": "convert",
+      "prompt": "How many pounds is 70 kilograms?",
+      "verdict": "ANSWERED",
+      "answer": "_(Generated from on-device tool data \u2014 the assistant model produced tool calls but no narrative summary for this turn.)_",
+      "answer_len": 120,
+      "elapsed_s": 53.2,
+      "screenshot": "/tmp/r25_Q09_weight_conv.png"
+    },
+    {
+      "tag": "Q10_distance",
+      "category": "convert",
+      "prompt": "How many kilometers is 50 miles?",
+      "verdict": "ANSWERED",
+      "answer": "_(Generated from on-device tool data \u2014 the assistant model produced tool calls but no narrative summary for this turn.)_",
+      "answer_len": 120,
+      "elapsed_s": 40.1,
+      "screenshot": "/tmp/r25_Q10_distance.png"
+    },
+    {
+      "tag": "Q11_boil_egg",
+      "category": "lifestyle",
+      "prompt": "How long do I boil an egg for it to be soft-boiled?",
+      "verdict": "ANSWERED",
+      "answer": "To boil an egg for a soft-boiled consistency, you should boil it for approximately 6 to 7 minutes.\nDefaults Used:\nBoiling Time: 6 to 7 minutes.\nWater Temperature: Assumed to be brought to a rolling boil before adding eggs.\nDisclaimer: Cooking times can vary based on the size of the egg and the specific heat of the stove.",
+      "answer_len": 322,
+      "elapsed_s": 39.6,
+      "screenshot": "/tmp/r25_Q11_boil_egg.png"
+    }
+  ]
+}

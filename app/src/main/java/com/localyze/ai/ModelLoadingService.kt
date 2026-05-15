@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import com.localyze.utils.AppLog
 import androidx.core.app.NotificationCompat
 import com.localyze.MainActivity
 import com.localyze.R
@@ -44,10 +45,10 @@ class ModelLoadingService : Service() {
          */
         fun start(context: Context) {
             if (isRunning) {
-                Log.d(TAG, "Service already running, skip")
+                AppLog.d(TAG, "Service already running, skip")
                 return
             }
-            Log.d(TAG, "Starting foreground service - protecting model process from OOM kill")
+            AppLog.d(TAG, "Starting foreground service - protecting model process from OOM kill")
             val intent = Intent(context, ModelLoadingService::class.java)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -64,7 +65,7 @@ class ModelLoadingService : Service() {
          * Stop the foreground service when the model is released.
          */
         fun stop(context: Context) {
-            Log.d(TAG, "Stopping foreground service - model released")
+            AppLog.d(TAG, "Stopping foreground service - model released")
             val intent = Intent(context, ModelLoadingService::class.java)
             context.stopService(intent)
         }
@@ -90,12 +91,12 @@ class ModelLoadingService : Service() {
         }
     }
 
-    private var notificationText = "Loading Gemma 4 E4B..."
+    private var notificationText = "Loading Localyze.ai..."
 
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        Log.d(TAG, "Service onCreate - promoting process to foreground priority")
+        AppLog.d(TAG, "Service onCreate - promoting process to foreground priority")
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification(notificationText))
     }
@@ -108,7 +109,7 @@ class ModelLoadingService : Service() {
             notificationText = intent.getStringExtra(EXTRA_TEXT) ?: notificationText
         }
 
-        Log.d(TAG, "Service onStartCommand - $notificationText")
+        AppLog.d(TAG, "Service onStartCommand - $notificationText")
 
         // Must call startForeground on every onStartCommand for Android 12+
         val notification = buildNotification(notificationText)
@@ -122,7 +123,7 @@ class ModelLoadingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
-        Log.d(TAG, "Service onDestroy - foreground protection removed")
+        AppLog.d(TAG, "Service onDestroy - foreground protection removed")
     }
 
     private fun buildNotification(text: String): Notification {
@@ -134,7 +135,7 @@ class ModelLoadingService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Localyze")
+            .setContentTitle("Localyze.ai")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)

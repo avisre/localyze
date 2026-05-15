@@ -1,0 +1,6 @@
+{"results":[
+  {"category":"KNOWLEDGE","index":1,"question":"What is the capital of France?","response_time_sec":23,"response_text":"What","tool_triggered":"Yes","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":2,"question":"What is 2 plus 2?","response_time_sec":23,"response_text":"Let me know how I can help!","tool_triggered":"Yes","status":"OK"}
+,
+  {"category":"KNOWLEDGE","index":3,"question":"Who wrote Romeo and Juliet?","response_time_sec":16,"response_text":"Who","tool_triggered":"Yes","status":"FAIL"}

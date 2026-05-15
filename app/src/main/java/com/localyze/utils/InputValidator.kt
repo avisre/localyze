@@ -27,17 +27,21 @@ object InputValidator {
         if (content.isNullOrBlank()) {
             return ValidationResult.Error("Message cannot be empty")
         }
-        if (content.length < MIN_MESSAGE_LENGTH) {
-            return ValidationResult.Error("Message is too short")
-        }
-        if (content.length > MAX_MESSAGE_LENGTH) {
-            return ValidationResult.Error(
-                "Message is too long (${content.length}/$MAX_MESSAGE_LENGTH characters)"
-            )
-        }
-        // Check for potential injection attempts
+        // Reject dangerous patterns in the original text before sanitization
         if (containsDangerousPatterns(content)) {
             return ValidationResult.Error("Message contains invalid characters")
+        }
+        val sanitized = sanitizeText(content)
+        if (sanitized.isBlank()) {
+            return ValidationResult.Error("Message contains only invalid characters")
+        }
+        if (sanitized.length < MIN_MESSAGE_LENGTH) {
+            return ValidationResult.Error("Message is too short")
+        }
+        if (sanitized.length > MAX_MESSAGE_LENGTH) {
+            return ValidationResult.Error(
+                "Message is too long (${sanitized.length}/$MAX_MESSAGE_LENGTH characters)"
+            )
         }
         return ValidationResult.Success
     }

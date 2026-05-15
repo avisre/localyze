@@ -1,0 +1,3345 @@
+{
+  "_doc": "250 fresh prompts. New domains: pets/health/finance/travel/hobbies/auto/multi-math/recipes/popculture/geo-deep/music/psych/mental/stats.",
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app",
+    "The user is asking",
+    "The user wants",
+    "I should answer",
+    "I will answer",
+    "Let me think",
+    "This is a general"
+  ],
+  "questions": [
+    {
+      "id": "Y001",
+      "fingerprint": "pets",
+      "prompt": "Why do dogs wag their tails?",
+      "category": "pets",
+      "expected_keywords": [
+        "communicate",
+        "emotion",
+        "happy",
+        "mood",
+        "tail"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y002",
+      "fingerprint": "pets",
+      "prompt": "How often should I take my dog to the vet?",
+      "category": "pets",
+      "expected_keywords": [
+        "annual",
+        "check",
+        "year",
+        "puppy",
+        "senior"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y003",
+      "fingerprint": "pets",
+      "prompt": "Why does my cat knead with its paws?",
+      "category": "pets",
+      "expected_keywords": [
+        "kitten",
+        "comfort",
+        "nurse",
+        "instinct",
+        "content"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y004",
+      "fingerprint": "pets",
+      "prompt": "What foods are toxic to dogs?",
+      "category": "pets",
+      "expected_keywords": [
+        "chocolate",
+        "grape",
+        "onion",
+        "xylitol",
+        "raisin"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y005",
+      "fingerprint": "pets",
+      "prompt": "How do I introduce two cats to each other?",
+      "category": "pets",
+      "expected_keywords": [
+        "slow",
+        "separate",
+        "scent",
+        "feed",
+        "door"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y006",
+      "fingerprint": "pets",
+      "prompt": "Why do parrots talk?",
+      "category": "pets",
+      "expected_keywords": [
+        "mimic",
+        "social",
+        "attention",
+        "sound",
+        "bond"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y007",
+      "fingerprint": "pets",
+      "prompt": "How to train a puppy to sit",
+      "category": "pets",
+      "expected_keywords": [
+        "treat",
+        "sit",
+        "reward",
+        "repeat",
+        "verbal"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y008",
+      "fingerprint": "pets",
+      "prompt": "Are essential oils safe around cats?",
+      "category": "pets",
+      "expected_keywords": [
+        "toxic",
+        "avoid",
+        "liver",
+        "tea tree",
+        "caution"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y009",
+      "fingerprint": "pets",
+      "prompt": "How to litter train a kitten",
+      "category": "pets",
+      "expected_keywords": [
+        "box",
+        "scratch",
+        "place",
+        "reward",
+        "clean"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y010",
+      "fingerprint": "pets",
+      "prompt": "How often should I bathe a golden retriever?",
+      "category": "pets",
+      "expected_keywords": [
+        "6 week",
+        "month",
+        "skin",
+        "oil",
+        "clean"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y011",
+      "fingerprint": "pets",
+      "prompt": "Signs of dehydration in dogs",
+      "category": "pets",
+      "expected_keywords": [
+        "gum",
+        "skin",
+        "eye",
+        "tired",
+        "tongue"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y012",
+      "fingerprint": "pets",
+      "prompt": "Best way to crate train a puppy",
+      "category": "pets",
+      "expected_keywords": [
+        "positive",
+        "treat",
+        "gradual",
+        "comfort",
+        "short"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y013",
+      "fingerprint": "pets",
+      "prompt": "Can cats eat dog food?",
+      "category": "pets",
+      "expected_keywords": [
+        "no",
+        "taurine",
+        "nutrition",
+        "cat",
+        "protein"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y014",
+      "fingerprint": "pets",
+      "prompt": "How long do hamsters live?",
+      "category": "pets",
+      "expected_keywords": [
+        "2",
+        "3",
+        "year",
+        "Syrian",
+        "dwarf"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y015",
+      "fingerprint": "pets",
+      "prompt": "Why is my cat purring while injured?",
+      "category": "pets",
+      "expected_keywords": [
+        "heal",
+        "comfort",
+        "self-sooth",
+        "frequency",
+        "vibrate"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y016",
+      "fingerprint": "health",
+      "prompt": "What is REM sleep and why is it important?",
+      "category": "health",
+      "expected_keywords": [
+        "dream",
+        "memory",
+        "REM",
+        "cycle",
+        "brain"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y017",
+      "fingerprint": "health",
+      "prompt": "How much water should I drink daily?",
+      "category": "health",
+      "expected_keywords": [
+        "8",
+        "glass",
+        "2",
+        "liter",
+        "ounce"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y018",
+      "fingerprint": "health",
+      "prompt": "What is a healthy resting heart rate for adults?",
+      "category": "health",
+      "expected_keywords": [
+        "60",
+        "100",
+        "beats",
+        "bpm",
+        "minute"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y019",
+      "fingerprint": "health",
+      "prompt": "Benefits of intermittent fasting",
+      "category": "health",
+      "expected_keywords": [
+        "insulin",
+        "autophagy",
+        "weight",
+        "metabolism",
+        "fat"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y020",
+      "fingerprint": "health",
+      "prompt": "How long should a beginner do cardio?",
+      "category": "health",
+      "expected_keywords": [
+        "20",
+        "30",
+        "minute",
+        "3",
+        "week",
+        "start"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y021",
+      "fingerprint": "health",
+      "prompt": "What is the glycemic index?",
+      "category": "health",
+      "expected_keywords": [
+        "blood sugar",
+        "spike",
+        "carb",
+        "low",
+        "high"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y022",
+      "fingerprint": "health",
+      "prompt": "How to stretch your lower back safely",
+      "category": "health",
+      "expected_keywords": [
+        "knee",
+        "spine",
+        "slow",
+        "cat-cow",
+        "gentle"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y023",
+      "fingerprint": "health",
+      "prompt": "What is a healthy BMI range?",
+      "category": "health",
+      "expected_keywords": [
+        "18.5",
+        "24.9",
+        "overweight",
+        "under",
+        "normal"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y024",
+      "fingerprint": "health",
+      "prompt": "Symptoms of vitamin D deficiency",
+      "category": "health",
+      "expected_keywords": [
+        "fatigue",
+        "bone",
+        "muscle",
+        "mood",
+        "sun"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y025",
+      "fingerprint": "health",
+      "prompt": "How much protein should I eat per kg of body weight?",
+      "category": "health",
+      "expected_keywords": [
+        "0.8",
+        "1.2",
+        "1.6",
+        "gram",
+        "protein"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y026",
+      "fingerprint": "health",
+      "prompt": "Benefits of cold showers",
+      "category": "health",
+      "expected_keywords": [
+        "circulation",
+        "alert",
+        "mood",
+        "brown fat",
+        "recover"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y027",
+      "fingerprint": "health",
+      "prompt": "What is a deload week in training?",
+      "category": "health",
+      "expected_keywords": [
+        "recover",
+        "reduce",
+        "intensity",
+        "week",
+        "fatigue"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y028",
+      "fingerprint": "health",
+      "prompt": "How to improve grip strength",
+      "category": "health",
+      "expected_keywords": [
+        "farmer",
+        "carry",
+        "hold",
+        "wrist",
+        "forearm"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y029",
+      "fingerprint": "health",
+      "prompt": "What causes muscle soreness after a workout?",
+      "category": "health",
+      "expected_keywords": [
+        "DOMS",
+        "microtear",
+        "lactic",
+        "inflammation",
+        "recover"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y030",
+      "fingerprint": "health",
+      "prompt": "Best stretches for tight hips",
+      "category": "health",
+      "expected_keywords": [
+        "pigeon",
+        "hip flexor",
+        "lunge",
+        "figure four",
+        "butterfly"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y031",
+      "fingerprint": "health",
+      "prompt": "How long does it take to lose 1 pound of fat?",
+      "category": "health",
+      "expected_keywords": [
+        "3500",
+        "calorie",
+        "week",
+        "deficit",
+        "pound"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y032",
+      "fingerprint": "health",
+      "prompt": "Benefits of magnesium supplementation",
+      "category": "health",
+      "expected_keywords": [
+        "sleep",
+        "muscle",
+        "stress",
+        "cramp",
+        "mineral"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y033",
+      "fingerprint": "health",
+      "prompt": "How to do a proper push-up",
+      "category": "health",
+      "expected_keywords": [
+        "plank",
+        "elbow",
+        "45",
+        "chest",
+        "core"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y034",
+      "fingerprint": "health",
+      "prompt": "What is HIIT training?",
+      "category": "health",
+      "expected_keywords": [
+        "high",
+        "intensity",
+        "interval",
+        "short",
+        "burst"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y035",
+      "fingerprint": "health",
+      "prompt": "Recommended sleep hours for adults",
+      "category": "health",
+      "expected_keywords": [
+        "7",
+        "8",
+        "9",
+        "hour",
+        "night"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y036",
+      "fingerprint": "finance_p",
+      "prompt": "How much should I save for an emergency fund?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "3",
+        "6",
+        "month",
+        "expense",
+        "emergency"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y037",
+      "fingerprint": "finance_p",
+      "prompt": "Difference between Roth IRA and Traditional IRA",
+      "category": "finance_p",
+      "expected_keywords": [
+        "Roth",
+        "Traditional",
+        "tax",
+        "withdraw",
+        "contribute"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y038",
+      "fingerprint": "finance_p",
+      "prompt": "How does a credit card interest charge work?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "APR",
+        "balance",
+        "carry",
+        "cycle",
+        "compound"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y039",
+      "fingerprint": "finance_p",
+      "prompt": "What is the 50/30/20 budget rule?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "50",
+        "30",
+        "20",
+        "need",
+        "want",
+        "save"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y040",
+      "fingerprint": "finance_p",
+      "prompt": "How to pay off student loans faster",
+      "category": "finance_p",
+      "expected_keywords": [
+        "extra",
+        "principal",
+        "refinance",
+        "avalanche",
+        "snowball"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y041",
+      "fingerprint": "finance_p",
+      "prompt": "What's a fixed vs adjustable mortgage?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "fixed",
+        "adjustable",
+        "ARM",
+        "rate",
+        "change"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y042",
+      "fingerprint": "finance_p",
+      "prompt": "How to start investing with $1000",
+      "category": "finance_p",
+      "expected_keywords": [
+        "index",
+        "ETF",
+        "broker",
+        "diversify",
+        "fee"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y043",
+      "fingerprint": "finance_p",
+      "prompt": "What are index funds?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "index",
+        "fund",
+        "track",
+        "S&P",
+        "passive"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y044",
+      "fingerprint": "finance_p",
+      "prompt": "How to improve a 600 credit score",
+      "category": "finance_p",
+      "expected_keywords": [
+        "pay",
+        "time",
+        "utilization",
+        "dispute",
+        "old"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y045",
+      "fingerprint": "finance_p",
+      "prompt": "What is FICO score made of?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "payment",
+        "utilization",
+        "length",
+        "mix",
+        "new",
+        "inquiry"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y046",
+      "fingerprint": "finance_p",
+      "prompt": "How does a 30-year mortgage differ from a 15-year?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "interest",
+        "payment",
+        "term",
+        "total",
+        "30",
+        "15"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y047",
+      "fingerprint": "finance_p",
+      "prompt": "What is the cap on 401(k) contributions in 2026?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "23",
+        "22",
+        "500",
+        "employer",
+        "limit"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y048",
+      "fingerprint": "finance_p",
+      "prompt": "Best way to negotiate medical bills",
+      "category": "finance_p",
+      "expected_keywords": [
+        "itemized",
+        "ask",
+        "negotiate",
+        "plan",
+        "pay"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y049",
+      "fingerprint": "finance_p",
+      "prompt": "What is dollar-cost averaging?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "regular",
+        "fixed",
+        "amount",
+        "time",
+        "average",
+        "DCA"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y050",
+      "fingerprint": "finance_p",
+      "prompt": "How to file taxes as a freelancer",
+      "category": "finance_p",
+      "expected_keywords": [
+        "1099",
+        "Schedule C",
+        "quarterly",
+        "SE",
+        "expense"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y051",
+      "fingerprint": "finance_p",
+      "prompt": "Difference between HSA and FSA",
+      "category": "finance_p",
+      "expected_keywords": [
+        "HSA",
+        "FSA",
+        "carry",
+        "tax",
+        "employer"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y052",
+      "fingerprint": "finance_p",
+      "prompt": "How to read a paycheck stub",
+      "category": "finance_p",
+      "expected_keywords": [
+        "gross",
+        "net",
+        "tax",
+        "FICA",
+        "deduct"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y053",
+      "fingerprint": "finance_p",
+      "prompt": "What is the difference between a debit and credit card?",
+      "category": "finance_p",
+      "expected_keywords": [
+        "debit",
+        "credit",
+        "bank",
+        "borrow",
+        "instant"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y054",
+      "fingerprint": "finance_p",
+      "prompt": "How to budget for a wedding",
+      "category": "finance_p",
+      "expected_keywords": [
+        "guest",
+        "venue",
+        "priority",
+        "percentage",
+        "fixed"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y055",
+      "fingerprint": "finance_p",
+      "prompt": "Best way to track monthly expenses",
+      "category": "finance_p",
+      "expected_keywords": [
+        "app",
+        "spreadsheet",
+        "category",
+        "review",
+        "Mint",
+        "YNAB"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y056",
+      "fingerprint": "travel",
+      "prompt": "How much cash should I carry traveling internationally?",
+      "category": "travel",
+      "expected_keywords": [
+        "local",
+        "100",
+        "small",
+        "ATM",
+        "minimal"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y057",
+      "fingerprint": "travel",
+      "prompt": "Best way to avoid jet lag",
+      "category": "travel",
+      "expected_keywords": [
+        "adjust",
+        "light",
+        "melatonin",
+        "hydrate",
+        "sleep"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y058",
+      "fingerprint": "travel",
+      "prompt": "How to pack light for a 2-week trip",
+      "category": "travel",
+      "expected_keywords": [
+        "roll",
+        "layer",
+        "laundry",
+        "capsule",
+        "versatile"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y059",
+      "fingerprint": "travel",
+      "prompt": "Do I need a visa for Japan as a US citizen?",
+      "category": "travel",
+      "expected_keywords": [
+        "90",
+        "visa-free",
+        "tourist",
+        "passport",
+        "Japan"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y060",
+      "fingerprint": "travel",
+      "prompt": "Best months to visit Bali",
+      "category": "travel",
+      "expected_keywords": [
+        "April",
+        "October",
+        "dry",
+        "rainy",
+        "season"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y061",
+      "fingerprint": "travel",
+      "prompt": "How to find cheap international flights",
+      "category": "travel",
+      "expected_keywords": [
+        "Skyscanner",
+        "Google",
+        "incognito",
+        "flexible",
+        "off-peak"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y062",
+      "fingerprint": "travel",
+      "prompt": "What is a Schengen visa?",
+      "category": "travel",
+      "expected_keywords": [
+        "Schengen",
+        "26",
+        "90",
+        "Europe",
+        "short"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y063",
+      "fingerprint": "travel",
+      "prompt": "How to deal with traveler's diarrhea",
+      "category": "travel",
+      "expected_keywords": [
+        "hydrate",
+        "BRAT",
+        "bismuth",
+        "loperamide",
+        "clean"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y064",
+      "fingerprint": "travel",
+      "prompt": "Tipping etiquette in Japan",
+      "category": "travel",
+      "expected_keywords": [
+        "no",
+        "not",
+        "custom",
+        "decline",
+        "insult"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y065",
+      "fingerprint": "travel",
+      "prompt": "How to use Google Maps offline",
+      "category": "travel",
+      "expected_keywords": [
+        "download",
+        "area",
+        "offline",
+        "search",
+        "navigate"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y066",
+      "fingerprint": "travel",
+      "prompt": "What plug type is used in Italy?",
+      "category": "travel",
+      "expected_keywords": [
+        "Type",
+        "C",
+        "F",
+        "L",
+        "European",
+        "Italy"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y067",
+      "fingerprint": "travel",
+      "prompt": "Best time to visit Iceland",
+      "category": "travel",
+      "expected_keywords": [
+        "Jun",
+        "Aug",
+        "Sep",
+        "aurora",
+        "midnight",
+        "summer"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y068",
+      "fingerprint": "travel",
+      "prompt": "How to apply for Global Entry",
+      "category": "travel",
+      "expected_keywords": [
+        "TTP",
+        "interview",
+        "fee",
+        "CBP",
+        "background"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y069",
+      "fingerprint": "travel",
+      "prompt": "Best apps for translation while traveling",
+      "category": "travel",
+      "expected_keywords": [
+        "Google Translate",
+        "DeepL",
+        "camera",
+        "offline",
+        "speak"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y070",
+      "fingerprint": "travel",
+      "prompt": "How to deal with lost luggage",
+      "category": "travel",
+      "expected_keywords": [
+        "report",
+        "baggage",
+        "claim",
+        "airline",
+        "compensation"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y071",
+      "fingerprint": "travel",
+      "prompt": "Is travel insurance worth it?",
+      "category": "travel",
+      "expected_keywords": [
+        "medical",
+        "trip",
+        "cancel",
+        "covid",
+        "situation"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y072",
+      "fingerprint": "travel",
+      "prompt": "Best way to learn basic phrases for a country",
+      "category": "travel",
+      "expected_keywords": [
+        "Duolingo",
+        "phrasebook",
+        "greet",
+        "please",
+        "thank"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y073",
+      "fingerprint": "travel",
+      "prompt": "How to avoid pickpockets in Europe",
+      "category": "travel",
+      "expected_keywords": [
+        "money belt",
+        "crowded",
+        "watch",
+        "backpack",
+        "aware"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y074",
+      "fingerprint": "travel",
+      "prompt": "What documents do I need for international travel?",
+      "category": "travel",
+      "expected_keywords": [
+        "passport",
+        "visa",
+        "insurance",
+        "copies",
+        "proof"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y075",
+      "fingerprint": "travel",
+      "prompt": "Best way to exchange currency abroad",
+      "category": "travel",
+      "expected_keywords": [
+        "ATM",
+        "local",
+        "avoid airport",
+        "credit",
+        "fee"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y076",
+      "fingerprint": "hobbies",
+      "prompt": "How to start journaling daily",
+      "category": "hobbies",
+      "expected_keywords": [
+        "prompt",
+        "time",
+        "short",
+        "habit",
+        "morning"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y077",
+      "fingerprint": "hobbies",
+      "prompt": "Beginner watercolor painting tips",
+      "category": "hobbies",
+      "expected_keywords": [
+        "paper",
+        "wet",
+        "dry",
+        "brush",
+        "layer"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y078",
+      "fingerprint": "hobbies",
+      "prompt": "How to start a stamp collection",
+      "category": "hobbies",
+      "expected_keywords": [
+        "theme",
+        "catalog",
+        "tongs",
+        "album",
+        "mount"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y079",
+      "fingerprint": "hobbies",
+      "prompt": "Tips for landscape photography",
+      "category": "hobbies",
+      "expected_keywords": [
+        "golden hour",
+        "tripod",
+        "wide",
+        "depth",
+        "composition"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y080",
+      "fingerprint": "hobbies",
+      "prompt": "How to learn to play chess as an adult",
+      "category": "hobbies",
+      "expected_keywords": [
+        "puzzle",
+        "opening",
+        "tactics",
+        "lichess",
+        "practice"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y081",
+      "fingerprint": "hobbies",
+      "prompt": "Beginner knitting projects",
+      "category": "hobbies",
+      "expected_keywords": [
+        "scarf",
+        "cast on",
+        "yarn",
+        "needle",
+        "stitch"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y082",
+      "fingerprint": "hobbies",
+      "prompt": "How to make your own kombucha",
+      "category": "hobbies",
+      "expected_keywords": [
+        "SCOBY",
+        "sugar",
+        "tea",
+        "ferment",
+        "week"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y083",
+      "fingerprint": "hobbies",
+      "prompt": "Tips for bird watching for beginners",
+      "category": "hobbies",
+      "expected_keywords": [
+        "binocular",
+        "field guide",
+        "quiet",
+        "dawn",
+        "app"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y084",
+      "fingerprint": "hobbies",
+      "prompt": "How to start a herb garden indoors",
+      "category": "hobbies",
+      "expected_keywords": [
+        "sunlight",
+        "pot",
+        "drain",
+        "basil",
+        "mint",
+        "window"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y085",
+      "fingerprint": "hobbies",
+      "prompt": "Basic origami folds to learn first",
+      "category": "hobbies",
+      "expected_keywords": [
+        "valley",
+        "mountain",
+        "reverse",
+        "crane",
+        "square"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y086",
+      "fingerprint": "hobbies",
+      "prompt": "How to start brewing beer at home",
+      "category": "hobbies",
+      "expected_keywords": [
+        "malt",
+        "hop",
+        "yeast",
+        "ferment",
+        "sanitize"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y087",
+      "fingerprint": "hobbies",
+      "prompt": "Tips for beginner woodworking",
+      "category": "hobbies",
+      "expected_keywords": [
+        "measure",
+        "square",
+        "sharp",
+        "practice",
+        "safety"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y088",
+      "fingerprint": "hobbies",
+      "prompt": "How to start a bullet journal",
+      "category": "hobbies",
+      "expected_keywords": [
+        "index",
+        "key",
+        "monthly",
+        "spread",
+        "collection"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y089",
+      "fingerprint": "hobbies",
+      "prompt": "Best yarn for beginner crochet",
+      "category": "hobbies",
+      "expected_keywords": [
+        "medium",
+        "worsted",
+        "cotton",
+        "light",
+        "acrylic"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y090",
+      "fingerprint": "hobbies",
+      "prompt": "How to choose a beginner camera",
+      "category": "hobbies",
+      "expected_keywords": [
+        "mirrorless",
+        "DSLR",
+        "budget",
+        "lens",
+        "sensor"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y091",
+      "fingerprint": "auto",
+      "prompt": "How often should I change my car's oil?",
+      "category": "auto",
+      "expected_keywords": [
+        "3000",
+        "5000",
+        "mile",
+        "synthetic",
+        "year"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y092",
+      "fingerprint": "auto",
+      "prompt": "What does the check engine light mean?",
+      "category": "auto",
+      "expected_keywords": [
+        "OBD",
+        "sensor",
+        "fault",
+        "emission",
+        "scan"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y093",
+      "fingerprint": "auto",
+      "prompt": "How to check tire pressure",
+      "category": "auto",
+      "expected_keywords": [
+        "gauge",
+        "cold",
+        "PSI",
+        "door",
+        "jamb"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y094",
+      "fingerprint": "auto",
+      "prompt": "When should I rotate my tires?",
+      "category": "auto",
+      "expected_keywords": [
+        "5000",
+        "7500",
+        "mile",
+        "even wear",
+        "front"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y095",
+      "fingerprint": "auto",
+      "prompt": "Symptoms of a failing battery",
+      "category": "auto",
+      "expected_keywords": [
+        "slow start",
+        "dim",
+        "corrosion",
+        "12",
+        "volt"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y096",
+      "fingerprint": "auto",
+      "prompt": "How to jump-start a car",
+      "category": "auto",
+      "expected_keywords": [
+        "red",
+        "positive",
+        "black",
+        "negative",
+        "ground"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y097",
+      "fingerprint": "auto",
+      "prompt": "What does AWD mean?",
+      "category": "auto",
+      "expected_keywords": [
+        "all wheel",
+        "drive",
+        "four",
+        "power",
+        "traction"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y098",
+      "fingerprint": "auto",
+      "prompt": "How to wash a car without damaging the paint",
+      "category": "auto",
+      "expected_keywords": [
+        "two bucket",
+        "microfiber",
+        "top",
+        "wash",
+        "dry"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y099",
+      "fingerprint": "auto",
+      "prompt": "Best way to remove a dent without paint damage",
+      "category": "auto",
+      "expected_keywords": [
+        "plunger",
+        "hot water",
+        "PDR",
+        "push",
+        "ice"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y100",
+      "fingerprint": "auto",
+      "prompt": "How long do car tires last?",
+      "category": "auto",
+      "expected_keywords": [
+        "6 year",
+        "50000",
+        "tread",
+        "mile",
+        "brand"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y101",
+      "fingerprint": "auto",
+      "prompt": "What is the difference between premium and regular gas?",
+      "category": "auto",
+      "expected_keywords": [
+        "octane",
+        "91",
+        "87",
+        "compression",
+        "performance"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y102",
+      "fingerprint": "auto",
+      "prompt": "How to replace windshield wipers",
+      "category": "auto",
+      "expected_keywords": [
+        "tab",
+        "release",
+        "slide",
+        "new",
+        "arm"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y103",
+      "fingerprint": "auto",
+      "prompt": "Symptoms of bad brake pads",
+      "category": "auto",
+      "expected_keywords": [
+        "squeak",
+        "grind",
+        "vibrate",
+        "longer",
+        "stop"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y104",
+      "fingerprint": "auto",
+      "prompt": "How does cruise control work?",
+      "category": "auto",
+      "expected_keywords": [
+        "set",
+        "speed",
+        "throttle",
+        "sensor",
+        "steady"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y105",
+      "fingerprint": "auto",
+      "prompt": "What is regenerative braking?",
+      "category": "auto",
+      "expected_keywords": [
+        "electric",
+        "motor",
+        "generator",
+        "battery",
+        "recapture"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y106",
+      "fingerprint": "multimath",
+      "prompt": "A store has 25% off all items. After tax (8%), what's the final price on a $80 item?",
+      "category": "multimath",
+      "expected_keywords": [
+        "64.8",
+        "64.80"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y107",
+      "fingerprint": "multimath",
+      "prompt": "Train A travels 50 mph for 3 hours; Train B travels 60 mph for 2 hours. Total distance?",
+      "category": "multimath",
+      "expected_keywords": [
+        "270"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y108",
+      "fingerprint": "multimath",
+      "prompt": "If I invest $1000 at 5% compound interest annually, how much after 3 years?",
+      "category": "multimath",
+      "expected_keywords": [
+        "1157",
+        "1158"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y109",
+      "fingerprint": "multimath",
+      "prompt": "A rectangle is 12m by 8m. What is its perimeter and area?",
+      "category": "multimath",
+      "expected_keywords": [
+        "40",
+        "96"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y110",
+      "fingerprint": "multimath",
+      "prompt": "If 3 painters take 4 hours, how long for 6 painters?",
+      "category": "multimath",
+      "expected_keywords": [
+        "2",
+        "two"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y111",
+      "fingerprint": "multimath",
+      "prompt": "Pool fills at 10 L/min, drains at 6 L/min. Net rate?",
+      "category": "multimath",
+      "expected_keywords": [
+        "4"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y112",
+      "fingerprint": "multimath",
+      "prompt": "A jar has 8 red, 12 blue marbles. Probability of red?",
+      "category": "multimath",
+      "expected_keywords": [
+        "8/20",
+        "2/5",
+        "40",
+        "0.4"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y113",
+      "fingerprint": "multimath",
+      "prompt": "Average of 80, 90, 70, 60 is what?",
+      "category": "multimath",
+      "expected_keywords": [
+        "75"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y114",
+      "fingerprint": "multimath",
+      "prompt": "If a triangle has angles 40 and 60, what's the third?",
+      "category": "multimath",
+      "expected_keywords": [
+        "80"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y115",
+      "fingerprint": "multimath",
+      "prompt": "Convert 3.5 meters to inches",
+      "category": "multimath",
+      "expected_keywords": [
+        "137.8",
+        "137",
+        "138",
+        "inch"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y116",
+      "fingerprint": "multimath",
+      "prompt": "If batting average is 0.300, hits per 50 at-bats?",
+      "category": "multimath",
+      "expected_keywords": [
+        "15"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y117",
+      "fingerprint": "multimath",
+      "prompt": "A square has area 64 sq m. Side length?",
+      "category": "multimath",
+      "expected_keywords": [
+        "8"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y118",
+      "fingerprint": "multimath",
+      "prompt": "Cube side 5cm. Volume?",
+      "category": "multimath",
+      "expected_keywords": [
+        "125"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y119",
+      "fingerprint": "multimath",
+      "prompt": "If a coin is flipped 4 times, probability of all heads?",
+      "category": "multimath",
+      "expected_keywords": [
+        "1/16",
+        "6.25",
+        "0.0625"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y120",
+      "fingerprint": "multimath",
+      "prompt": "20% of x is 30. What is x?",
+      "category": "multimath",
+      "expected_keywords": [
+        "150"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y121",
+      "fingerprint": "multimath",
+      "prompt": "Solve 3x + 5 = 26",
+      "category": "multimath",
+      "expected_keywords": [
+        "7"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y122",
+      "fingerprint": "multimath",
+      "prompt": "If 5x = 35, what is x?",
+      "category": "multimath",
+      "expected_keywords": [
+        "7"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y123",
+      "fingerprint": "multimath",
+      "prompt": "Find slope between (1,2) and (4,8)",
+      "category": "multimath",
+      "expected_keywords": [
+        "2"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y124",
+      "fingerprint": "multimath",
+      "prompt": "Distance between (0,0) and (3,4)?",
+      "category": "multimath",
+      "expected_keywords": [
+        "5"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y125",
+      "fingerprint": "multimath",
+      "prompt": "Hypotenuse of a 3-4-? right triangle",
+      "category": "multimath",
+      "expected_keywords": [
+        "5"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y126",
+      "fingerprint": "recipe2",
+      "prompt": "How to make a basic vinaigrette dressing",
+      "category": "recipe2",
+      "expected_keywords": [
+        "oil",
+        "vinegar",
+        "mustard",
+        "ratio",
+        "emulsify"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y127",
+      "fingerprint": "recipe2",
+      "prompt": "How to make a simple curry from scratch",
+      "category": "recipe2",
+      "expected_keywords": [
+        "onion",
+        "garlic",
+        "ginger",
+        "spice",
+        "tomato"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y128",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for chocolate chip cookies",
+      "category": "recipe2",
+      "expected_keywords": [
+        "butter",
+        "sugar",
+        "egg",
+        "flour",
+        "chip",
+        "bake"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y129",
+      "fingerprint": "recipe2",
+      "prompt": "How to make pancakes from scratch",
+      "category": "recipe2",
+      "expected_keywords": [
+        "flour",
+        "milk",
+        "egg",
+        "baking powder",
+        "griddle"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y130",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for pesto",
+      "category": "recipe2",
+      "expected_keywords": [
+        "basil",
+        "pine nut",
+        "Parmesan",
+        "olive oil",
+        "garlic"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y131",
+      "fingerprint": "recipe2",
+      "prompt": "How to make focaccia bread at home",
+      "category": "recipe2",
+      "expected_keywords": [
+        "flour",
+        "olive oil",
+        "yeast",
+        "dimple",
+        "salt"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y132",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for guacamole",
+      "category": "recipe2",
+      "expected_keywords": [
+        "avocado",
+        "lime",
+        "cilantro",
+        "onion",
+        "salt"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y133",
+      "fingerprint": "recipe2",
+      "prompt": "How to make homemade ice cream without a machine",
+      "category": "recipe2",
+      "expected_keywords": [
+        "cream",
+        "condensed",
+        "freeze",
+        "whip",
+        "fold"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y134",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for vegetable stir fry",
+      "category": "recipe2",
+      "expected_keywords": [
+        "wok",
+        "high heat",
+        "sauce",
+        "vegetable",
+        "quick"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y135",
+      "fingerprint": "recipe2",
+      "prompt": "How to roast vegetables",
+      "category": "recipe2",
+      "expected_keywords": [
+        "400",
+        "oil",
+        "salt",
+        "spread",
+        "sheet"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y136",
+      "fingerprint": "recipe2",
+      "prompt": "How to make miso soup",
+      "category": "recipe2",
+      "expected_keywords": [
+        "dashi",
+        "miso",
+        "tofu",
+        "green onion",
+        "seaweed"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y137",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for hummus",
+      "category": "recipe2",
+      "expected_keywords": [
+        "chickpea",
+        "tahini",
+        "lemon",
+        "garlic",
+        "olive oil"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y138",
+      "fingerprint": "recipe2",
+      "prompt": "How to cook quinoa",
+      "category": "recipe2",
+      "expected_keywords": [
+        "rinse",
+        "2:1",
+        "simmer",
+        "fluff",
+        "water"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y139",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for caesar salad dressing",
+      "category": "recipe2",
+      "expected_keywords": [
+        "anchovy",
+        "garlic",
+        "Parmesan",
+        "egg",
+        "Worcestershire"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y140",
+      "fingerprint": "recipe2",
+      "prompt": "How to bake a potato",
+      "category": "recipe2",
+      "expected_keywords": [
+        "400",
+        "prick",
+        "oil",
+        "salt",
+        "60",
+        "hour"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y141",
+      "fingerprint": "recipe2",
+      "prompt": "How to make scrambled eggs creamy",
+      "category": "recipe2",
+      "expected_keywords": [
+        "low heat",
+        "butter",
+        "stir",
+        "off heat",
+        "cream"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y142",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for granola",
+      "category": "recipe2",
+      "expected_keywords": [
+        "oat",
+        "nut",
+        "honey",
+        "oil",
+        "bake",
+        "clump"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y143",
+      "fingerprint": "recipe2",
+      "prompt": "How to make a simple roux",
+      "category": "recipe2",
+      "expected_keywords": [
+        "butter",
+        "flour",
+        "equal",
+        "cook",
+        "color"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y144",
+      "fingerprint": "recipe2",
+      "prompt": "Recipe for marinara sauce",
+      "category": "recipe2",
+      "expected_keywords": [
+        "tomato",
+        "garlic",
+        "basil",
+        "oil",
+        "simmer"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y145",
+      "fingerprint": "recipe2",
+      "prompt": "How to make french toast",
+      "category": "recipe2",
+      "expected_keywords": [
+        "egg",
+        "milk",
+        "cinnamon",
+        "soak",
+        "brown"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y146",
+      "fingerprint": "popculture",
+      "prompt": "Who plays Iron Man in the MCU?",
+      "category": "popculture",
+      "expected_keywords": [
+        "Robert",
+        "Downey",
+        "RDJ"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y147",
+      "fingerprint": "popculture",
+      "prompt": "Director of Pulp Fiction",
+      "category": "popculture",
+      "expected_keywords": [
+        "Tarantino"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y148",
+      "fingerprint": "popculture",
+      "prompt": "Author of the Harry Potter series",
+      "category": "popculture",
+      "expected_keywords": [
+        "Rowling",
+        "J.K."
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y149",
+      "fingerprint": "popculture",
+      "prompt": "Lead singer of Queen",
+      "category": "popculture",
+      "expected_keywords": [
+        "Mercury",
+        "Freddie"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y150",
+      "fingerprint": "popculture",
+      "prompt": "What was the highest grossing movie of all time?",
+      "category": "popculture",
+      "expected_keywords": [
+        "Avatar",
+        "Avengers",
+        "Endgame"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y151",
+      "fingerprint": "popculture",
+      "prompt": "Who created The Simpsons?",
+      "category": "popculture",
+      "expected_keywords": [
+        "Groening",
+        "Matt"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y152",
+      "fingerprint": "popculture",
+      "prompt": "Country that produced K-Pop",
+      "category": "popculture",
+      "expected_keywords": [
+        "South Korea",
+        "Korea"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y153",
+      "fingerprint": "popculture",
+      "prompt": "Lead actor in Stranger Things as Eleven",
+      "category": "popculture",
+      "expected_keywords": [
+        "Millie",
+        "Bobby",
+        "Brown"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y154",
+      "fingerprint": "popculture",
+      "prompt": "Composer of Star Wars theme",
+      "category": "popculture",
+      "expected_keywords": [
+        "John",
+        "Williams"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y155",
+      "fingerprint": "popculture",
+      "prompt": "Iconic song from the movie Titanic",
+      "category": "popculture",
+      "expected_keywords": [
+        "My Heart Will Go On",
+        "Celine",
+        "Dion"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y156",
+      "fingerprint": "popculture",
+      "prompt": "Author of Game of Thrones",
+      "category": "popculture",
+      "expected_keywords": [
+        "Martin",
+        "George",
+        "R.R."
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y157",
+      "fingerprint": "popculture",
+      "prompt": "Director of Inception",
+      "category": "popculture",
+      "expected_keywords": [
+        "Nolan",
+        "Christopher"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y158",
+      "fingerprint": "popculture",
+      "prompt": "Lead singer of U2",
+      "category": "popculture",
+      "expected_keywords": [
+        "Bono"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y159",
+      "fingerprint": "popculture",
+      "prompt": "Movie with the line 'You can't handle the truth'",
+      "category": "popculture",
+      "expected_keywords": [
+        "A Few Good Men",
+        "Few Good"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y160",
+      "fingerprint": "popculture",
+      "prompt": "Year Friends sitcom ended",
+      "category": "popculture",
+      "expected_keywords": [
+        "2004"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y161",
+      "fingerprint": "popculture",
+      "prompt": "Director of Spirited Away",
+      "category": "popculture",
+      "expected_keywords": [
+        "Miyazaki",
+        "Hayao"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y162",
+      "fingerprint": "popculture",
+      "prompt": "Lead actor of Breaking Bad",
+      "category": "popculture",
+      "expected_keywords": [
+        "Cranston",
+        "Bryan"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y163",
+      "fingerprint": "popculture",
+      "prompt": "Where was Breaking Bad set?",
+      "category": "popculture",
+      "expected_keywords": [
+        "Albuquerque",
+        "New Mexico"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y164",
+      "fingerprint": "popculture",
+      "prompt": "Most-streamed song on Spotify all time?",
+      "category": "popculture",
+      "expected_keywords": [
+        "Blinding Lights",
+        "Weeknd"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y165",
+      "fingerprint": "popculture",
+      "prompt": "Singer of Bad Guy (2019)",
+      "category": "popculture",
+      "expected_keywords": [
+        "Billie",
+        "Eilish"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y166",
+      "fingerprint": "geo_deep",
+      "prompt": "Country with the most lakes",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Canada"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y167",
+      "fingerprint": "geo_deep",
+      "prompt": "Longest river in South America",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Amazon"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y168",
+      "fingerprint": "geo_deep",
+      "prompt": "Capital of Mongolia",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Ulaanbaatar",
+        "Ulan Bator"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y169",
+      "fingerprint": "geo_deep",
+      "prompt": "What sea is between Italy and the Balkans?",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Adriatic"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y170",
+      "fingerprint": "geo_deep",
+      "prompt": "Capital of Kazakhstan",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Astana",
+        "Nur-Sultan"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y171",
+      "fingerprint": "geo_deep",
+      "prompt": "Country smallest by population",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Vatican"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y172",
+      "fingerprint": "geo_deep",
+      "prompt": "Largest country by land area",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Russia"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y173",
+      "fingerprint": "geo_deep",
+      "prompt": "Capital of Iceland",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Reykjavik",
+        "Reykjavík"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y174",
+      "fingerprint": "geo_deep",
+      "prompt": "Strait between Spain and Morocco",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Gibraltar"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y175",
+      "fingerprint": "geo_deep",
+      "prompt": "Highest waterfall in the world",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Angel",
+        "Venezuela"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y176",
+      "fingerprint": "geo_deep",
+      "prompt": "Country that borders only one other country",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Canada",
+        "Denmark",
+        "Gambia",
+        "Lesotho",
+        "Monaco",
+        "Portugal",
+        "South Korea",
+        "Vatican"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y177",
+      "fingerprint": "geo_deep",
+      "prompt": "What city is split between Europe and Asia?",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Istanbul"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y178",
+      "fingerprint": "geo_deep",
+      "prompt": "Largest country in South America",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Brazil"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y179",
+      "fingerprint": "geo_deep",
+      "prompt": "Capital of New Zealand",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Wellington"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y180",
+      "fingerprint": "geo_deep",
+      "prompt": "Tallest mountain in North America",
+      "category": "geo_deep",
+      "expected_keywords": [
+        "Denali",
+        "McKinley"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y181",
+      "fingerprint": "music",
+      "prompt": "What is a major scale made of?",
+      "category": "music",
+      "expected_keywords": [
+        "whole",
+        "half",
+        "step",
+        "pattern",
+        "WWHWWWH"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y182",
+      "fingerprint": "music",
+      "prompt": "Difference between a major and minor chord",
+      "category": "music",
+      "expected_keywords": [
+        "third",
+        "major",
+        "minor",
+        "semitone",
+        "interval"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y183",
+      "fingerprint": "music",
+      "prompt": "What is a key signature?",
+      "category": "music",
+      "expected_keywords": [
+        "sharp",
+        "flat",
+        "key",
+        "tonic",
+        "scale"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y184",
+      "fingerprint": "music",
+      "prompt": "How many beats are in 4/4 time?",
+      "category": "music",
+      "expected_keywords": [
+        "4",
+        "four",
+        "quarter"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y185",
+      "fingerprint": "music",
+      "prompt": "What is a triad?",
+      "category": "music",
+      "expected_keywords": [
+        "three",
+        "note",
+        "chord",
+        "root",
+        "third",
+        "fifth"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y186",
+      "fingerprint": "music",
+      "prompt": "What does forte mean in music?",
+      "category": "music",
+      "expected_keywords": [
+        "loud",
+        "strong",
+        "Italian",
+        "dynamic"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y187",
+      "fingerprint": "music",
+      "prompt": "What is a fermata?",
+      "category": "music",
+      "expected_keywords": [
+        "hold",
+        "pause",
+        "sustain",
+        "symbol"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y188",
+      "fingerprint": "music",
+      "prompt": "Difference between sharp and flat",
+      "category": "music",
+      "expected_keywords": [
+        "raise",
+        "lower",
+        "semitone",
+        "half",
+        "step"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y189",
+      "fingerprint": "music",
+      "prompt": "What is the relative minor of C major?",
+      "category": "music",
+      "expected_keywords": [
+        "A minor"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y190",
+      "fingerprint": "music",
+      "prompt": "How many notes in an octave?",
+      "category": "music",
+      "expected_keywords": [
+        "12",
+        "13",
+        "semitone",
+        "chromatic"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y191",
+      "fingerprint": "music",
+      "prompt": "What is a perfect fifth interval?",
+      "category": "music",
+      "expected_keywords": [
+        "7",
+        "semitone",
+        "C",
+        "G",
+        "power"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y192",
+      "fingerprint": "music",
+      "prompt": "What does crescendo mean?",
+      "category": "music",
+      "expected_keywords": [
+        "gradually",
+        "louder",
+        "build",
+        "Italian"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y193",
+      "fingerprint": "music",
+      "prompt": "What is the I-IV-V chord progression?",
+      "category": "music",
+      "expected_keywords": [
+        "one",
+        "four",
+        "five",
+        "tonic",
+        "dominant"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y194",
+      "fingerprint": "music",
+      "prompt": "What is syncopation?",
+      "category": "music",
+      "expected_keywords": [
+        "off-beat",
+        "accent",
+        "rhythm",
+        "unexpected"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y195",
+      "fingerprint": "music",
+      "prompt": "What is treble vs bass clef?",
+      "category": "music",
+      "expected_keywords": [
+        "high",
+        "low",
+        "G",
+        "F",
+        "staff",
+        "clef"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y196",
+      "fingerprint": "psych",
+      "prompt": "What is cognitive dissonance?",
+      "category": "psych",
+      "expected_keywords": [
+        "conflict",
+        "belief",
+        "behavior",
+        "Festinger",
+        "tension"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y197",
+      "fingerprint": "psych",
+      "prompt": "Define confirmation bias",
+      "category": "psych",
+      "expected_keywords": [
+        "seek",
+        "confirm",
+        "existing",
+        "belief",
+        "ignore"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y198",
+      "fingerprint": "psych",
+      "prompt": "What is the bystander effect?",
+      "category": "psych",
+      "expected_keywords": [
+        "help",
+        "crowd",
+        "responsibility",
+        "diffuse",
+        "Kitty"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y199",
+      "fingerprint": "psych",
+      "prompt": "Difference between extrovert and introvert",
+      "category": "psych",
+      "expected_keywords": [
+        "energy",
+        "social",
+        "alone",
+        "crowd",
+        "recharge"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y200",
+      "fingerprint": "psych",
+      "prompt": "What is Maslow's hierarchy of needs?",
+      "category": "psych",
+      "expected_keywords": [
+        "physiological",
+        "safety",
+        "love",
+        "esteem",
+        "self-actualization"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y201",
+      "fingerprint": "psych",
+      "prompt": "Define operant conditioning",
+      "category": "psych",
+      "expected_keywords": [
+        "Skinner",
+        "reward",
+        "punish",
+        "behavior",
+        "consequence"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y202",
+      "fingerprint": "psych",
+      "prompt": "What is the placebo effect?",
+      "category": "psych",
+      "expected_keywords": [
+        "expectation",
+        "belief",
+        "improve",
+        "sugar",
+        "mind"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y203",
+      "fingerprint": "psych",
+      "prompt": "Define imposter syndrome",
+      "category": "psych",
+      "expected_keywords": [
+        "fraud",
+        "competent",
+        "feel",
+        "not enough",
+        "achievement"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y204",
+      "fingerprint": "psych",
+      "prompt": "What is classical conditioning?",
+      "category": "psych",
+      "expected_keywords": [
+        "Pavlov",
+        "stimulus",
+        "association",
+        "dog",
+        "bell"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y205",
+      "fingerprint": "psych",
+      "prompt": "Difference between empathy and sympathy",
+      "category": "psych",
+      "expected_keywords": [
+        "feel with",
+        "feel for",
+        "understand",
+        "share",
+        "compassion"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y206",
+      "fingerprint": "psych",
+      "prompt": "What is anchoring bias?",
+      "category": "psych",
+      "expected_keywords": [
+        "first",
+        "information",
+        "reference",
+        "stick",
+        "negotiate"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y207",
+      "fingerprint": "psych",
+      "prompt": "Define the Dunning-Kruger effect",
+      "category": "psych",
+      "expected_keywords": [
+        "incompetent",
+        "overestimate",
+        "ability",
+        "confidence",
+        "unaware"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y208",
+      "fingerprint": "psych",
+      "prompt": "What is mindfulness?",
+      "category": "psych",
+      "expected_keywords": [
+        "present",
+        "awareness",
+        "non-judg",
+        "breath",
+        "moment"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y209",
+      "fingerprint": "psych",
+      "prompt": "What is fight or flight response?",
+      "category": "psych",
+      "expected_keywords": [
+        "adrenaline",
+        "threat",
+        "sympathetic",
+        "cortisol",
+        "fast"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y210",
+      "fingerprint": "psych",
+      "prompt": "Define groupthink",
+      "category": "psych",
+      "expected_keywords": [
+        "conform",
+        "consensus",
+        "critical",
+        "dissent",
+        "group"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y211",
+      "fingerprint": "mental",
+      "prompt": "What is Occam's Razor?",
+      "category": "mental",
+      "expected_keywords": [
+        "simplest",
+        "explanation",
+        "fewer",
+        "assumption",
+        "parsimony"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y212",
+      "fingerprint": "mental",
+      "prompt": "Explain the Pareto principle (80/20)",
+      "category": "mental",
+      "expected_keywords": [
+        "80",
+        "20",
+        "cause",
+        "effect",
+        "minority"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y213",
+      "fingerprint": "mental",
+      "prompt": "What is opportunity cost?",
+      "category": "mental",
+      "expected_keywords": [
+        "forgo",
+        "alternative",
+        "best",
+        "trade",
+        "next best"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y214",
+      "fingerprint": "mental",
+      "prompt": "Define survivorship bias",
+      "category": "mental",
+      "expected_keywords": [
+        "only",
+        "survive",
+        "missing",
+        "sample",
+        "plane"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y215",
+      "fingerprint": "mental",
+      "prompt": "What is first principles thinking?",
+      "category": "mental",
+      "expected_keywords": [
+        "fundamental",
+        "basics",
+        "reason",
+        "Aristotle",
+        "build up"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y216",
+      "fingerprint": "mental",
+      "prompt": "What is the Eisenhower matrix?",
+      "category": "mental",
+      "expected_keywords": [
+        "urgent",
+        "important",
+        "priority",
+        "quadrant",
+        "decide"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y217",
+      "fingerprint": "mental",
+      "prompt": "Explain sunk cost fallacy",
+      "category": "mental",
+      "expected_keywords": [
+        "already",
+        "spent",
+        "continue",
+        "irrational",
+        "recover"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y218",
+      "fingerprint": "mental",
+      "prompt": "What is the SWOT analysis?",
+      "category": "mental",
+      "expected_keywords": [
+        "Strength",
+        "Weakness",
+        "Opportunity",
+        "Threat"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y219",
+      "fingerprint": "mental",
+      "prompt": "Define second-order thinking",
+      "category": "mental",
+      "expected_keywords": [
+        "consequence",
+        "downstream",
+        "beyond",
+        "ripple",
+        "ahead"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y220",
+      "fingerprint": "mental",
+      "prompt": "What is Hanlon's razor?",
+      "category": "mental",
+      "expected_keywords": [
+        "malice",
+        "stupidity",
+        "incompetence",
+        "attribute",
+        "never"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y221",
+      "fingerprint": "mental",
+      "prompt": "Explain the bus factor",
+      "category": "mental",
+      "expected_keywords": [
+        "risk",
+        "single",
+        "knowledge",
+        "one",
+        "leave"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y222",
+      "fingerprint": "mental",
+      "prompt": "What is rubber duck debugging?",
+      "category": "mental",
+      "expected_keywords": [
+        "explain",
+        "duck",
+        "stuck",
+        "talk",
+        "find"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y223",
+      "fingerprint": "mental",
+      "prompt": "Define the Peter principle",
+      "category": "mental",
+      "expected_keywords": [
+        "promote",
+        "incompetent",
+        "level",
+        "competence",
+        "management"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y224",
+      "fingerprint": "mental",
+      "prompt": "What is the Streisand effect?",
+      "category": "mental",
+      "expected_keywords": [
+        "hide",
+        "attention",
+        "backfire",
+        "more",
+        "unintended"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y225",
+      "fingerprint": "mental",
+      "prompt": "What is Goodhart's law?",
+      "category": "mental",
+      "expected_keywords": [
+        "measure",
+        "target",
+        "ceases",
+        "metric",
+        "gaming"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y226",
+      "fingerprint": "stats",
+      "prompt": "What is standard deviation?",
+      "category": "stats",
+      "expected_keywords": [
+        "spread",
+        "mean",
+        "square root",
+        "variance",
+        "dispersion"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y227",
+      "fingerprint": "stats",
+      "prompt": "Difference between mean and median",
+      "category": "stats",
+      "expected_keywords": [
+        "average",
+        "middle",
+        "skew",
+        "outlier"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y228",
+      "fingerprint": "stats",
+      "prompt": "What is a normal distribution?",
+      "category": "stats",
+      "expected_keywords": [
+        "bell",
+        "68",
+        "95",
+        "99.7",
+        "mean",
+        "std"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y229",
+      "fingerprint": "stats",
+      "prompt": "Explain probability vs statistics",
+      "category": "stats",
+      "expected_keywords": [
+        "future",
+        "past",
+        "predict",
+        "describe",
+        "sample"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y230",
+      "fingerprint": "stats",
+      "prompt": "What is a p-value?",
+      "category": "stats",
+      "expected_keywords": [
+        "null",
+        "reject",
+        "0.05",
+        "significance",
+        "probability"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y231",
+      "fingerprint": "stats",
+      "prompt": "Define correlation vs causation",
+      "category": "stats",
+      "expected_keywords": [
+        "correlation",
+        "causation",
+        "not",
+        "relationship",
+        "third"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y232",
+      "fingerprint": "stats",
+      "prompt": "Birthday paradox: how many people for 50% match?",
+      "category": "stats",
+      "expected_keywords": [
+        "23"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y233",
+      "fingerprint": "stats",
+      "prompt": "Probability of rolling a 6 on a fair die?",
+      "category": "stats",
+      "expected_keywords": [
+        "1/6",
+        "16.6",
+        "16.7"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y234",
+      "fingerprint": "stats",
+      "prompt": "What is a confidence interval?",
+      "category": "stats",
+      "expected_keywords": [
+        "range",
+        "true",
+        "value",
+        "percent",
+        "interval"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y235",
+      "fingerprint": "stats",
+      "prompt": "Difference between bias and variance in ML",
+      "category": "stats",
+      "expected_keywords": [
+        "under",
+        "over",
+        "bias",
+        "variance",
+        "tradeoff"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y236",
+      "fingerprint": "stats",
+      "prompt": "What is a histogram?",
+      "category": "stats",
+      "expected_keywords": [
+        "frequency",
+        "bin",
+        "distribution",
+        "bar",
+        "range"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y237",
+      "fingerprint": "stats",
+      "prompt": "Define mode in statistics",
+      "category": "stats",
+      "expected_keywords": [
+        "most",
+        "frequent",
+        "value",
+        "occur",
+        "data"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y238",
+      "fingerprint": "stats",
+      "prompt": "What is regression to the mean?",
+      "category": "stats",
+      "expected_keywords": [
+        "extreme",
+        "return",
+        "average",
+        "next",
+        "measurement"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y239",
+      "fingerprint": "stats",
+      "prompt": "What does 'statistically significant' mean?",
+      "category": "stats",
+      "expected_keywords": [
+        "p",
+        "0.05",
+        "chance",
+        "not random",
+        "reject"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y240",
+      "fingerprint": "stats",
+      "prompt": "Expected value of a die roll?",
+      "category": "stats",
+      "expected_keywords": [
+        "3.5"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y241",
+      "fingerprint": "misc",
+      "prompt": "Etiquette tips for a business dinner",
+      "category": "misc",
+      "expected_keywords": [
+        "napkin",
+        "outside",
+        "inside",
+        "slow",
+        "host"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y242",
+      "fingerprint": "misc",
+      "prompt": "Best way to apologize to a friend",
+      "category": "misc",
+      "expected_keywords": [
+        "sincere",
+        "specific",
+        "ownership",
+        "change",
+        "listen"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y243",
+      "fingerprint": "misc",
+      "prompt": "How to handle a panic attack",
+      "category": "misc",
+      "expected_keywords": [
+        "breath",
+        "ground",
+        "name",
+        "slow",
+        "safe"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y244",
+      "fingerprint": "misc",
+      "prompt": "Tips for writing a personal essay",
+      "category": "misc",
+      "expected_keywords": [
+        "specific",
+        "detail",
+        "emotion",
+        "show",
+        "arc"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y245",
+      "fingerprint": "misc",
+      "prompt": "How to give constructive criticism",
+      "category": "misc",
+      "expected_keywords": [
+        "specific",
+        "behavior",
+        "example",
+        "actionable",
+        "positive"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y246",
+      "fingerprint": "misc",
+      "prompt": "Best way to listen to someone struggling",
+      "category": "misc",
+      "expected_keywords": [
+        "active",
+        "present",
+        "empathy",
+        "question",
+        "silence"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y247",
+      "fingerprint": "misc",
+      "prompt": "How to make small talk less awkward",
+      "category": "misc",
+      "expected_keywords": [
+        "question",
+        "listen",
+        "topic",
+        "observe",
+        "follow"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y248",
+      "fingerprint": "misc",
+      "prompt": "Tips for productive morning routine",
+      "category": "misc",
+      "expected_keywords": [
+        "sleep",
+        "light",
+        "plan",
+        "habit",
+        "movement"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y249",
+      "fingerprint": "misc",
+      "prompt": "Best way to recover from burnout",
+      "category": "misc",
+      "expected_keywords": [
+        "rest",
+        "boundary",
+        "support",
+        "values",
+        "gradual"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y250",
+      "fingerprint": "misc",
+      "prompt": "How to set healthy boundaries",
+      "category": "misc",
+      "expected_keywords": [
+        "clear",
+        "calm",
+        "consistent",
+        "need",
+        "communicate"
+      ],
+      "must_not_contain": []
+    }
+  ]
+}

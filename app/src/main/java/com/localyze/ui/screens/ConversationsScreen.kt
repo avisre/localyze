@@ -6,6 +6,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,9 +17,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
@@ -92,24 +96,59 @@ fun ConversationsScreen(
                         )
                     }
                     }
-                    IconButton(onClick = { viewModel.updateSearchQuery(uiState.searchQuery) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "Search conversations",
-                            tint = TextSecondary
-                        )
-                    }
                     if (uiState.conversations.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                if (selectedCount > 0) viewModel.clearSelection() else viewModel.showClearAllConfirmDialog()
+                        var libraryMenuOpen by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(
+                                onClick = {
+                                    if (selectedCount > 0) viewModel.clearSelection()
+                                    else libraryMenuOpen = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.MoreVert,
+                                    contentDescription = if (selectedCount > 0) "Cancel selection" else "Library actions",
+                                    tint = TextSecondary
+                                )
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = if (selectedCount > 0) "Cancel selection" else "Library actions",
-                                tint = TextSecondary
-                            )
+                            DropdownMenu(
+                                expanded = libraryMenuOpen,
+                                onDismissRequest = { libraryMenuOpen = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Select all") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    onClick = {
+                                        libraryMenuOpen = false
+                                        viewModel.selectAllFiltered()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = "Delete all",
+                                            color = MaterialTheme.colorScheme.error,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    },
+                                    onClick = {
+                                        libraryMenuOpen = false
+                                        viewModel.showClearAllConfirmDialog()
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -226,6 +265,7 @@ fun ConversationsScreen(
 
             if (selectedCount > 0) {
                 BulkActionRow(
+                    onSelectAll = { viewModel.selectAllFiltered() },
                     onArchive = { viewModel.bulkArchiveSelected(true) },
                     onRestore = { viewModel.bulkArchiveSelected(false) },
                     onExport = {
@@ -248,7 +288,7 @@ fun ConversationsScreen(
                     // Pinned section
                     if (pinnedConversations.isNotEmpty()) {
                         item {
-                            SectionHeader(title = "\uD83D\uDCCC Pinned")
+                            SectionHeader(title = "Pinned")
                         }
                         items(
                             items = pinnedConversations,
@@ -283,7 +323,7 @@ fun ConversationsScreen(
                             if (pinnedConversations.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
-                            SectionHeader(title = "\uD83D\uDCAC Recent")
+                            SectionHeader(title = "Recent")
                         }
                         items(
                             items = unpinnedConversations,
@@ -312,7 +352,14 @@ fun ConversationsScreen(
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(80.dp)) }
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        DeleteAllChatsRow(
+                            count = uiState.conversations.size,
+                            onClick = { viewModel.showClearAllConfirmDialog() }
+                        )
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }
@@ -374,11 +421,20 @@ fun ConversationsScreen(
 
     // Clear All Confirmation Dialog
     if (uiState.showClearAllConfirmDialog) {
+        val n = uiState.conversations.size
         AlertDialog(
             onDismissRequest = { viewModel.dismissClearAllConfirmDialog() },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
             title = {
                 Text(
-                    text = "Clear All Conversations",
+                    text = "Delete all chats?",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
@@ -387,7 +443,8 @@ fun ConversationsScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to delete all ${uiState.conversations.size} conversations? This action cannot be undone.",
+                    text = "This will permanently remove all $n chat${if (n == 1) "" else "s"} " +
+                        "and every message inside them. This cannot be undone.",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
@@ -402,7 +459,7 @@ fun ConversationsScreen(
                     )
                 ) {
                     Text(
-                        text = "Clear All",
+                        text = "Delete all",
                         fontFamily = Nunito,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -553,19 +610,72 @@ private fun ConversationFilters(
 
 @Composable
 private fun BulkActionRow(
+    onSelectAll: () -> Unit,
     onArchive: () -> Unit,
     onRestore: () -> Unit,
     onExport: () -> Unit,
     onDelete: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
+        TextButton(onClick = onSelectAll) { Text("Select all") }
         TextButton(onClick = onArchive) { Text("Archive") }
         TextButton(onClick = onRestore) { Text("Restore") }
         TextButton(onClick = onExport) { Text("Export") }
         TextButton(onClick = onDelete) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+@Composable
+private fun DeleteAllChatsRow(count: Int, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        enabled = count > 0,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = if (count > 0) MaterialTheme.colorScheme.error.copy(alpha = 0.08f) else Surface,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (count > 0) MaterialTheme.colorScheme.error.copy(alpha = 0.3f) else SurfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                tint = if (count > 0) MaterialTheme.colorScheme.error else TextSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Delete all",
+                    fontFamily = Nunito,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    color = if (count > 0) MaterialTheme.colorScheme.error else TextSecondary
+                )
+                Text(
+                    text = if (count > 0) {
+                        "Permanently remove all $count conversation${if (count == 1) "" else "s"}"
+                    } else {
+                        "No conversations to delete"
+                    },
+                    fontFamily = Nunito,
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+        }
     }
 }
 
@@ -774,7 +884,7 @@ private fun ConversationItem(
             text = { Text("Export") },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Edit,
+                    imageVector = Icons.Filled.IosShare,
                     contentDescription = null
                 )
             },

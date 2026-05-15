@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Image
@@ -51,6 +52,7 @@ fun CapabilitiesScreen(
     onOpenAttachments: () -> Unit = {},
     onOpenReplies: () -> Unit = {},
     onOpenToolCenter: () -> Unit = {},
+    onOpenCodeWorkspace: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -63,6 +65,7 @@ fun CapabilitiesScreen(
             "attachments" -> onOpenAttachments()
             "replies" -> onOpenReplies()
             "tool_center" -> onOpenToolCenter()
+            "code_workspace" -> onOpenCodeWorkspace()
             "settings" -> onOpenSettings()
             else -> onCapabilitySelected(target)
         }
@@ -136,6 +139,15 @@ fun CapabilitiesScreen(
                 actions = listOf(
                     CapabilityAction("Search web", "Ask before leaving device", "chat", Icons.Outlined.Public),
                     CapabilityAction("Ask about image", "Describe and inspect", "see", Icons.Outlined.Image)
+                ),
+                onSelect = ::choose
+            )
+
+            CapabilitySection(
+                title = "Build",
+                actions = listOf(
+                    CapabilityAction("Code workspace", "Paste, debug, and fix", "code_workspace", Icons.Outlined.Code),
+                    CapabilityAction("Review code", "Find bugs and risks", "code_workspace", Icons.Outlined.Search)
                 ),
                 onSelect = ::choose
             )

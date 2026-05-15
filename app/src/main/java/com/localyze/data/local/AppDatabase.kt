@@ -51,6 +51,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "local_assistant_db"
                 )
+                    .openHelperFactory(createEncryptedDatabaseFactory(context))
                     .addCallback(DatabaseCallback(context))
                     .addMigrations(*DatabaseMigrations.getAllMigrations())
                     .build()

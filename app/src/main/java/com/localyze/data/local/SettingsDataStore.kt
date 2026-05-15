@@ -10,6 +10,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,18 +35,26 @@ class SettingsDataStore @Inject constructor(
         val KEY_TEMPERATURE = floatPreferencesKey("temperature")
         val KEY_TOP_K = intPreferencesKey("top_k")
         val KEY_ALLOW_CELLULAR_DOWNLOAD = booleanPreferencesKey("allow_cellular_download")
+        val KEY_CRASH_REPORTING_ENABLED = booleanPreferencesKey("crash_reporting_enabled")
+        val KEY_FORCE_CPU_BACKEND = booleanPreferencesKey("force_cpu_backend")
     }
 
     val darkMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_DARK_MODE] ?: false }
-    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: false }
+    // Default ON: thinking mode lets the model reason through ambiguous
+    // / vague prompts before answering. Users can still toggle it off in
+    // Settings if they want lower-latency responses.
+    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: true }
     val streamTokens: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_STREAM_TOKENS] ?: true }
     val voiceAutoPlay: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_VOICE_AUTO_PLAY] ?: false }
-    val allowWebSearch: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_ALLOW_WEB_SEARCH] ?: false }
+    val allowWebSearch: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_ALLOW_WEB_SEARCH] ?: true }
     val memoryEnabled: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_MEMORY_ENABLED] ?: false }
     val proactiveAssistant: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_PROACTIVE_ASSISTANT] ?: false }
     val taskFollowups: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_TASK_FOLLOWUPS] ?: false }
     val dailySummary: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_DAILY_SUMMARY] ?: false }
     val allowCellularDownload: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_ALLOW_CELLULAR_DOWNLOAD] ?: false }
+    val allowCrashReporting: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_CRASH_REPORTING_ENABLED] ?: true }
+    val forceCpuBackend: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_FORCE_CPU_BACKEND] ?: false }
+    fun forceCpuBackendBlocking(): Boolean = runBlocking { forceCpuBackend.first() }
 
     suspend fun setDarkMode(value: Boolean) {
         context.settingsDataStore.edit { it[KEY_DARK_MODE] = value }
@@ -75,5 +85,11 @@ class SettingsDataStore @Inject constructor(
     }
     suspend fun setAllowCellularDownload(value: Boolean) {
         context.settingsDataStore.edit { it[KEY_ALLOW_CELLULAR_DOWNLOAD] = value }
+    }
+    suspend fun setCrashReportingEnabled(value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_CRASH_REPORTING_ENABLED] = value }
+    }
+    suspend fun setForceCpuBackend(value: Boolean) {
+        context.settingsDataStore.edit { it[KEY_FORCE_CPU_BACKEND] = value }
     }
 }

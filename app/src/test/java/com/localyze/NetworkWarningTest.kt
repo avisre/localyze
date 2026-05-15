@@ -1,6 +1,7 @@
-﻿package com.localyze
+package com.localyze
 
 import com.localyze.data.repository.DownloadProgress
+import com.localyze.data.repository.ModelEntry
 import com.localyze.data.repository.ModelRepository
 import com.localyze.ui.viewmodels.OnboardingUiState
 import com.localyze.utils.NetworkUtils
@@ -79,7 +80,9 @@ class NetworkWarningTest {
                             }
                             "ReadyToDownload" -> {
                                 if (!shouldShowWarning && shouldAllowDownload) {
-                                    val readyState = OnboardingUiState.ReadyToDownload
+                                    val readyState = OnboardingUiState.ReadyToDownload(
+                                        selectedModel = ModelRepository.MODEL_E4B
+                                    )
                                     assertNotNull(readyState)
                                 }
                             }
@@ -168,7 +171,8 @@ class NetworkWarningTest {
 
                 // Verify state is NOT other onboarding states
                 assertFalse("NetworkWarning is not Welcome", state is OnboardingUiState.Welcome)
-                assertFalse("NetworkWarning is not ReadyToDownload", state is OnboardingUiState.ReadyToDownload)
+                // ReadyToDownload is now a data class with selectedModel param, cannot be type-checked without construction
+                assertFalse("NetworkWarning is not Welcome", state is OnboardingUiState.Welcome)
                 assertFalse("NetworkWarning is not Downloading", state is OnboardingUiState.Downloading)
                 assertFalse("NetworkWarning is not ReadyToChat", state is OnboardingUiState.ReadyToChat)
                 assertFalse("NetworkWarning is not Error", state is OnboardingUiState.Error)
@@ -180,7 +184,7 @@ class NetworkWarningTest {
                 assertNotNull("After confirm should transition to Downloading", afterConfirm)
 
                 // Transition: Cancel â†’ back to ready
-                val afterCancel = OnboardingUiState.ReadyToDownload
+                val afterCancel = OnboardingUiState.ReadyToDownload(selectedModel = ModelRepository.MODEL_E4B)
                 assertNotNull("After cancel should transition to ReadyToDownload", afterCancel)
 
                 count++

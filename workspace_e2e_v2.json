@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "tag": "ws_landing",
+      "prompt": "build a simple landing page for a coffee shop",
+      "elapsed_s": 7.9,
+      "screenshot": "/tmp/ws_ws_landing.png",
+      "status": "Ready - 360 lines - HTML",
+      "code_lines": 360,
+      "assistant_text": "",
+      "all_texts_count": 11
+    },
+    {
+      "tag": "ws_explain",
+      "prompt": "explain what a Python list comprehension is",
+      "elapsed_s": 8.3,
+      "screenshot": "/tmp/ws_ws_explain.png",
+      "status": "Ready - 360 lines - HTML",
+      "code_lines": 360,
+      "assistant_text": "",
+      "all_texts_count": 84
+    },
+    {
+      "tag": "ws_debug",
+      "prompt": "find the bug: def avg(xs): return sum(xs)/len(xs)",
+      "elapsed_s": 8.2,
+      "screenshot": "/tmp/ws_ws_debug.png",
+      "status": "Ready - 360 lines - HTML",
+      "code_lines": 360,
+      "assistant_text": "",
+      "all_texts_count": 84
+    }
+  ]
+}

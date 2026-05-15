@@ -1,0 +1,83 @@
+{
+  "_doc": "Re-test of 4 prompts that previously thinking-leaked, with multi-strip filter.",
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app",
+    "The user is asking",
+    "The user wants",
+    "I should answer",
+    "I will answer",
+    "Let me think",
+    "This is a general"
+  ],
+  "questions": [
+    {
+      "id": "Y022",
+      "fingerprint": "health",
+      "prompt": "How to stretch your lower back safely",
+      "category": "health",
+      "expected_keywords": [
+        "knee",
+        "spine",
+        "slow",
+        "cat-cow",
+        "gentle"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y050",
+      "fingerprint": "finance_p",
+      "prompt": "How to file taxes as a freelancer",
+      "category": "finance_p",
+      "expected_keywords": [
+        "1099",
+        "Schedule C",
+        "quarterly",
+        "SE",
+        "expense"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y054",
+      "fingerprint": "finance_p",
+      "prompt": "How to budget for a wedding",
+      "category": "finance_p",
+      "expected_keywords": [
+        "guest",
+        "venue",
+        "priority",
+        "percentage",
+        "fixed"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "Y074",
+      "fingerprint": "travel",
+      "prompt": "What documents do I need for international travel?",
+      "category": "travel",
+      "expected_keywords": [
+        "passport",
+        "visa",
+        "insurance",
+        "copies",
+        "proof"
+      ],
+      "must_not_contain": []
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{"results":[
+  {"category":"KNOWLEDGE","index":1,"question":"What is the capital of France?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":2,"question":"What is 2 plus 2?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":3,"question":"Who wrote Romeo and Juliet?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":4,"question":"What is the chemical symbol for water?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":5,"question":"How many planets are in our solar system?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":6,"question":"What is the speed of light approximately?","response_time_sec":33,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":7,"question":"Who painted the Mona Lisa?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":8,"question":"What is the largest ocean on Earth?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":9,"question":"What year did World War II end?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":10,"question":"What is the smallest prime number?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":11,"question":"Who invented the telephone?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":12,"question":"What is the capital of Japan?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":13,"question":"How many continents are there?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":14,"question":"What gas do plants absorb from the atmosphere?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"KNOWLEDGE","index":15,"question":"What is the freezing point of water in Celsius?","response_time_sec":29,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"WEB_SEARCH","index":1,"question":"What is the current weather in New York City?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"WEB_SEARCH","index":2,"question":"What is the price of Bitcoin right now?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}
+,
+  {"category":"WEB_SEARCH","index":3,"question":"Who is the current CEO of Google?","response_time_sec":30,"response_text":"Share","tool_triggered":"No","status":"FAIL"}

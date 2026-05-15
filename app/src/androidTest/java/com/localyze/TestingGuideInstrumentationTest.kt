@@ -259,8 +259,9 @@ class TestingGuideInstrumentationTest {
         val modelFile = File(modelsDir, ModelRepository.MODEL_FILENAME)
         modelFile.writeText("test")
 
-        assertTrue("Model should exist before delete", modelRepository.isModelDownloaded())
+        assertTrue("Model file should exist before delete", modelFile.exists())
         modelRepository.deleteModel()
+        assertFalse("Model file should be deleted", modelFile.exists())
         assertFalse("Model should not exist after delete", modelRepository.isModelDownloaded())
     }
 

@@ -1,12 +1,16 @@
-﻿package com.localyze.ui.components
+package com.localyze.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Button
@@ -20,19 +24,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.localyze.ui.theme.OnBackground
+import com.localyze.ui.theme.SurfaceVariant
+import com.localyze.ui.theme.TextSecondary
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A reusable error boundary that catches errors in its children and displays a fallback UI.
  *
- * Usage:
- * ```
- * ErrorBoundary {
- *     ChatScreen()
- * }
- * ```
+ * Uses SubcomposeLayout to isolate child composition so that a crash in any
+ * single composable does not tear down the entire screen.
  */
 class ErrorBoundaryState {
     var hasError by mutableStateOf(false)
@@ -43,7 +47,6 @@ class ErrorBoundaryState {
         private set
 
     fun catchError(throwable: Throwable) {
-        // Don't catch cancellation exceptions - they're intentional
         if (throwable is CancellationException) {
             throw throwable
         }
@@ -66,7 +69,9 @@ fun rememberErrorBoundaryState(): ErrorBoundaryState {
 
 @Composable
 fun ErrorBoundary(
+    modifier: Modifier = Modifier,
     state: ErrorBoundaryState = rememberErrorBoundaryState(),
+    label: String = "content",
     fallback: @Composable (Throwable, () -> Unit) -> Unit = { error, onRetry ->
         DefaultErrorFallback(
             error = error,
@@ -77,11 +82,38 @@ fun ErrorBoundary(
     content: @Composable () -> Unit
 ) {
     if (state.hasError) {
-        fallback(state.error!!) { state.reset() }
+        Box(modifier = modifier) {
+            fallback(state.error!!) { state.reset() }
+        }
     } else {
-        // Note: Compose doesn't support try-catch around composables
-        // Errors should be caught at the caller level or using SideEffect
-        content()
+        androidx.compose.ui.layout.SubcomposeLayout(modifier = modifier) { constraints ->
+            val placeable = try {
+                subcompose("error_boundary_content") {
+                    content()
+                }.firstOrNull()?.measure(constraints)
+            } catch (e: Throwable) {
+                if (e !is CancellationException) {
+                    state.catchError(e)
+                }
+                null
+            }
+
+            if (placeable == null || state.hasError) {
+                val fallbackPlaceable = subcompose("error_boundary_fallback") {
+                    fallback(
+                        state.error ?: RuntimeException("Composition failed for $label"),
+                        { state.reset() }
+                    )
+                }.first().measure(constraints)
+                layout(fallbackPlaceable.width, fallbackPlaceable.height) {
+                    fallbackPlaceable.placeRelative(0, 0)
+                }
+            } else {
+                layout(placeable.width, placeable.height) {
+                    placeable.placeRelative(0, 0)
+                }
+            }
+        }
     }
 }
 
@@ -93,36 +125,39 @@ fun DefaultErrorFallback(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(SurfaceVariant)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Default.ErrorOutline,
             contentDescription = "Error",
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = "Something went wrong",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.titleMedium,
+            color = OnBackground
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = error.message ?: "An unexpected error occurred",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+            color = TextSecondary,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(onClick = onRetry) {
             Text("Try Again")
@@ -131,7 +166,7 @@ fun DefaultErrorFallback(
 }
 
 /**
- * A safer wrapper for async operations that catches errors.
+ * A wrapper for async operations that catches errors.
  */
 suspend fun <T> safeOperation(
     errorBoundary: ErrorBoundaryState? = null,

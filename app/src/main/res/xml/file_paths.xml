@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camera capture writes JPEGs into the app's cache directory under
+         /camera_captures/ before they are read back as a Bitmap and sent. -->
+    <cache-path name="camera_captures" path="camera_captures/" />
+</paths>

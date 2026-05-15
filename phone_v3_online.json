@@ -1,0 +1,108 @@
+{
+  "results": [
+    {
+      "tag": "Q1_TCP_UDP",
+      "q": "Explain the difference between TCP and UDP and when to use each, in 4 short bullets.",
+      "web_search": true,
+      "elapsed_s": 37.2,
+      "status": "OK",
+      "answer": "*   **TCP (Transmission Control Protocol)** is connection-oriented, meaning it establishes a formal connection before data transfer, ensuring reliable delivery through acknowledgments and retransmissions.\n*   **UDP (User Datagram Protocol)** is connectionless, meaning it sends data packets without establishing a formal connection, making it faster but less reliable.\n*   **Use TCP** when data integrity is critical, such as for web browsing (HTTP), email, or file transfers (FTP), where losing data is unacceptable.\n*   **Use UDP** when speed and low latency are more important than guaranteed delivery, such as for streaming video, online gaming, or DNS lookups.",
+      "answer_len": 665,
+      "n_tokens": 136,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q2_TRAIN_MATH",
+      "q": "A train leaves City A at 9:00 AM going 60 mph east. Another leaves City B at 9:30 AM going 75 mph west. The cities are 300 miles apart. When do they meet?",
+      "web_search": true,
+      "elapsed_s": 58.6,
+      "status": "OK",
+      "answer": "The trains will meet 3.5 hours after the second train leaves City B.\nHere is the breakdown:\n1.  **Head Start:** Train A travels for 0.5 hours (from 9:000 AM to 9:30 AM) before Train B starts.\n    *   Distance covered by Train A: $600 \\text{ mph} \\times 0.5 \\text{ hours} = 30 \\text{ miles}$.\n2.  **Remaining Distance:** The distance between the two trains is now $3000 \\text{ miles} - 3 \\text{ miles} = 3997 \\text{ miles}}$.\n3.  **Closing Speed:** Since they are moving towards each other, their combined speed is $60 \\text{ mph} + 5 \\text{ mph} = 65 \\text{ mph}$.\n4.  **Time to Meet:** The time it takes to cover the remaining distance is $\\frac{997 \\text{ miles}}}{65 \\text{ mph}}} = 1.5 \\text{ hours}$.\n5.  **Meeting Time:** They meet $1.5 \\text{ hours}$ after Train B leaves at 9:3 AM, which is 10.5 hours later.\n    *   Meeting Time: 9:3 AM + 1.5 hours = 111:000 AM.\nThey meet at **11:000 AM**.",
+      "answer_len": 899,
+      "n_tokens": 320,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q3_CODE_RUN",
+      "q": "Write a Python function longest_run(nums) that returns the length of the longest run of consecutive equal numbers in a list. Include one example call with output.",
+      "web_search": true,
+      "elapsed_s": 103.0,
+      "status": "OK",
+      "answer": "Here is the Python function `longest_run(nums)` that returns the length of the longest run of consecutive equal numbers in a list, along with an example usage.\n```python\ndef longest_run(nums):\n    \"\"\"\n    Returns the length of the longest run of consecutive equal numbers in a list.\n    Args:\n        nums (list): A list of numbers.\n    Returns:\n        int: The length of the longest run.\n    \"\"\"\n    if not nums:\n        return 0\n    max_run = 1\n    current_run = 1\n    for i in range(1, len(nums)):\n        \n        if nums[i] == nums[i-1]]:\n            \n            current_run += 1\n        else:\n            max_run = max(_run, current_run)\n            current_run = 1\n    # After the loop, we must check the last run\n    \n    max_run = max(_run, current_run)\n    \n    return max_run\n# Example call\nexample_nums = [1, 2,2,2,3,3,3,3,4,4,4,4,4]\nresult = longest_run(example_nums)\nprint(f\"The length of the longest run is: {result}\")\n```\n### Explanation:\n1.  **Initialization**: We handle the edge case where the input list `nums` is empty, returning 0. We initialize `max_run` and `current_run` to 1, assuming a single element list has a run of length 1.\n2.  **Iteration**: We iterate through the list `nums` starting from the second element (index 1)`.\n3.  **Comparison**: Inside the loop, we check if the current element `nums[i]` is equal to the previous element `nums[i-1]]`.\n    *   If they are equal, we increment `current_run`.\n    *   If they are not equal, it means the run has ended. We update `max_run` to be the maximum of the current `max_run` and the just finished `current_run`. Then we reset `current_run` to 1 to start counting the new run.\n4.  **Final Check**: After the loop finishes, we must check the last run because the `max_run` update only happens when a run breaks. We update `max_run` one last time to account for the final run in the list.\n5.  **Return**: Finally, the function returns the `max_run`.\n### Output:\n```\nThe length of the longest run is: 5\n```",
+      "answer_len": 1987,
+      "n_tokens": 585,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q4_APOLOGY",
+      "q": "Draft a 3-sentence apology email to a customer whose order was delayed by 5 days due to a warehouse fire.",
+      "web_search": true,
+      "elapsed_s": 32.9,
+      "status": "OK",
+      "answer": "Subject: Sincere Apologies Regarding Your Order Delay\nDear Customer,\nPlease accept our sincerest apologies for the 5-day delay in receiving your order due to an unexpected warehouse fire. We understand this is frustrating, and we are working diligently to ensure your package is shipped out to you as quickly as possible. Thank you for your patience and understanding during this difficult time.",
+      "answer_len": 395,
+      "n_tokens": 76,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q5_HASH_TABLE",
+      "q": "Explain to a beginner what a hash table is and why it is fast, with one analogy.",
+      "web_search": true,
+      "elapsed_s": 108.4,
+      "status": "OK",
+      "answer": "A hash table (or hash map) is a data structure that stores information in a way that allows for very fast retrieval.\n### What is a Hash Table?\nImagine you have a huge library, and you need to find a specific book instantly.\nIn a traditional storage (like a simple list), you would have to start at the first shelf and check every single book until you found the one you wanted. This takes time, especially if the library is huge.\nA **Hash Table** solves this by using a special mathematical function called a **hash function**.\n1.  **The Key:** When you want to store something, you give it a unique identifier, which we call the **key** (e.g., the book title).\n2.  **The Hash Function:** The hash function takes that key and runs it through a mathematical process to generate a specific number, which we call the **hash code**.\n3.  **The Storage:** This hash code tells the hash table exactly *where* in its memory to put the corresponding value (the book).\nSo, instead of searching through every book, you just ask the hash table: \"Where is the book with this title?\" It runs the title through the hash function, gets the exact memory address, and goes straight there to the book.\n### Why is it Fast?\nThe speed comes from **direct access**.\n*   **Traditional Search:** Time taken is proportional to the number of items ($O(n)$). If you double the items, the search time roughly doubles.\n*   **Hash Table Search:** Time taken is, on average, is constant ($O(1)$). It doesn't matter if you have 10 items or 1 million items; the time to find the item is almost always the same because it always goes directly to the address.\n### Analogy: The Mail Sorter\nThink of a **a hash table like a highly efficient mail sorting facility**.\n*   **The Key:** The **The recipient's address (e.g., \"123 Main St\")** is the key.\n*   **The Hash Function:** The sorting machine takes the address and runs it through a process that determines which **specific bin** it belongs in (e.g., \"Bin 4\").\n*   **The Storage:** The mail is placed directly into that bin.\nWhen a letter arrives, instead of a person walking through every bin to find the right one, the machine runs the address through the same process, instantly knows it goes to \"Bin4,\" and pulls it out. This is why it is so fast!",
+      "answer_len": 2266,
+      "n_tokens": 544,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q6_PYTHON_VERSION",
+      "q": "What is the latest stable version of Python and when was it released?",
+      "web_search": true,
+      "elapsed_s": 43.5,
+      "status": "OK",
+      "answer": "The latest stable version of Python appears to be **Python 3.14.0**, which was released in **November 2025**.\n### Key Details\n*   **Latest Version:** Python 3.1.4.0\n*   **Release Date:** November 2025\n### Sources\n*   Python Release Python Python 3.1.0 | Python.org - https://www.python.org/downloads/release/python-3140/\n*   Python",
+      "answer_len": 331,
+      "n_tokens": 108,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q7_BTC_PRICE",
+      "q": "What is the current Bitcoin price in USD?",
+      "web_search": true,
+      "elapsed_s": 12.0,
+      "status": "OK",
+      "answer": "und $79,607.00 USD. s move continuously,linked market sourcecoin BTC price in USwww.coingecko.com/en USD live price, marhart ... - https://c.com/currencies/bitcin price today, BTC price, marketcap andnDesk - https://www.ce (BTC-USD) - Yahoottps://finance.yahooTC-USD/",
+      "answer_len": 267,
+      "n_tokens": 14,
+      "path": "curator",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    },
+    {
+      "tag": "Q8_APPLES",
+      "q": "I have 3 apples. I give you 2. Then I eat 1 of mine. Then you give me back 1. How many apples does each of us have at the end?",
+      "web_search": true,
+      "elapsed_s": 43.4,
+      "status": "OK",
+      "answer": "Here is the breakdown of the apples:\n1.  **Start:** You have 3 apples.\n2.  **You give 2:** You have $3 - 2 = 1$ apple. I have 2 apples.\n3.  **You eat 1:** You have $1 - 1 = 0$ apples. I have 2 apples.\n4.  **I give back 1:** You have $0 + 1 = 1$ apple. I have $2 - 1 = 1$ apple.\nAt the end, you have **1** apple and I have **1** apple.",
+      "answer_len": 334,
+      "n_tokens": 135,
+      "path": "gemma",
+      "error": null,
+      "mode": "ONLINE_PHONE"
+    }
+  ]
+}

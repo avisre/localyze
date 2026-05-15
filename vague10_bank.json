@@ -1,0 +1,95 @@
+{
+  "_doc": "10 deliberately vague English prompts. The clarification orchestrator should fire on each — answer should contain 'Quick question' or 'About **' (the topic-echo prefix). If it doesn't, the orchestrator missed an obvious case.",
+  "questions": [
+    {
+      "id": "V01",
+      "fingerprint": "vague_help_finance",
+      "prompt": "Help me with my finances",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **"],
+      "must_contain": ["question"],
+      "must_not_contain": []
+    },
+    {
+      "id": "V02",
+      "fingerprint": "vague_emotion",
+      "prompt": "I'm having a hard time",
+      "category": "vague",
+      "expected_keywords": ["What", "tell me more", "?"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V03",
+      "fingerprint": "vague_shopping",
+      "prompt": "What should I buy?",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "What"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V04",
+      "fingerprint": "vague_interesting",
+      "prompt": "Tell me something interesting",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "What"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V05",
+      "fingerprint": "vague_recommend_movie",
+      "prompt": "Recommend a movie",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "genre", "mood", "What"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V06",
+      "fingerprint": "vague_career",
+      "prompt": "Should I quit my job?",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "What"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V07",
+      "fingerprint": "vague_equipment",
+      "prompt": "Best laptop?",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "budget", "use"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V08",
+      "fingerprint": "vague_market",
+      "prompt": "How's the market?",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "sector", "region", "What"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V09",
+      "fingerprint": "vague_news",
+      "prompt": "What's the news?",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "topic", "region"],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V10",
+      "fingerprint": "vague_trip",
+      "prompt": "Plan my trip",
+      "category": "vague",
+      "expected_keywords": ["Quick question", "About **", "Where", "When", "budget"],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

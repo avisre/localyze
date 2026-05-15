@@ -1,0 +1,211 @@
+{
+  "records": [
+    {
+      "id": "V01",
+      "fingerprint": "vague_help_finance",
+      "prompt": "Help me with my finances",
+      "category": "vague",
+      "answer": "About Help me with my finances \u2014 quick question first to give you a useful answer:\n1.\nWhat specifically? (a question / a plan / review my situation / general guidance)\n2.\nCountry / region? (US / India / UK / EU / other)\n3.\nHow urgent? (right now / this week / this month / general)",
+      "answer_len": 281,
+      "elapsed_s": 16.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **"
+      ],
+      "must_contain": [
+        "question"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "V02",
+      "fingerprint": "vague_emotion",
+      "prompt": "I'm having a hard time",
+      "category": "vague",
+      "answer": "I am sorry to hear that you are having a hard time. If you would like to talk about it or need help with something specific, please let me know. I am here to assist you with information, tasks, or just to listen.",
+      "answer_len": 212,
+      "elapsed_s": 117.2,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['What', 'tell me more', '?']"
+      ],
+      "expected_keywords": [
+        "What",
+        "tell me more",
+        "?"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V03",
+      "fingerprint": "vague_shopping",
+      "prompt": "What should I buy?",
+      "category": "vague",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat are you looking to buy? (Electronics / Groceries / Clothing / Something else)\n2.\nWhat is your budget or need? (Specific item / General category / Gift)",
+      "answer_len": 211,
+      "elapsed_s": 119.6,
+      "completed_log": false,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "What"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V04",
+      "fingerprint": "vague_interesting",
+      "prompt": "Tell me something interesting",
+      "category": "vague",
+      "answer": "The Giant Squid, Architeuthis, is one of the largest creatures known to have ever lived. These cephalopods can grow to immense sizes, with some specimens reaching lengths of over 43 feet and weights exceeding 1,000 pounds. They are also famous for their massive eyes, which can be up to 10 inches in diameter, allowing them to see in the deep darkness of the ocean.\nSources: My internal knowledge base.",
+      "answer_len": 402,
+      "elapsed_s": 132.6,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Quick question', 'About **', 'What']"
+      ],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "What"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V05",
+      "fingerprint": "vague_recommend_movie",
+      "prompt": "Recommend a movie",
+      "category": "vague",
+      "answer": "About Recommend a movie \u2014 quick question first to give you a useful answer:\n1.\nGenre / style? (drama / comedy / thriller / documentary / any)\n2.\nMood right now? (light / thought-provoking / fun / intense)\n3.\nTime / length? (short / medium / long / any)",
+      "answer_len": 252,
+      "elapsed_s": 16.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "genre",
+        "mood",
+        "What"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V06",
+      "fingerprint": "vague_career",
+      "prompt": "Should I quit my job?",
+      "category": "vague",
+      "answer": "I am an AI and cannot provide personal advice like whether you should quit your job. That is a significant life decision that depends entirely on your personal finances, career goals, job satisfaction, and future plans.\nTo help you think through it, here are four areas you might want to consider:\nFinancial Stability: Do you have an emergency fund to cover several months of expenses?\nCareer Goals: Does this job align with where you want to be professionally in the next 3 to 5 years?\nJob Satisfaction: What are the primary reasons you are considering leaving? (e.g., culture, pay, workload, lack of growth).\nAlternatives: Have you explored other options, such as asking for a raise, a change in role, or negotiating a better work-life balance?",
+      "answer_len": 746,
+      "elapsed_s": 146.8,
+      "completed_log": false,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "What"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V07",
+      "fingerprint": "vague_equipment",
+      "prompt": "Best laptop?",
+      "category": "vague",
+      "answer": "About Best laptop? \u2014 quick question first to give you a useful answer:\n1.\nBudget range? (under $500 / $500\u20131000 / $1000\u20132000 / $2000+)\n2.\nPrimary use? (work / gaming / travel / video editing / general)\n3.\nRegion? (US / UK / India / EU / global)",
+      "answer_len": 244,
+      "elapsed_s": 17.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "budget",
+        "use"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V08",
+      "fingerprint": "vague_market",
+      "prompt": "How's the market?",
+      "category": "vague",
+      "answer": "Something went wrong\nCheck that Google Play is enabled on your device and that you're using an up-to-date version before opening the app. If the problem persists try reinstalling the app.\nCLOSE",
+      "answer_len": 193,
+      "elapsed_s": 118.6,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Quick question', 'About **', 'sector', 'region', 'What']"
+      ],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "sector",
+        "region",
+        "What"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V09",
+      "fingerprint": "vague_news",
+      "prompt": "What's the news?",
+      "category": "vague",
+      "answer": "Read 6 sources\nSources\nC\ncnn.com\nBreaking News, Latest News and Videos | CNN\nB\nbbc.com\nBBC News - Breaking news, video and the latest top stories from the U.S ...",
+      "answer_len": 162,
+      "elapsed_s": 18.6,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Quick question', 'About **', 'topic', 'region']"
+      ],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "topic",
+        "region"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "V10",
+      "fingerprint": "vague_trip",
+      "prompt": "Plan my trip",
+      "category": "vague",
+      "answer": "About Plan my trip \u2014 quick question first to give you a useful answer:\n1.\nWhere / for who? (my own use / for a group / for someone else)\n2.\nBudget / time available? (low / medium / high / flexible)\n3.\nGoal? (save money / save time / best quality / novelty)",
+      "answer_len": 256,
+      "elapsed_s": 16.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Quick question",
+        "About **",
+        "Where",
+        "When",
+        "budget"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

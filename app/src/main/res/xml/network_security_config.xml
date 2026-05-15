@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Pin certificates for critical endpoints to prevent MITM attacks -->
+    <!--
+        These are the expected certificate chains as of May 2026.
+        If certificate rotation causes pin failures, update the SHA-256 digests
+        after verifying the new chain.
+    -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">huggingface.co</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">play.google.com</domain>
+        <domain includeSubdomains="true">android.googleapis.com</domain>
+        <pin-set expiration="2027-05-01">
+            <!-- GTS Root R1 (Google Trust Services primary) -->
+            <pin digest="SHA-256">KQ7+6yzF3GW2+ZC8i1NgrlW7U0s7R8p3d+oHbzh0qGQ=</pin>
+            <!-- GTS Root R3 (Google Trust Services backup) -->
+            <pin digest="SHA-256">QXnt2YHvdHR3tJYmQIr0Paosp6t/nggsEGD4QJZ3Q0g=</pin>
+            <!-- GTS Root R4 (Google Trust Services tertiary) -->
+            <pin digest="SHA-256">mEflZT5enoR1FuXLgYYGqnVEoZvmf9c2bVBpiOjYQ0c=</pin>
+        </pin-set>
+    </domain-config>
+
+    <!-- Default config: cleartext disabled, standard trust store -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" tools:ignore="AcceptsUserCertificates" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

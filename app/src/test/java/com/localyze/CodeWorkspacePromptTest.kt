@@ -2,59 +2,53 @@ package com.localyze
 
 import com.localyze.ui.viewmodels.CodeAssistAction
 import com.localyze.ui.viewmodels.MAX_CODE_WORKSPACE_PROMPT_CODE_CHARS
-import com.localyze.ui.viewmodels.buildEcommerceLandingPageTemplate
 import com.localyze.ui.viewmodels.buildCodeWorkspacePrompt
+import com.localyze.ui.viewmodels.buildEcommerceLandingPageTemplate
+import com.localyze.ui.viewmodels.buildWebsiteTemplateForInstruction
+import com.localyze.ui.viewmodels.resolveCodeAssistAction
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
 
-@Ignore("Code workspace is hidden while chatbot quality work is in focus.")
 class CodeWorkspacePromptTest {
 
     @Test
-    fun promptContainsStrictOutputRules() {
+    fun promptContainsIdentityAndCodeWorkspaceRules() {
         val prompt = buildCodeWorkspacePrompt(
             language = "HTML",
-            action = CodeAssistAction.Explain,
-            code = "",
-            instruction = "Build a portfolio website"
+            action = CodeAssistAction.Fix,
+            code = "<button>Save</button>",
+            instruction = "Fix the button alignment"
         )
 
-        // Must enforce single code block
-        assertTrue(prompt.contains("ONE fenced code block"))
-        // Must enforce complete HTML document
-        assertTrue(prompt.contains("<!DOCTYPE html>"))
-        // Must enforce inline CSS
-        assertTrue(prompt.contains("<style>"))
-        // Must enforce inline JS
-        assertTrue(prompt.contains("<script>"))
-        // Must forbid CDNs
-        assertTrue(prompt.contains("external CDN"))
-        // Must forbid API calls
-        assertTrue(prompt.contains("fetch()"))
-        assertTrue(prompt.contains("API calls"))
-        // Must enforce viewport meta
-        assertTrue(prompt.contains("viewport"))
-        // Must prevent generic low-quality website output
-        assertTrue(prompt.contains("real shipped ecommerce landing page"))
-        assertTrue(prompt.contains("Never use lorem ipsum"))
-        assertTrue(prompt.contains("meaningful JavaScript interaction"))
+        assertTrue(prompt.contains("Localyze.ai"))
+        assertTrue(prompt.contains("based on Gemma 4 E4B"))
+        assertTrue(prompt.contains("Detected language: HTML"))
+        assertTrue(prompt.contains("Action: Fix"))
+        assertTrue(prompt.contains("corrected full code in one fenced code block"))
         assertTrue(prompt.contains("Do not output <thought>"))
+        assertTrue(prompt.contains("User instruction: Fix the button alignment"))
     }
 
     @Test
-    fun ecommercePromptAddsStorefrontRequirements() {
-        val prompt = buildCodeWorkspacePrompt(
-            language = "HTML",
-            action = CodeAssistAction.Explain,
-            code = "",
-            instruction = "Create a landing page for an ecommerce website selling trail shoes"
+    fun resolveActionInfersFixAndDebugRequests() {
+        assertEquals(
+            CodeAssistAction.Fix,
+            resolveCodeAssistAction("please fix this code and make it work", CodeAssistAction.Explain)
         )
-
-        assertTrue(prompt.contains("ECOMMERCE LANDING PAGE REQUIREMENTS"))
-        assertTrue(prompt.contains("at least four products"))
-        assertTrue(prompt.contains("cart count"))
+        assertEquals(
+            CodeAssistAction.Debug,
+            resolveCodeAssistAction("why does this throw an exception?", CodeAssistAction.Explain)
+        )
+        assertEquals(
+            CodeAssistAction.Optimize,
+            resolveCodeAssistAction("make this faster and use less memory", CodeAssistAction.Explain)
+        )
+        assertEquals(
+            CodeAssistAction.Review,
+            resolveCodeAssistAction("review this for production ready security", CodeAssistAction.Explain)
+        )
     }
 
     @Test
@@ -100,6 +94,33 @@ class CodeWorkspacePromptTest {
     }
 
     @Test
+    fun ecommerceTemplateUsesExplicitBrandAndCartSidebar() {
+        val html = buildEcommerceLandingPageTemplate(
+            "Build a complete ecommerce landing page for KickX sneakers with 6 product cards and cart sidebar"
+        )
+
+        assertTrue(html.contains("KickX"))
+        assertTrue(html.contains("cart-sidebar"))
+        assertTrue(html.contains("cart-items"))
+        assertTrue(html.contains("Checkout preview"))
+        assertTrue(Regex("""class="product-card"""").findAll(html).count() >= 6)
+    }
+
+    @Test
+    fun genericWebsiteTemplateIsCompleteResponsiveAndPreviewable() {
+        val html = buildWebsiteTemplateForInstruction("Create a portfolio website for an app designer")
+
+        assertTrue(html.startsWith("<!DOCTYPE html>"))
+        assertTrue(html.endsWith("</html>"))
+        assertTrue(html.contains("<meta name=\"viewport\""))
+        assertTrue(html.contains("<style>"))
+        assertTrue(html.contains("<script>"))
+        assertTrue(html.contains("Nova Hart"))
+        assertTrue(html.contains("lead-form"))
+        assertFalse(html.contains("Lorem ipsum"))
+    }
+
+    @Test
     fun promptIncludesUserInstruction() {
         val prompt = buildCodeWorkspacePrompt(
             language = "HTML",
@@ -108,8 +129,8 @@ class CodeWorkspacePromptTest {
             instruction = "Build a todo list app"
         )
 
-        assertTrue(prompt.contains("todo list app"))
-        assertTrue(prompt.contains("USER REQUEST"))
+        assertTrue(prompt.contains("Build a todo list app"))
+        assertTrue(prompt.contains("USER'S SPECIFIC REQUEST"))
     }
 
     @Test
@@ -122,11 +143,11 @@ class CodeWorkspacePromptTest {
         )
 
         assertTrue(prompt.contains("fun answer() = 41"))
-        assertTrue(prompt.contains("EXISTING CODE"))
+        assertTrue(prompt.contains("CODE TO ANALYZE"))
     }
 
     @Test
-    fun promptSaysFromScratchWhenNoCode() {
+    fun promptSaysNoCodeWasProvidedWhenEditorIsEmpty() {
         val prompt = buildCodeWorkspacePrompt(
             language = "HTML",
             action = CodeAssistAction.Explain,
@@ -134,8 +155,8 @@ class CodeWorkspacePromptTest {
             instruction = "Build a dashboard"
         )
 
-        assertTrue(prompt.contains("from scratch"))
-        assertFalse(prompt.contains("EXISTING CODE"))
+        assertTrue(prompt.contains("No code was provided"))
+        assertFalse(prompt.contains("CODE TO ANALYZE"))
     }
 
     @Test

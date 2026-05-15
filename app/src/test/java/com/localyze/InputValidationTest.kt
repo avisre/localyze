@@ -200,6 +200,7 @@ class InputValidationTest {
                     "mixed_with_safe_text" -> {
                         val mixed = "Hello $pattern world"
                         val mixedResult = InputValidator.validateMessage(mixed)
+                        // Dangerous patterns are rejected outright; mixed text is also blocked
                         assertTrue("Mixed text with XSS should be rejected", mixedResult is ValidationResult.Error)
                     }
                     "encoded_variant" -> {

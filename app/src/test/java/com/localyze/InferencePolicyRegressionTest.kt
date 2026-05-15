@@ -2,6 +2,7 @@ package com.localyze
 
 import com.localyze.ai.KNOWLEDGE_AND_TOOL_INSTRUCTION
 import com.localyze.ai.RESPONSE_FORMAT_INSTRUCTION
+import com.localyze.ai.ASSISTANT_IDENTITY_INSTRUCTION
 import com.localyze.ai.shouldExposeToolToModel
 import com.localyze.ui.viewmodels.ChatUiState
 import com.localyze.ui.viewmodels.SettingsUiState
@@ -15,6 +16,17 @@ import java.util.Locale
  * but treated stable educational prompts as blocked web-search requests.
  */
 class InferencePolicyRegressionTest {
+
+    @Test
+    fun assistantIdentityUsesLocalyzeNameWithGemmaAsBaseModelOnly() {
+        val policy = ASSISTANT_IDENTITY_INSTRUCTION.lowercase(Locale.US)
+
+        assertTrue(policy.contains("localyze.ai"))
+        assertTrue(policy.contains("based on"))
+        assertTrue(policy.contains("gemma 4 e4b"))
+        assertTrue(policy.contains("not your public name"))
+        assertTrue(policy.contains("do not introduce"))
+    }
 
     @Test
     fun stableKnowledgePolicyDoesNotGateGeneralAnswersOnWebSearch() {
@@ -56,6 +68,9 @@ class InferencePolicyRegressionTest {
 
         assertTrue(policy.contains("clean markdown"))
         assertTrue(policy.contains("avoid walls of text"))
+        assertTrue(policy.contains("numeric values"))
+        assertTrue(policy.contains("markdown table"))
+        assertTrue(policy.contains("inline chart"))
         assertTrue(policy.contains("sources section"))
         assertTrue(policy.contains("do not say you cannot browse"))
         assertTrue(policy.contains("jargon-free"))

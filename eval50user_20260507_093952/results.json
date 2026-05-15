@@ -1,0 +1,17 @@
+[
+  {
+    "i": 1,
+    "category": "KNOWLEDGE",
+    "prompt": "What is the capital of France",
+    "answer": "On-device  Context aware\nThe next number in the sequence is 32.This sequence is formed by multiplying the previous number by2, and then adding2 to the result:*$2 times2 =4$*$4 times2 =8$*$8 times2 =16$ (This step seems to be a typo in the sequence provided, as $8 times2 =16$ is not mathematically sound for a simple progression)Assuming the pattern is multiply by2, then add2:*$2 times2 =4$*$4 +2 =6$ (This doesn't match8)Let's re-examine the sequence: 2,4,8,16If we look at the differences:*$4 -2 =2$*$8 -4 =4$*$6 -8 = -2$This does not show a clear arithmetic progression.However, if the sequence was intended to be 2,4,8,164 (where164 is a typo for64), the pattern is:*$2 times2 =4$*$4 times2 =8$*$8 -2 =6$*$6 times2 =12$ (This is getting complicated)The most likely intended pattern for2,4,8,16 is a typo for2,4,8,16 where the pattern is:1.$2 times2 =4$2.$4 times2 =8$3.$8 times2 =16$ (This is mathematically incorrect, $8 times2 =16$ is not possible)If the sequence is2,4,8,16, the pattern is likely:*$2 times2 =4$*$4 times2 =8$*$8 -2 =6$*$6 times2 =12$ (If the next number is16, the next could be12)Given the ambiguity, if we assume the sequence is 2,4,8,16 and the pattern is multiply by2, then subtract2:*$2 times2 =4$*$4 times2 =8$*$8 -2 =6$*$6 times2 =12$If the sequence is 2,4,8,16, the next number is 2.If you meant 2,4,8,164, the next number is 128.Please clarify the sequence if the pattern is not clear.",
+    "elapsed_s": 9.69,
+    "timed_out": false,
+    "db_error_ui": false,
+    "passed": false,
+    "quality": "WRONG",
+    "logcat_fatal": false,
+    "logcat_anr": false,
+    "logcat_db_error": false,
+    "screenshot": "01_KNOWLEDGE.png"
+  }
+]

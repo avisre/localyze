@@ -1,0 +1,221 @@
+{
+  "_doc": "Compare-15 retest after orchestrator narrow.",
+  "global_forbidden_substrings": [
+    "\"results\":",
+    "\"query\":",
+    "\"fetched_at\":",
+    "\"snippet\":",
+    "\"url\":",
+    "\"source\":",
+    "\"plannedQueries\":",
+    "<thinking>",
+    "</thinking>",
+    "<channel|>",
+    "<|channel|>",
+    "I wasn't able to generate",
+    "couldn't generate",
+    "Try rephrasing the question, or restart the app"
+  ],
+  "questions": [
+    {
+      "id": "N086",
+      "fingerprint": "compare",
+      "prompt": "Compare iPhone vs Android",
+      "category": "compare",
+      "expected_keywords": [
+        "iPhone",
+        "Android",
+        "iOS"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N087",
+      "fingerprint": "compare",
+      "prompt": "Compare React vs Vue",
+      "category": "compare",
+      "expected_keywords": [
+        "React",
+        "Vue",
+        "framework",
+        "component"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N088",
+      "fingerprint": "compare",
+      "prompt": "Compare SQL vs NoSQL",
+      "category": "compare",
+      "expected_keywords": [
+        "SQL",
+        "NoSQL",
+        "relational",
+        "schema"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N089",
+      "fingerprint": "compare",
+      "prompt": "Compare TCP vs UDP",
+      "category": "compare",
+      "expected_keywords": [
+        "TCP",
+        "UDP",
+        "reliable",
+        "connectionless"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N090",
+      "fingerprint": "compare",
+      "prompt": "Compare AWS vs Azure",
+      "category": "compare",
+      "expected_keywords": [
+        "AWS",
+        "Azure",
+        "cloud",
+        "Amazon",
+        "Microsoft"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N091",
+      "fingerprint": "compare",
+      "prompt": "Compare Python vs Java",
+      "category": "compare",
+      "expected_keywords": [
+        "Python",
+        "Java",
+        "syntax",
+        "JVM"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N092",
+      "fingerprint": "compare",
+      "prompt": "Compare HTTP vs HTTPS",
+      "category": "compare",
+      "expected_keywords": [
+        "HTTPS",
+        "HTTP",
+        "TLS",
+        "encrypt"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N093",
+      "fingerprint": "compare",
+      "prompt": "Compare REST vs GraphQL",
+      "category": "compare",
+      "expected_keywords": [
+        "REST",
+        "GraphQL",
+        "endpoint",
+        "query"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N094",
+      "fingerprint": "compare",
+      "prompt": "Compare arrays vs linked lists",
+      "category": "compare",
+      "expected_keywords": [
+        "array",
+        "linked",
+        "O(",
+        "contiguous",
+        "pointer"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N095",
+      "fingerprint": "compare",
+      "prompt": "Compare git rebase vs merge",
+      "category": "compare",
+      "expected_keywords": [
+        "rebase",
+        "merge",
+        "commit",
+        "linear"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N096",
+      "fingerprint": "compare",
+      "prompt": "Compare gas vs electric cars",
+      "category": "compare",
+      "expected_keywords": [
+        "electric",
+        "gas",
+        "battery",
+        "range",
+        "emission"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N097",
+      "fingerprint": "compare",
+      "prompt": "Compare cats vs dogs as pets",
+      "category": "compare",
+      "expected_keywords": [
+        "cat",
+        "dog",
+        "independent",
+        "loyal"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N098",
+      "fingerprint": "compare",
+      "prompt": "Compare tea vs coffee",
+      "category": "compare",
+      "expected_keywords": [
+        "tea",
+        "coffee",
+        "caffeine",
+        "leaves",
+        "bean"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N099",
+      "fingerprint": "compare",
+      "prompt": "Compare Mac vs PC",
+      "category": "compare",
+      "expected_keywords": [
+        "Mac",
+        "PC",
+        "Windows",
+        "macOS",
+        "Apple"
+      ],
+      "must_not_contain": []
+    },
+    {
+      "id": "N100",
+      "fingerprint": "compare",
+      "prompt": "Compare yoga vs pilates",
+      "category": "compare",
+      "expected_keywords": [
+        "yoga",
+        "Pilates",
+        "core",
+        "flexibility",
+        "breath"
+      ],
+      "must_not_contain": []
+    }
+  ]
+}

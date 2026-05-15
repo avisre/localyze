@@ -1,0 +1,140 @@
+{
+  "results": [
+    {
+      "tag": "US_tesla",
+      "prompt": "Tesla revenue over the past 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "first": "$96.8B",
+      "last": "$94.8B",
+      "screenshot": "/tmp/world_US_tesla.png"
+    },
+    {
+      "tag": "IN_reliance",
+      "prompt": "Reliance revenue for the last 3 fiscal years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "first": "\u20b9792,756 crore",
+      "last": "\u20b91,000,122 crore",
+      "screenshot": "/tmp/world_IN_reliance.png"
+    },
+    {
+      "tag": "CN_byd",
+      "prompt": "BYD revenue over the past 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "first": "\u00a5424.1B",
+      "last": "\u00a5777.1B",
+      "screenshot": "/tmp/world_CN_byd.png"
+    },
+    {
+      "tag": "UK_gsk",
+      "prompt": "GSK revenue for the last 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "first": "\u00a329.3B",
+      "last": "\u00a331.4B",
+      "screenshot": "/tmp/world_UK_gsk.png"
+    },
+    {
+      "tag": "DE_volkswagen",
+      "prompt": "Volkswagen revenue for the past 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "first": "\u20ac279.2B",
+      "last": "\u20ac324.7B",
+      "screenshot": "/tmp/world_DE_volkswagen.png"
+    },
+    {
+      "tag": "FR_totale",
+      "prompt": "TotalEnergies revenue last 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "first": "$263.3B",
+      "last": "$195.6B",
+      "screenshot": "/tmp/world_FR_totale.png"
+    },
+    {
+      "tag": "CH_roche",
+      "prompt": "Roche revenue for the past 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "first": "CHF 63.3B",
+      "last": "CHF 60.5B",
+      "screenshot": "/tmp/world_CH_roche.png"
+    },
+    {
+      "tag": "IT_stellantis",
+      "prompt": "Stellantis revenue last 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023"
+      ],
+      "first": "\u20ac179.6B",
+      "last": "\u20ac156.9B",
+      "screenshot": "/tmp/world_IT_stellantis.png"
+    },
+    {
+      "tag": "CA_enbridge",
+      "prompt": "Enbridge revenue for the past 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "first": "C$53.3B",
+      "last": "C$49.6B",
+      "screenshot": "/tmp/world_CA_enbridge.png"
+    },
+    {
+      "tag": "MX_femsa",
+      "prompt": "FEMSA revenue last 3 years",
+      "verdict": "PASS",
+      "header": "Revenue (Last 3 Fiscal Years)",
+      "years": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "first": "MX$681.3B",
+      "last": "MX$802.4B",
+      "screenshot": "/tmp/world_MX_femsa.png"
+    }
+  ]
+}

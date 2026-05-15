@@ -1,0 +1,108 @@
+{
+  "offline": [
+    {
+      "tag": "Q1_TCP_UDP",
+      "q": "Explain the difference between TCP and UDP and when to use each, in 4 short bullets.",
+      "web_search": false,
+      "elapsed_s": 60.1,
+      "status": "OK",
+      "answer": "The difference between TCP and UDP lies in how they handle data transmission.\n*   **TCP (Transmission Control Protocol):**\n    *   **Reliable:** Guarantees that all data packets arrive at their destination in the correct order.\n    *   **Connection-Oriented:** Requires a formal connection setup (handshake) before data is sent.\n    *   **When to use:** When data integrity is critical, such as web browsing (HTTP), email, or file transfers (FTP).\n*   **UDP (User Datagram Protocol):**\n    *   **Unreliable:** Does not guarantee delivery, order, or error checking.\n    *   **Connectionless:** Sends data packets without establishing a formal connection.\n    *   **When to use:** When speed and low latency are more important than perfect reliability, such as live video streaming, online gaming, or DNS lookups.",
+      "answer_len": 811,
+      "n_tokens": 186,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q2_TRAIN_MATH",
+      "q": "A train leaves City A at 9:00 AM going 60 mph east. Another leaves City B at 9:30 AM going 75 mph west. The cities are 300 miles apart. When do they meet?",
+      "web_search": false,
+      "elapsed_s": 41.7,
+      "status": "ERROR",
+      "answer": "",
+      "answer_len": 0,
+      "n_tokens": 0,
+      "path": "gemma",
+      "error": "Response timeout",
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q3_CODE_RUN",
+      "q": "Write a Python function longest_run(nums) that returns the length of the longest run of consecutive equal numbers in a list. Include one example call with output.",
+      "web_search": false,
+      "elapsed_s": 66.5,
+      "status": "OK",
+      "answer": "```python\ndef longest_run(nums):\n    \"\"\"\n    Returns the length of the longest run of consecutive equal numbers in a list.\n    \"\"\"\n    if not nums:\n        return 0\n    \n    max_run = 1\n    current_run = 1\n    \n    for i in range(1, len(nums)):\n        \n        if nums[i] == nums[i-1]:\n            \n            currentrun += 1\n        else:\n            max_run = max(max_run, currentrun)\n            \n            currentrun = 1\n            \n    return max(max_run, currentrun)\n# Example call:\nnums_list = [1, 2, 2, 2, 3, 3, 3, 3, 4]\nresult = longestrun(nums_list)\nprint(f\"The length of the longest run is: {result}\")\n```\n**Output:**\n```\nThe length of the longest run is: 4\n```",
+      "answer_len": 677,
+      "n_tokens": 228,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q4_APOLOGY",
+      "q": "Draft a 3-sentence apology email to a customer whose order was delayed by 5 days due to a warehouse fire.",
+      "web_search": false,
+      "elapsed_s": 41.2,
+      "status": "OK",
+      "answer": "The email draft has been opened for your review. You must tap Send manually.",
+      "answer_len": 76,
+      "n_tokens": 16,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q5_HASH_TABLE",
+      "q": "Explain to a beginner what a hash table is and why it is fast, with one analogy.",
+      "web_search": false,
+      "elapsed_s": 105.9,
+      "status": "OK",
+      "answer": "A hash table is a data structure that stores information in **key-value pairs**. Think of it like a highly organized filing cabinet where you can instantly find a specific files if you know the exact label on the drawer.\n### How it Works (The Analogy)\nImagine you have a massive library, and you want to find a specific book (the **value**) by its title (the **key**).\n1.  **The Hash Function (The Librarian's Rule):** Instead of walking down every single shelf, you have a special rule. This rule (the **hash function**) takes the title of the book (e.g., \"Moby Dick\") and runs it through a mathematical process that spits out a specific, fixed number (e. This number is the **the index** or the shelf number).\n2.  **The Storage (The Shelf):** You don't store the book randomly; you put it directly onto the shelf number 123.\n3. **Retrieval (The Speed):** When you want to find \"Moby Dick\" again, you don't search the whole library. You just run the title through the same rule, get the number 123, and go *straight* to shelf 3.\n### Why is it Fast?\nThe speed comes from **avoiding the search**.\n*   **Slow Way (Like a List):** If you just had a simple list, to find a book, you might have to check every single book one by one until you find the right title. This takes time that time proportional to the number of books.\n*   **Fast Way (Hash Table):** With a hash table, the time it takes to find *any* item is almost always the same, no matter how many millions of items you have. You just calculate the address, and go straight there. This is called **O(1) time complexity**, which is the fastest possible for looking something up.\nIn short: **A hash table uses a mathematical trickery (the hash function) to turn a search problem into a direct address problem.**",
+      "answer_len": 1767,
+      "n_tokens": 439,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q6_PYTHON_VERSION",
+      "q": "What is the latest stable version of Python and when was it released?",
+      "web_search": false,
+      "elapsed_s": 3.7,
+      "status": "OK",
+      "answer": "## I can't verify liy off, so I can't fest live data for thiThis topic depends omation that may haveer the model's built*Web search** in Setk the same question return a short answe source links.",
+      "answer_len": 194,
+      "n_tokens": 10,
+      "path": "curator",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q7_BTC_PRICE",
+      "q": "What is the current Bitcoin price in USD?",
+      "web_search": false,
+      "elapsed_s": 3.7,
+      "status": "OK",
+      "answer": "## I can't verify liy off, so I can't fest live data for thiThis topic depends omation that may haveer the model's built*Web search** in Setk the same question return a short answe source links.",
+      "answer_len": 194,
+      "n_tokens": 10,
+      "path": "curator",
+      "error": null,
+      "mode": "OFFLINE"
+    },
+    {
+      "tag": "Q8_APPLES",
+      "q": "I have 3 apples. I give you 2. Then I eat 1 of mine. Then you give me back 1. How many apples does each of us have at the end?",
+      "web_search": false,
+      "elapsed_s": 58.2,
+      "status": "OK",
+      "answer": "Here is the step-by-step breakdown:\n1.  **Start:** You have 3 apples.\n2.  **You give 2 to me:** You have $3 - 2 = 1$ apple. I have $0 + 2 = 2$ apples.\n3.  **You eat 1 of yours:** You have $1 - 1 = 0$ apples. I still have 2 apples.\n4.  **I give you 1 back:** You have $0 + 1 = 1$ apple. I have $2 - 1 = 1$ apple.\nAt the end, you have **1 apple** and I have **1 apple**.",
+      "answer_len": 368,
+      "n_tokens": 149,
+      "path": "gemma",
+      "error": null,
+      "mode": "OFFLINE"
+    }
+  ]
+}

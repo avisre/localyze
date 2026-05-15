@@ -1,0 +1,304 @@
+{
+  "results": [
+    {
+      "tag": "Q01_capital_de",
+      "category": "fact",
+      "prompt": "What's the capital of Germany?",
+      "verdict": "ANSWERED",
+      "answer": "The capital of Germany is Berlin.",
+      "answer_len": 33,
+      "elapsed_s": 46.2,
+      "screenshot": "/tmp/g30_Q01_capital_de.png"
+    },
+    {
+      "tag": "Q02_chemical",
+      "category": "fact",
+      "prompt": "What is the chemical formula for water?",
+      "verdict": "ANSWERED",
+      "answer": "The chemical formula for water is H2O.",
+      "answer_len": 38,
+      "elapsed_s": 19.9,
+      "screenshot": "/tmp/g30_Q02_chemical.png"
+    },
+    {
+      "tag": "Q03_seasons",
+      "category": "fact",
+      "prompt": "How many seasons are there in a year?",
+      "verdict": "ANSWERED",
+      "answer": "There are four seasons in a year: spring, summer, autumn (fall), and winter.",
+      "answer_len": 76,
+      "elapsed_s": 27.7,
+      "screenshot": "/tmp/g30_Q03_seasons.png"
+    },
+    {
+      "tag": "Q04_continent",
+      "category": "fact",
+      "prompt": "Which continent is Egypt in?",
+      "verdict": "ANSWERED",
+      "answer": "Egypt is located in Africa.",
+      "answer_len": 27,
+      "elapsed_s": 27.2,
+      "screenshot": "/tmp/g30_Q04_continent.png"
+    },
+    {
+      "tag": "Q05_olympics",
+      "category": "fact",
+      "prompt": "How often are the Summer Olympics held?",
+      "verdict": "ANSWERED",
+      "answer": "The Summer Olympics are held every four years.",
+      "answer_len": 46,
+      "elapsed_s": 27.2,
+      "screenshot": "/tmp/g30_Q05_olympics.png"
+    },
+    {
+      "tag": "Q06_planet",
+      "category": "fact",
+      "prompt": "Which planet is closest to the Sun?",
+      "verdict": "ANSWERED",
+      "answer": "The planet closest to the Sun is Mercury.",
+      "answer_len": 41,
+      "elapsed_s": 27.3,
+      "screenshot": "/tmp/g30_Q06_planet.png"
+    },
+    {
+      "tag": "Q07_speed_sound",
+      "category": "fact",
+      "prompt": "What is the speed of sound in air?",
+      "verdict": "ANSWERED",
+      "answer": "The speed of sound in air depends on the temperature. At 20\u00b0C, the speed of sound in air is approximately 333.13 meters per second.",
+      "answer_len": 131,
+      "elapsed_s": 27.2,
+      "screenshot": "/tmp/g30_Q07_speed_sound.png"
+    },
+    {
+      "tag": "Q08_dna",
+      "category": "fact",
+      "prompt": "What does DNA stand for?",
+      "verdict": "ANSWERED",
+      "answer": "DNA stands for Deoxyribonucleic acid.",
+      "answer_len": 37,
+      "elapsed_s": 27.3,
+      "screenshot": "/tmp/g30_Q08_dna.png"
+    },
+    {
+      "tag": "Q09_simple_add",
+      "category": "math",
+      "prompt": "What is 47 plus 38?",
+      "verdict": "THIN",
+      "answer": "47+38 = 85.",
+      "answer_len": 11,
+      "elapsed_s": 19.8,
+      "screenshot": "/tmp/g30_Q09_simple_add.png"
+    },
+    {
+      "tag": "Q10_percent",
+      "category": "math",
+      "prompt": "What is 15 percent of 200?",
+      "verdict": "ANSWERED",
+      "answer": "200 \u00d7 15 \u00f7 100 = 30.",
+      "answer_len": 20,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/g30_Q10_percent.png"
+    },
+    {
+      "tag": "Q11_split_check",
+      "category": "math",
+      "prompt": "Split a $90 dinner check between four people.",
+      "verdict": "THIN",
+      "answer": "90 \u00f7 4 = 22.5.",
+      "answer_len": 14,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/g30_Q11_split_check.png"
+    },
+    {
+      "tag": "Q12_tip_calc",
+      "category": "math",
+      "prompt": "What is a 18 percent tip on a $65 meal?",
+      "verdict": "ANSWERED",
+      "answer": "65 \u00d7 18 \u00f7 100 = 11.7.",
+      "answer_len": 21,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/g30_Q12_tip_calc.png"
+    },
+    {
+      "tag": "Q13_sale_price",
+      "category": "math",
+      "prompt": "A laptop is $1200 with 15 percent off. What is the sale price?",
+      "verdict": "ANSWERED",
+      "answer": "1200 \u00d7 (1 \u2212 15\u00f7100) = 1020.",
+      "answer_len": 27,
+      "elapsed_s": 19.6,
+      "screenshot": "/tmp/g30_Q13_sale_price.png"
+    },
+    {
+      "tag": "Q14_speed_calc",
+      "category": "math",
+      "prompt": "If I walk 9 kilometers in 90 minutes, what is my speed in km per hour?",
+      "verdict": "ANSWERED",
+      "answer": "Your speed is 6 km per hour.",
+      "answer_len": 28,
+      "elapsed_s": 27.2,
+      "screenshot": "/tmp/g30_Q14_speed_calc.png"
+    },
+    {
+      "tag": "Q15_temp_conv",
+      "category": "convert",
+      "prompt": "How many degrees Celsius is 75 degrees Fahrenheit?",
+      "verdict": "ANSWERED",
+      "answer": "75 \u00b0F = 23.8889 \u00b0C.",
+      "answer_len": 19,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/g30_Q15_temp_conv.png"
+    },
+    {
+      "tag": "Q16_dist_conv",
+      "category": "convert",
+      "prompt": "How many miles is 25 kilometers?",
+      "verdict": "ANSWERED",
+      "answer": "25 km = 15.5343 mi.",
+      "answer_len": 19,
+      "elapsed_s": 19.8,
+      "screenshot": "/tmp/g30_Q16_dist_conv.png"
+    },
+    {
+      "tag": "Q17_height_conv",
+      "category": "convert",
+      "prompt": "How many centimeters is 6 feet?",
+      "verdict": "ANSWERED",
+      "answer": "6 ft = 182.88 centimeters.",
+      "answer_len": 26,
+      "elapsed_s": 19.7,
+      "screenshot": "/tmp/g30_Q17_height_conv.png"
+    },
+    {
+      "tag": "Q18_weight_conv",
+      "category": "convert",
+      "prompt": "How many grams is 3 ounces?",
+      "verdict": "ANSWERED",
+      "answer": "3 oz = 85.0486 g.",
+      "answer_len": 17,
+      "elapsed_s": 19.6,
+      "screenshot": "/tmp/g30_Q18_weight_conv.png"
+    },
+    {
+      "tag": "Q19_water_day",
+      "category": "lifestyle",
+      "prompt": "How much water should I drink each day?",
+      "verdict": "ANSWERED",
+      "answer": "The amount of water you should drink each day depends on several factors, including your age, sex, weight, activity level, and climate.\nA general guideline often cited is to drink about 8 glasses (648 ounces) of water per day for men and 6 glasses (324 ounces) for women.\nHowever, for more personalized advice, it is best to consult with a healthcare professional.",
+      "answer_len": 364,
+      "elapsed_s": 33.6,
+      "screenshot": "/tmp/g30_Q19_water_day.png"
+    },
+    {
+      "tag": "Q20_steps",
+      "category": "lifestyle",
+      "prompt": "How many steps a day are recommended?",
+      "verdict": "ANSWERED",
+      "answer": "The recommended number of steps per day varies depending on your current fitness level and health goals.\nFor general health and weight management, the CDC recommends aiming for at least 15,00 steps per day.\nFor those who are more active, the recommendation is to aim for 100,0000 steps per day.\nIf you are looking for more specific guidance, I recommend consulting with a healthcare professional.",
+      "answer_len": 396,
+      "elapsed_s": 33.9,
+      "screenshot": "/tmp/g30_Q20_steps.png"
+    },
+    {
+      "tag": "Q21_pasta",
+      "category": "lifestyle",
+      "prompt": "How long do I cook spaghetti pasta?",
+      "verdict": "ANSWERED",
+      "answer": "The cooking time for spaghetti pasta depends on the type of pasta and the desired texture.\nStandard Spaghetti: Typically takes 8 to 120 minutes.\nAl Dente: For a firm bite-to-the-chew texture, cook for the minimum 100 minutes less than the package directions suggest.\nSoft: For a softer texture, cook for the full time listed on the package.\nDisclaimer: These are general guidelines; always refer to the specific package instructions on the spaghetti you are using for the most accurate cooking time.",
+      "answer_len": 499,
+      "elapsed_s": 46.0,
+      "screenshot": "/tmp/g30_Q21_pasta.png"
+    },
+    {
+      "tag": "Q22_freeze_chick",
+      "category": "lifestyle",
+      "prompt": "Can I refreeze chicken after thawing it?",
+      "verdict": "ANSWERED",
+      "answer": "No, you should not refreeze chicken after thawing it.\nThe USDA recommends that once chicken has been thawed, it should be cooked or frozen again. If you thaw chicken, it, you should cook it immediately or freeze it.",
+      "answer_len": 215,
+      "elapsed_s": 33.8,
+      "screenshot": "/tmp/g30_Q22_freeze_chick.png"
+    },
+    {
+      "tag": "Q23_clear_cache",
+      "category": "tech",
+      "prompt": "How do I clear the cache on my browser?",
+      "verdict": "THIN",
+      "answer": "If you",
+      "answer_len": 6,
+      "elapsed_s": 59.7,
+      "screenshot": "/tmp/g30_Q23_clear_cache.png"
+    },
+    {
+      "tag": "Q24_storage",
+      "category": "tech",
+      "prompt": "Why is my phone storage always full?",
+      "verdict": "ANSWERED",
+      "answer": "Downloads: Files you download from the internet, such as documents or media, can accumulate over time.\nTo free up space, you can try these steps:\nDelete Unnecessary Photos and Videos: Go through your gallery and delete duplicates, blurry photos, or videos you no longer need.\nClear App Cache: Go into your phone's settings and clear the cache for apps you use frequently.\nUninstall Unused Apps: Remove any apps you no longer use.\nUse Cloud Storage: Consider moving your photos and videos to a cloud service like Google Photos or iCloud.\nIf you can tell me what kind of phone you have (e.g., iPhone or Android), I can give you more specific advice.",
+      "answer_len": 647,
+      "elapsed_s": 60.9,
+      "screenshot": "/tmp/g30_Q24_storage.png"
+    },
+    {
+      "tag": "Q25_2fa",
+      "category": "tech",
+      "prompt": "What is two-factor authentication?",
+      "verdict": "ANSWERED",
+      "answer": "Two-factor authentication (2FA) is a security process that requires users to provide two different types of verification factors to gain access an account. This is designed to add an extra layer of security beyond just a password protection.\nThe two factors are generally categorized as:\nSomething you know: This is typically a password, PIN, or security question answer.\nSomething you have: This is a physical item, such as a smartphone (receiving a text message or push notification), a hardware token, or a security key.\nSomething you are: This is a biometric characteristic, such as a fingerprint, facial scan, or a retina scan.\nFor example, when you log in to an account, you might enter your password (something you know) and then you might be prompted to enter a code sent to your phone (something you have).",
+      "answer_len": 815,
+      "elapsed_s": 48.0,
+      "screenshot": "/tmp/g30_Q25_2fa.png"
+    },
+    {
+      "tag": "Q26_meeting_req",
+      "category": "writing",
+      "prompt": "Write a short email asking my coworker to meet for 15 minutes tomorrow.",
+      "verdict": "ANSWERED",
+      "answer": "Subject: Quick Chat Tomorrow?\nHi [Coworker's Name],\nDo you have 5 minutes to meet tomorrow? Let me know what time works best for you.\nBest,\n[Your Name]",
+      "answer_len": 151,
+      "elapsed_s": 34.7,
+      "screenshot": "/tmp/g30_Q26_meeting_req.png"
+    },
+    {
+      "tag": "Q27_birthday",
+      "category": "writing",
+      "prompt": "Write a 3-sentence birthday message for a close friend.",
+      "verdict": "ANSWERED",
+      "answer": "Happy Birthday to one of my favorite people! I hope your day is filled with all the joy, laughter, and cake you deserve. Cheers to another amazing year of friendship!",
+      "answer_len": 166,
+      "elapsed_s": 28.3,
+      "screenshot": "/tmp/g30_Q27_birthday.png"
+    },
+    {
+      "tag": "Q28_blockchain",
+      "category": "explain",
+      "prompt": "Explain blockchain in simple terms.",
+      "verdict": "ANSWERED",
+      "answer": "Decentralized: Instead of one bank or company keeping the master copy of the ledger, every computer in the network has a copy.\nImmutable: Because every new block is linked to the previous block, if someone tries to change a transaction in an old block, the digital fingerprint of that block changes, which breaks the entire chain. This makes the data very hard to tamper with.\nIn short, it is a secure, transparent, and permanent way to record information without needing a central authority like a bank or government.",
+      "answer_len": 518,
+      "elapsed_s": 54.2,
+      "screenshot": "/tmp/g30_Q28_blockchain.png"
+    },
+    {
+      "tag": "Q29_recession",
+      "category": "explain",
+      "prompt": "What is a recession?",
+      "verdict": "ANSWERED",
+      "answer": "A recession is a significant decline in economic activity spread across the economy, lasting more than a few months, which is normally visible in real GDP deflator, real income, employment, and industrial production.\nKey characteristics often include:\nGDP Contraction: A sustained decrease in the Gross Domestic Product (GDP).\nJob Losses: Rising unemployment rates and job losses.\nDecreased Spending: A drop in consumer spending and business investment.\nRecessions are typically measured by economists using various indicators, such as the Nonfarm Payroll Employment Change, Real Gross Receipts, Industrial Production, and Income changes in the Personal Consumption Expenditures aggregates method.",
+      "answer_len": 697,
+      "elapsed_s": 40.9,
+      "screenshot": "/tmp/g30_Q29_recession.png"
+    },
+    {
+      "tag": "Q30_python_rev",
+      "category": "code",
+      "prompt": "Write a Python function that reverses a string.",
+      "verdict": "EMPTY",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 76.1,
+      "screenshot": "/tmp/g30_Q30_python_rev.png"
+    }
+  ]
+}

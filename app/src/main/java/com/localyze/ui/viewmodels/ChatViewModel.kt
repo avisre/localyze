@@ -1,4 +1,4 @@
-﻿package com.localyze.ui.viewmodels
+package com.localyze.ui.viewmodels
 
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
@@ -42,7 +42,26 @@ class ChatViewModel @Inject constructor(
 
     companion object {
         const val CONVERSATION_ID_KEY = "conversationId"
-        const val GENERATION_TIMEOUT_MS = 180_000L
+        // 180s on real devices is plenty, but emulator CPU prefill on a
+        // 5000+ token system prompt + web context easily exceeds that.
+        // Bump to 1200s on emulator so the ViewModel doesn't kill long
+        // inferences before they finish.
+        val GENERATION_TIMEOUT_MS: Long = try {
+            val fields = listOf(
+                android.os.Build.PRODUCT.orEmpty(),
+                android.os.Build.HARDWARE.orEmpty(),
+                android.os.Build.MODEL.orEmpty()
+            )
+            val isEmulator = fields.any { v ->
+                v.contains("sdk_gphone", ignoreCase = true) ||
+                v.contains("ranchu", ignoreCase = true) ||
+                v.contains("goldfish", ignoreCase = true) ||
+                v.contains("generic", ignoreCase = true)
+            }
+            if (isEmulator) 1_200_000L else 180_000L
+        } catch (t: Throwable) {
+            180_000L
+        }
     }
 
     private val _uiState = MutableStateFlow(ChatUiState())
@@ -57,7 +76,6 @@ class ChatViewModel @Inject constructor(
     val expandedThinking: StateFlow<Set<Int>> = _expandedThinking.asStateFlow()
 
     init {
-        _uiState.update { it.copy(isMockMode = sendMessageUseCase.isUsingMockEngine()) }
         observeSettings()
         val cid = readInitialConversationId(savedStateHandle)
         when {
@@ -138,18 +156,7 @@ class ChatViewModel @Inject constructor(
                 )
             }
 
-            messagesJob = viewModelScope.launch {
-                chatRepository.getMessagesForConversation(id)
-                    .catch { e -> _uiState.update { it.copy(error = "Failed to load messages: " + e.message) } }
-                    .collect { msgs ->
-                        _uiState.update { s ->
-                            s.copy(
-                                messages = msgs,
-                                showMascot = msgs.isEmpty() && !s.isStreaming
-                            )
-                        }
-                    }
-            }
+            observeMessagesForConversation(id)
         }
     }
 
@@ -158,7 +165,7 @@ class ChatViewModel @Inject constructor(
             try {
                 val conv = chatRepository.createConversation(capabilityMode = _uiState.value.capabilityMode)
                 sendMessageUseCase.resetEngineConversation(conv.capabilityMode, _uiState.value.enableThinking)
-                _uiState.update { s -> s.copy(currentConversationId = conv.id, currentConversationTitle = conv.title, messages = emptyList(), streamingText = "", thinkingText = "", generationStatus = "", activeToolCalls = emptyList(), isStreaming = false, isThinking = false, showMascot = true, error = null) }
+                _uiState.update { s -> s.copy(currentConversationId = conv.id, currentConversationTitle = conv.title, messages = emptyList(), streamingText = "", thinkingText = "", generationStatus = "", activeToolCalls = emptyList(), isStreaming = false, isThinking = false, showMascot = true, isUsingThreadContext = false, error = null) }
                 loadConversation(conv.id)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Failed to create conversation: " + e.message) }
@@ -167,18 +174,19 @@ class ChatViewModel @Inject constructor(
     }
 
     fun sendMessage(text: String) {
-        android.util.Log.d("ChatViewModel", "sendMessage called with: '$text'")
+        com.localyze.utils.AppLog.d("ChatViewModel", "sendMessage called with: '$text'")
 
         // Validate input before processing
-        val validationResult = InputValidator.validateMessage(text)
+        val trimmedText = text.trim()
+        val validationResult = InputValidator.validateMessage(trimmedText)
         if (validationResult is ValidationResult.Error) {
             _uiState.update { it.copy(error = validationResult.message) }
             return
         }
 
         val state = _uiState.value
-        android.util.Log.d("ChatViewModel", "isStreaming=${state.isStreaming}, currentConversationId=${state.currentConversationId}")
-        if (state.isStreaming || text.isBlank()) return
+        com.localyze.utils.AppLog.d("ChatViewModel", "isStreaming=${state.isStreaming}, currentConversationId=${state.currentConversationId}")
+        if (state.isStreaming || trimmedText.isBlank()) return
         val conversationId = state.currentConversationId
         if (conversationId <= 0L) {
             viewModelScope.launch {
@@ -186,18 +194,63 @@ class ChatViewModel @Inject constructor(
                     val conv = chatRepository.createConversation(capabilityMode = state.capabilityMode)
                     _uiState.update { it.copy(currentConversationId = conv.id) }
                     loadConversation(conv.id)
-                    doSendMessage(conv.id, text)
+                    doSendMessage(conv.id, trimmedText)
                 } catch (e: Exception) {
                     _uiState.update { it.copy(error = "Failed to create conversation: " + e.message) }
                 }
             }
             return
         }
-        doSendMessage(conversationId, text)
+        doSendMessage(conversationId, trimmedText)
+    }
+
+    fun sendMessageInNewConversation(text: String, capabilityModeOverride: String? = null) {
+        val trimmedText = text.trim()
+        com.localyze.utils.AppLog.d("ChatViewModel", "sendMessageInNewConversation called with: '$trimmedText'")
+
+        val validationResult = InputValidator.validateMessage(trimmedText)
+        if (validationResult is ValidationResult.Error) {
+            _uiState.update { it.copy(error = validationResult.message) }
+            return
+        }
+
+        if (_uiState.value.isStreaming || trimmedText.isBlank()) return
+
+        viewModelScope.launch {
+            try {
+                val capabilityMode = capabilityModeOverride ?: _uiState.value.capabilityMode
+                val enableThinking = _uiState.value.enableThinking
+                val conv = chatRepository.createConversation(capabilityMode = capabilityMode)
+                sendMessageUseCase.resetEngineConversation(conv.capabilityMode, enableThinking)
+
+                loadConversationJob?.cancel()
+                observeMessagesForConversation(conv.id)
+                _uiState.update { s ->
+                    s.copy(
+                        currentConversationId = conv.id,
+                        currentConversationTitle = conv.title,
+                        capabilityMode = conv.capabilityMode,
+                        messages = emptyList(),
+                        streamingText = "",
+                        thinkingText = "",
+                        generationStatus = "",
+                        activeToolCalls = emptyList(),
+                        isStreaming = false,
+                        isThinking = false,
+                        showMascot = true,
+                        error = null
+                    )
+                }
+
+                doSendMessage(conv.id, trimmedText)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to create conversation: " + e.message) }
+            }
+        }
     }
 
     private fun doSendMessage(conversationId: Long, text: String) {
-        android.util.Log.d("ChatViewModel", "doSendMessage: convId=$conversationId, text='$text'")
+        com.localyze.utils.AppLog.d("ChatViewModel", "doSendMessage: convId=$conversationId, text='$text'")
         performanceMonitor.startResponse()
         _uiState.update { s -> s.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", generationStatus = "Reading your message", activeToolCalls = emptyList(), showMascot = false, error = null) }
         generationJob = viewModelScope.launch {
@@ -210,7 +263,7 @@ class ChatViewModel @Inject constructor(
                             _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "Generation error: " + e.message) }
                         }
                         .collect { event ->
-                            android.util.Log.d("ChatViewModel", "Received event: ${event.javaClass.simpleName}")
+                            com.localyze.utils.AppLog.d("ChatViewModel", "Received event: ${event.javaClass.simpleName}")
                             handleResponseEvent(event)
                         }
                 }
@@ -219,10 +272,48 @@ class ChatViewModel @Inject constructor(
                 performanceMonitor.recordError("Generation timed out", timeout = true)
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "The model took too long to respond. Please try again.") }
             } catch (e: CancellationException) {
-                android.util.Log.d("ChatViewModel", "Message generation cancelled")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Message generation cancelled")
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", activeToolCalls = emptyList()) }
             } catch (e: Exception) {
                 android.util.Log.e("ChatViewModel", "Unexpected error during message generation", e)
+                performanceMonitor.recordError(e.message ?: "Generation error")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "Error: ${e.message}") }
+            }
+        }
+    }
+
+    private fun doContinueWithToolResult(conversationId: Long, toolResult: com.localyze.domain.models.ToolResult) {
+        com.localyze.utils.AppLog.d("ChatViewModel", "doContinueWithToolResult: convId=$conversationId, tool=${toolResult.name}")
+        performanceMonitor.startResponse()
+        _uiState.update { s -> s.copy(isStreaming = true, isThinking = false, streamingText = "", thinkingText = "", generationStatus = "Using tool result", activeToolCalls = emptyList(), error = null) }
+        generationJob = viewModelScope.launch {
+            try {
+                kotlinx.coroutines.withTimeout(GENERATION_TIMEOUT_MS) {
+                    sendMessageUseCase.continueWithToolResult(
+                        conversationId = conversationId,
+                        toolResult = toolResult,
+                        capabilityMode = _uiState.value.capabilityMode,
+                        enableThinking = _uiState.value.enableThinking
+                    )
+                        .catch { e ->
+                            if (e is CancellationException) throw e
+                            android.util.Log.e("ChatViewModel", "Error in continueWithToolResult flow", e)
+                            _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "Generation error: " + e.message) }
+                        }
+                        .collect { event ->
+                            com.localyze.utils.AppLog.d("ChatViewModel", "Received event: ${event.javaClass.simpleName}")
+                            handleResponseEvent(event)
+                        }
+                }
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                android.util.Log.e("ChatViewModel", "Tool result generation timed out", e)
+                performanceMonitor.recordError("Tool result generation timed out", timeout = true)
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "The model took too long to respond. Please try again.") }
+            } catch (e: CancellationException) {
+                com.localyze.utils.AppLog.d("ChatViewModel", "Tool result generation cancelled")
+                _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", activeToolCalls = emptyList()) }
+            } catch (e: Exception) {
+                android.util.Log.e("ChatViewModel", "Unexpected error during tool result generation", e)
                 performanceMonitor.recordError(e.message ?: "Generation error")
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = "Error: ${e.message}") }
             }
@@ -286,7 +377,7 @@ class ChatViewModel @Inject constructor(
                             }
                         }
                         .collect { event ->
-                            android.util.Log.d("ChatViewModel", "Received image event: ${event.javaClass.simpleName}")
+                            com.localyze.utils.AppLog.d("ChatViewModel", "Received image event: ${event.javaClass.simpleName}")
                             handleResponseEvent(event)
                         }
                 }
@@ -302,7 +393,7 @@ class ChatViewModel @Inject constructor(
                     )
                 }
             } catch (e: CancellationException) {
-                android.util.Log.d("ChatViewModel", "Image generation cancelled")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Image generation cancelled")
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", activeToolCalls = emptyList()) }
             } catch (e: Exception) {
                 android.util.Log.e("ChatViewModel", "Unexpected error during image generation", e)
@@ -320,7 +411,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun sendAudioMessage(audioBytes: ByteArray) {
-        android.util.Log.d("ChatViewModel", "sendAudioMessage called with ${audioBytes.size} bytes")
+        com.localyze.utils.AppLog.d("ChatViewModel", "sendAudioMessage called with ${audioBytes.size} bytes")
         val state = _uiState.value
         if (state.isStreaming) {
             android.util.Log.w("ChatViewModel", "Cannot send audio: already streaming")
@@ -355,28 +446,31 @@ class ChatViewModel @Inject constructor(
                     }
                     .collect { event -> handleResponseEvent(event) }
             } catch (e: CancellationException) {
-                android.util.Log.d("ChatViewModel", "Audio generation cancelled")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Audio generation cancelled")
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", activeToolCalls = emptyList()) }
             }
         }
     }
 
     private fun handleResponseEvent(event: ChatResponseEvent) {
-        android.util.Log.d("ChatViewModel", "handleResponseEvent: ${event.javaClass.simpleName}")
+        com.localyze.utils.AppLog.d("ChatViewModel", "handleResponseEvent: ${event.javaClass.simpleName}")
         when (event) {
             is ChatResponseEvent.StreamingToken -> {
-                android.util.Log.v("ChatViewModel", "StreamingToken: '${event.text.take(20)}...'")
+                com.localyze.utils.AppLog.v("ChatViewModel", "StreamingToken: '${event.text.take(200)}'")
                 performanceMonitor.addToken(event.text)
                 _uiState.update { s ->
                     if (s.streamTokens) {
-                        s.copy(streamingText = s.streamingText + event.text, isStreaming = true, isThinking = false, generationStatus = "Writing answer")
+                        val newText = s.streamingText + event.text
+                        var fixedText = newText.replace(Regex("(\\d)([a-zA-Z])"), "$1 $2")
+                        fixedText = fixedText.replace(Regex("([a-zA-Z])(\\d)"), "$1 $2")
+                        s.copy(streamingText = fixedText, isStreaming = true, isThinking = false, generationStatus = "Writing answer")
                     } else {
                         s.copy(isStreaming = true, isThinking = false, generationStatus = "Writing answer")
                     }
                 }
             }
             is ChatResponseEvent.ThinkingToken -> {
-                android.util.Log.v("ChatViewModel", "ThinkingToken: '${event.text.take(20)}...'")
+                com.localyze.utils.AppLog.v("ChatViewModel", "ThinkingToken: '${event.text.take(200)}'")
                 _uiState.update { s ->
                     if (s.streamTokens) {
                         s.copy(thinkingText = s.thinkingText + event.text, isThinking = true, isStreaming = true, generationStatus = "Thinking through the request")
@@ -386,18 +480,34 @@ class ChatViewModel @Inject constructor(
                 }
             }
             is ChatResponseEvent.ToolCallStarted -> {
-                android.util.Log.d("ChatViewModel", "ToolCallStarted: ${event.toolName}")
+                com.localyze.utils.AppLog.d("ChatViewModel", "ToolCallStarted: ${event.toolName}")
                 _uiState.update { s -> s.copy(generationStatus = toolStatus(event.toolName, executing = true), activeToolCalls = s.activeToolCalls + ActiveToolCall(toolName = event.toolName, isExecuting = true)) }
             }
             is ChatResponseEvent.ToolCallCompleted -> {
-                android.util.Log.d("ChatViewModel", "ToolCallCompleted: ${event.toolName}")
+                com.localyze.utils.AppLog.d("ChatViewModel", "ToolCallCompleted: ${event.toolName}")
                 val updated = _uiState.value.activeToolCalls.map { if (it.toolName == event.toolName && it.isExecuting) it.copy(isExecuting = false, result = event.result) else it }
                 _uiState.update { s -> s.copy(generationStatus = toolStatus(event.toolName, executing = false), activeToolCalls = updated) }
             }
             is ChatResponseEvent.Completed -> {
-                android.util.Log.d("ChatViewModel", "Completed")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Completed")
                 performanceMonitor.completeResponse()
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, streamingText = "", thinkingText = "", generationStatus = "", activeToolCalls = emptyList(), showMascot = false) }
+            }
+            is ChatResponseEvent.ContextReset -> {
+                com.localyze.utils.AppLog.d("ChatViewModel", "ContextReset: ${event.message}")
+                _uiState.update { s -> s.copy(contextResetNotice = event.message) }
+            }
+            is ChatResponseEvent.ToolConfirmationNeeded -> {
+                com.localyze.utils.AppLog.d("ChatViewModel", "ToolConfirmationNeeded: ${event.toolName}")
+                _uiState.update { s ->
+                    s.copy(
+                        pendingToolConfirmation = DispatchResult.PendingConfirmation(
+                            tool = toolDispatcher.getTool(event.toolCall.name) ?: return@update s,
+                            toolCall = event.toolCall,
+                            message = event.message
+                        )
+                    )
+                }
             }
             is ChatResponseEvent.Error -> {
                 android.util.Log.e("ChatViewModel", "Error event: ${event.message}")
@@ -405,6 +515,10 @@ class ChatViewModel @Inject constructor(
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", error = event.message) }
             }
         }
+    }
+
+    fun clearContextResetNotice() {
+        _uiState.update { it.copy(contextResetNotice = null) }
     }
 
     fun startAudioRecording() {
@@ -415,17 +529,17 @@ class ChatViewModel @Inject constructor(
     }
 
     fun stopAudioRecording() {
-        android.util.Log.d("ChatViewModel", "stopAudioRecording called")
+        com.localyze.utils.AppLog.d("ChatViewModel", "stopAudioRecording called")
         viewModelScope.launch {
             val result = recordAudioUseCase.stopRecording()
-            android.util.Log.d("ChatViewModel", "voice transcription result: isSuccess=${result.isSuccess}, transcript='${result.getOrNull().orEmpty().take(80)}'")
+            com.localyze.utils.AppLog.d("ChatViewModel", "voice transcription result: isSuccess=${result.isSuccess}, transcript='${result.getOrNull().orEmpty().take(80)}'")
             if (result.isSuccess) {
                 val transcript = result.getOrNull().orEmpty().trim()
                 if (transcript.isBlank()) {
                     _uiState.update { it.copy(error = "No speech was recognized") }
                     return@launch
                 }
-                android.util.Log.d("ChatViewModel", "Sending transcribed voice prompt")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Sending transcribed voice prompt")
                 sendMessage(transcript)
             } else {
                 _uiState.update { s -> s.copy(error = "Voice input error: " + result.exceptionOrNull()?.message) }
@@ -479,7 +593,7 @@ class ChatViewModel @Inject constructor(
                     }
                     .collect { event -> handleResponseEvent(event) }
             } catch (e: CancellationException) {
-                android.util.Log.d("ChatViewModel", "Regeneration cancelled")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Regeneration cancelled")
                 _uiState.update { s -> s.copy(isStreaming = false, isThinking = false, generationStatus = "", activeToolCalls = emptyList()) }
             }
         }
@@ -488,8 +602,6 @@ class ChatViewModel @Inject constructor(
     fun toggleThinkingExpanded(index: Int) {
         _expandedThinking.update { c -> if (c.contains(index)) c - index else c + index }
     }
-
-    fun isUsingMockEngine(): Boolean = sendMessageUseCase.isUsingMockEngine()
 
     fun clearError() { _uiState.update { it.copy(error = null) } }
 
@@ -599,6 +711,23 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun observeMessagesForConversation(id: Long) {
+        messagesJob?.cancel()
+        messagesJob = viewModelScope.launch {
+            chatRepository.getMessagesForConversation(id)
+                .catch { e -> _uiState.update { it.copy(error = "Failed to load messages: " + e.message) } }
+                .collect { msgs ->
+                    _uiState.update { s ->
+                        s.copy(
+                            messages = msgs,
+                            showMascot = msgs.isEmpty() && !s.isStreaming,
+                            isUsingThreadContext = msgs.size >= 2
+                        )
+                    }
+                }
+        }
+    }
+
     private fun loadMostRecentConversation(existingConversations: List<com.localyze.domain.models.Conversation>? = null) {
         viewModelScope.launch {
             val conversations = existingConversations ?: chatRepository.getAllConversations().first()
@@ -619,7 +748,8 @@ class ChatViewModel @Inject constructor(
                         activeToolCalls = emptyList(),
                         isStreaming = false,
                         isThinking = false,
-                        showMascot = true
+                        showMascot = true,
+                        isUsingThreadContext = false
                     )
                 }
             }
@@ -630,9 +760,12 @@ class ChatViewModel @Inject constructor(
 
     private fun toolStatus(toolName: String, executing: Boolean): String {
         return when (toolName) {
-            "web_search" -> if (executing) "Searching the web" else "Reading search results"
+            "web_search" -> if (executing) "Searching the web" else "Synthesizing from sources"
+            "calculator" -> if (executing) "Calculating" else "Using exact result"
             "memory" -> if (executing) "Checking memory" else "Using saved context"
             "file_reader" -> if (executing) "Reading file" else "Using file context"
+            "calendar" -> if (executing) "Reading calendar" else "Using calendar data"
+            "contacts" -> if (executing) "Looking up contact" else "Using contact data"
             else -> if (executing) "Using $toolName" else "Processing tool result"
         }
     }
@@ -652,8 +785,13 @@ class ChatViewModel @Inject constructor(
             try {
                 _uiState.update { it.copy(pendingToolConfirmation = null) }
                 val result = toolDispatcher.confirmAndExecute(pending)
-                // Tool result will be handled through the message flow
-                android.util.Log.d("ChatViewModel", "Tool executed: ${result.name}, success: ${!result.isError}")
+                com.localyze.utils.AppLog.d("ChatViewModel", "Tool executed: ${result.name}, success: ${!result.isError}")
+
+                // Resume generation with the tool result
+                val state = _uiState.value
+                if (state.currentConversationId > 0L && !result.isError) {
+                    doContinueWithToolResult(state.currentConversationId, result)
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Tool execution failed: ${e.message}") }
             }

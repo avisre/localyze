@@ -1,8 +1,9 @@
-﻿package com.localyze
+package com.localyze
 
 import com.localyze.ai.AudioRecordingState
 import com.localyze.ai.ModelLoadState
 import com.localyze.data.repository.DownloadProgress
+import com.localyze.data.repository.ModelRepository
 import com.localyze.domain.models.*
 import com.localyze.domain.usecases.ChatResponseEvent
 import com.localyze.domain.usecases.ManageMemoryUseCase
@@ -157,7 +158,7 @@ class ReplyScenariosTest {
                         val os = when (state) {
                             "Welcome" -> OnboardingUiState.Welcome
                             "CheckingModel" -> OnboardingUiState.CheckingModel(true)
-                            "ReadyToDownload" -> OnboardingUiState.ReadyToDownload
+                            "ReadyToDownload" -> OnboardingUiState.ReadyToDownload(selectedModel = ModelRepository.MODEL_E4B)
                             "Downloading" -> OnboardingUiState.Downloading(
                                 DownloadProgress.Downloading(
                                     bytesDownloaded = (pct * 36544675L),

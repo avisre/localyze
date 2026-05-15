@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "tag": "Q1_HFrEF",
+      "prompt": "A 72-year-old woman with HFrEF (LVEF 28%), NYHA class II, eGFR 45 mL/min, K+ 4.8, on max-tolerated lisinopril and bisoprolol. What's the next drug class to add per ESC/AHA 2024 guidelines, and how does your choice change if her K+ was 5.4?",
+      "answer": "I wasn't able to generate a response for that. Try rephrasing the question, or restart the app if this keeps happening.",
+      "verdict": "FALLBACK",
+      "elapsed_s": 45.5,
+      "info": {
+        "first_token_s": 0.0,
+        "completed_log": true,
+        "recovery_log": true,
+        "saw_generating": false
+      },
+      "screenshot": "/tmp/doc3_Q1_HFrEF.png"
+    },
+    {
+      "tag": "Q2_CAP",
+      "prompt": "A 68-year-old man with CAP, CURB-65 of 1, no recent antibiotics, mild penicillin allergy (rash, no anaphylaxis). What's your first-line oral antibiotic, and how does the choice change if he has eGFR 30 and is on warfarin?",
+      "answer": "The first-line oral antibiotic for a68-year-old man with CAP and a CURB-65 of1, no recent antibiotics, and a mild penicillin allergy (rash, no anaphylaxis) is Amoxicillinamoxicillinamoxicillinam (or a macrolide like azithromycin, depending on local guidelines).If the patient has eGFR30 and is on warfarin, the choice of antibiotic would need to be reviewed by a healthcare provider due to the potential drug interactions and the severe renal impairment.",
+      "verdict": "ANSWERED",
+      "elapsed_s": 45.7,
+      "info": {
+        "first_token_s": 0.0,
+        "completed_log": true,
+        "recovery_log": true,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc3_Q2_CAP.png"
+    },
+    {
+      "tag": "Q3_T2DM",
+      "prompt": "A 58-year-old man with T2DM (HbA1c 8.4%), BMI 31, eGFR 55, MI one year ago, currently on metformin 1 g BID. What's the next agent to add per ADA 2024, and how does the choice change if he develops recurrent UTIs?",
+      "answer": "I wasn't able to generate a response for that. Try rephrasing the question, or restart the app if this keeps happening.",
+      "verdict": "FALLBACK",
+      "elapsed_s": 45.4,
+      "info": {
+        "first_token_s": 0.0,
+        "completed_log": true,
+        "recovery_log": true,
+        "saw_generating": false
+      },
+      "screenshot": "/tmp/doc3_Q3_T2DM.png"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+=== GENERAL (Knowledge) QUESTIONS ===
+Passed: 13/15
+Avg score: 9.07/10
+Min: 7.00, Max: 10.00
+  Q01: PASS | 8.67/10 | What is the capital of Japan, and name one famous landm
+  Q02: PASS | 9.33/10 | Explain photosynthesis in simple terms.
+  Q03: PASS | 10.00/10 | What is 15 percent of 240? Show the calculation.
+  Q04: PASS | 9.33/10 | Why was the printing press important?
+  Q05: PASS | 9.33/10 | How does compound interest work, and what is the differ
+  Q06: PASS | 10.00/10 | Explain the difference between REST and GraphQL APIs.
+  Q07: FAIL | 7.00/10 | What is a SQL injection vulnerability and how do parame
+  Q08: PASS | 8.67/10 | Explain binary search and when it can be used.
+  Q09: PASS | 9.33/10 | Explain the cultural significance of Diwali.
+  Q10: PASS | 9.33/10 | What are practical ways to manage stress during a busy 
+  Q11: PASS | 10.00/10 | Write a concise professional follow-up email after a jo
+  Q12: PASS | 9.33/10 | What is climate change and why does it matter?
+  Q13: PASS | 9.33/10 | What is the difference between mean, median, and mode?
+  Q14: PASS | 9.33/10 | What is the Nobel Prize and how are laureates selected?
+  Q15: FAIL | 7.00/10 | Give me a simple plan for prioritizing tasks when every
+
+=== WEB SEARCH QUESTIONS ===
+Passed: 12/15
+Avg score: 8.48/10
+Min: 8.00, Max: 8.60
+  Q01: PASS | 8.60/10 | Search the web: what is the current Federal Funds targe
+  Q02: PASS | 8.60/10 | Search the web: what is the latest US inflation CPI upd
+  Q03: PASS | 8.60/10 | Search the web: how is the US stock market performing t
+  Q04: PASS | 8.60/10 | Search the web: what are the latest Android 16 features
+  Q05: PASS | 8.60/10 | Search the web: what are the latest OpenAI model or API
+  Q06: PASS | 8.60/10 | Search the web: what is the latest iPhone iOS update ne
+  Q07: PASS | 8.60/10 | Search the web: who won the Oscar for Best Picture in 2
+  Q08: FAIL | 8.00/10 | Search the web: what are the top trending movies in Ind
+  Q09: FAIL | 8.00/10 | Search the web: what is the current status of the India
+  Q10: PASS | 8.60/10 | Search the web: what are the latest developments in AI 
+  Q11: PASS | 8.60/10 | Search the web: what is the latest NBA playoff news?
+  Q12: FAIL | 8.00/10 | Search the web: what is the weather forecast for New Yo
+  Q13: PASS | 8.60/10 | Search the web: what are the latest US mortgage rate up
+  Q14: PASS | 8.60/10 | Search the web: what are the latest space launch headli
+  Q15: PASS | 8.60/10 | Search the web: what are the latest oil price and energ

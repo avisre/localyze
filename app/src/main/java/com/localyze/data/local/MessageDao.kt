@@ -56,6 +56,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLastMessage(conversationId: Long): Message?
 
+    @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY timestamp ASC LIMIT :limit OFFSET :offset")
+    suspend fun getMessagesPage(conversationId: Long, limit: Int, offset: Int): List<Message>
+
     @Query("SELECT COUNT(*) FROM messages WHERE conversationId = :conversationId")
     suspend fun getMessageCount(conversationId: Long): Int
 

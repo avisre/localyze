@@ -1,0 +1,332 @@
+{
+  "records": [
+    {
+      "id": "N086",
+      "fingerprint": "compare",
+      "prompt": "Compare iPhone vs Android",
+      "category": "compare",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 202.0,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['iPhone', 'Android', 'iOS']"
+      ],
+      "expected_keywords": [
+        "iPhone",
+        "Android",
+        "iOS"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N087",
+      "fingerprint": "compare",
+      "prompt": "Compare React vs Vue",
+      "category": "compare",
+      "answer": "React and Vue are both popular JavaScript frameworks used for building user interfaces, but they have distinct philosophies and approaches.",
+      "answer_len": 139,
+      "elapsed_s": 223.0,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "React",
+        "Vue",
+        "framework",
+        "component"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N088",
+      "fingerprint": "compare",
+      "prompt": "Compare SQL vs NoSQL",
+      "category": "compare",
+      "answer": "Here is a comparison between SQL and NoSQL databases:\n#\nComparison Overview\nFeature\nSQL (Relational Databases)\nNoSQL (Non-Relational Databases)\n| Data Model | Tabular (Rows and Columns) | Document, Key-Value",
+      "answer_len": 207,
+      "elapsed_s": 220.6,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "SQL",
+        "NoSQL",
+        "relational",
+        "schema"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N089",
+      "fingerprint": "compare",
+      "prompt": "Compare TCP vs UDP",
+      "category": "compare",
+      "answer": "TCP and UDP are both transport layer protocols in the Internet Protocol Suite (TCP/IP), but they differ significantly in how they handle data transmission, offering different trade-offs between reliability and speed.\nFeature\nTCP (Transmission Control Protocol)\nUDP (User Datagram Protocol)\nConnection\nConnection-oriented (requires a handshake)\nConnectionless (sends data immediately)\nReliability\nHigh (guarantees delivery via acknowledgments)\nLow (no guarantee of delivery)",
+      "answer_len": 473,
+      "elapsed_s": 136.4,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "TCP",
+        "UDP",
+        "reliable",
+        "connectionless"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N090",
+      "fingerprint": "compare",
+      "prompt": "Compare AWS vs Azure",
+      "category": "compare",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 200.6,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['AWS', 'Azure', 'cloud', 'Amazon', 'Microsoft']"
+      ],
+      "expected_keywords": [
+        "AWS",
+        "Azure",
+        "cloud",
+        "Amazon",
+        "Microsoft"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N091",
+      "fingerprint": "compare",
+      "prompt": "Compare Python vs Java",
+      "category": "compare",
+      "answer": "The user wants a comparison between Python and Java. This is a general knowledge question about programming languages, so I should answer directly without using web search or the calculator tool. I will use markdown formatting to present the comparison clearly. I will focus on key aspects like syntax, use cases, speed, and learning curve. &lt;channel|&gt;Python and Java are two of the most popular and widely used programming languages, but they have significant differences in their design, execution, and ideal use cases.\n#\nComparison Overview",
+      "answer_len": 548,
+      "elapsed_s": 223.3,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Python",
+        "Java",
+        "syntax",
+        "JVM"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N092",
+      "fingerprint": "compare",
+      "prompt": "Compare HTTP vs HTTPS",
+      "category": "compare",
+      "answer": "HTTP (Hypertext Transfer Protocol) and HTTPS (Hypertext Transfer Protocol Secure) are both protocols used to transfer data over the World Wide Web, but they differ significantly in terms of security.\nHere is a comparison of the two:\nSecurity: HTTP transmits data in plain text, meaning anyone intercepting the communication can read the information (like passwords or credit card numbers). HTTPS uses an SSL/TLS certificate to encrypt the data, making it unreadable to unauthorized parties.\nAuthentication: HTTP provides no way to verify the identity of the server you are connecting to. HTTPS allows the server to prove its identity using a digital certificate, ensuring you are talking to the legitimate website.",
+      "answer_len": 714,
+      "elapsed_s": 135.3,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "HTTPS",
+        "HTTP",
+        "TLS",
+        "encrypt"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N093",
+      "fingerprint": "compare",
+      "prompt": "Compare REST vs GraphQL",
+      "category": "compare",
+      "answer": "REST vs GraphQL\nREST gives you fixed endpoints. GraphQL lets the app ask for exactly the fields it needs.\nUse REST when...\nUse GraphQL when...\nThe API is simple and predictable\nScreens need many related pieces of data\nCaching should be straightforward\nYou want to avoid over-fetching data\nTeams prefer standard HTTP patterns\nClient teams need more query flexibility\nShort version: REST is simpler; GraphQL is more flexible.\nSources:",
+      "answer_len": 432,
+      "elapsed_s": 17.4,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "REST",
+        "GraphQL",
+        "endpoint",
+        "query"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N094",
+      "fingerprint": "compare",
+      "prompt": "Compare arrays vs linked lists",
+      "category": "compare",
+      "answer": "Arrays and linked lists are fundamental linear data structures, but they differ significantly in how they store and access data in memory.\n#\nArrays\nStorage: Elements are stored in contiguous (adjacent) memory locations.\nAccess: Provide O(1) (constant time) access because you can calculate the exact memory address of any element using its index",
+      "answer_len": 345,
+      "elapsed_s": 219.5,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "array",
+        "linked",
+        "O(",
+        "contiguous",
+        "pointer"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N095",
+      "fingerprint": "compare",
+      "prompt": "Compare git rebase vs merge",
+      "category": "compare",
+      "answer": "The user wants a comparison between git rebase and git merge. This is a general knowledge question about version control workflow, so I should answer it directly using my internal knowledge, structuring the comparison clearly. I will use markdown formatting to make the comparison easy to read. &lt;channel|&gt;Git rebase and git merge are both ways to integrate changes from one branch into another, but they achieve this in fundamentally different ways. The choice between them heavily depends on the desired history of your repository.\n#\nGit Merge",
+      "answer_len": 550,
+      "elapsed_s": 219.5,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "rebase",
+        "merge",
+        "commit",
+        "linear"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N096",
+      "fingerprint": "compare",
+      "prompt": "Compare gas vs electric cars",
+      "category": "compare",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 201.3,
+      "completed_log": false,
+      "wait_reason": "native_crash",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['electric', 'gas', 'battery', 'range', 'emission']"
+      ],
+      "expected_keywords": [
+        "electric",
+        "gas",
+        "battery",
+        "range",
+        "emission"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N097",
+      "fingerprint": "compare",
+      "prompt": "Compare cats vs dogs as pets",
+      "category": "compare",
+      "answer": "Feature\nDogs\nCats",
+      "answer_len": 17,
+      "elapsed_s": 222.8,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "cat",
+        "dog",
+        "independent",
+        "loyal"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N098",
+      "fingerprint": "compare",
+      "prompt": "Compare tea vs coffee",
+      "category": "compare",
+      "answer": "The user is asking for a comparison between tea and coffee. This is a general knowledge request that does not require live data, math, or specific tool usage. I will synthesize a concise comparison covering key aspects like caffeine, health benefits, taste, and preparation. I will aim for a balanced overview without being overly detailed.&lt;channel|&gt;Tea and coffee are both popular beverages with significant cultural and health impacts, but they differ in their chemical composition, taste, and effects on the body.\n#\nKey Comparisons",
+      "answer_len": 540,
+      "elapsed_s": 220.7,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "tea",
+        "coffee",
+        "caffeine",
+        "leaves",
+        "bean"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N099",
+      "fingerprint": "compare",
+      "prompt": "Compare Mac vs PC",
+      "category": "compare",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 220.9,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['Mac', 'PC', 'Windows', 'macOS', 'Apple']"
+      ],
+      "expected_keywords": [
+        "Mac",
+        "PC",
+        "Windows",
+        "macOS",
+        "Apple"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "N100",
+      "fingerprint": "compare",
+      "prompt": "Compare yoga vs pilates",
+      "category": "compare",
+      "answer": "Yoga in Indian Tradition\nYoga is a discipline for training the body, breath, mind, and awareness.\nIts roots are in ancient Indian spiritual and philosophical traditions. Classical yoga emphasizes calming the mind, ethical living, focus, meditation, and self-knowledge.\nModern yoga often highlights posture and fitness, but traditionally it is broader: it is a path toward balance, clarity, and liberation.",
+      "answer_len": 405,
+      "elapsed_s": 17.5,
+      "completed_log": true,
+      "wait_reason": "completed",
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "yoga",
+        "Pilates",
+        "core",
+        "flexibility",
+        "breath"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

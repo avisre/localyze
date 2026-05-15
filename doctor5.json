@@ -1,0 +1,79 @@
+{
+  "results": [
+    {
+      "tag": "Q1_DIABETES_GUIDELINE",
+      "prompt": "What is the first-line pharmacological treatment for a newly diagnosed type 2 diabetes patient who is obese with no other comorbidities, and what HbA1c target would you set?",
+      "expected": "guideline + target",
+      "answer": "Writing answer\nThe answer will appear below",
+      "verdict": "ANSWERED",
+      "elapsed_s": 167.0,
+      "info": {
+        "first_token_s": 151.7,
+        "completed_log": true,
+        "recovery_log": false,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc5_Q1_DIABETES_GUIDELINE.png"
+    },
+    {
+      "tag": "Q2_DRUG_INTERACTION",
+      "prompt": "A patient on warfarin for atrial fibrillation is starting amiodarone. How would you adjust their INR monitoring frequency in the first month, and would you anticipate a dose change?",
+      "expected": "drug interaction practical",
+      "answer": "",
+      "verdict": "EMPTY",
+      "elapsed_s": 76.0,
+      "info": {
+        "first_token_s": 40.0,
+        "completed_log": true,
+        "recovery_log": false,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc5_Q2_DRUG_INTERACTION.png"
+    },
+    {
+      "tag": "Q3_DIFFERENTIAL",
+      "prompt": "A 45-year-old woman presents with sudden-onset right lower quadrant pain, no fever, normal white cell count, and no nausea. Walk me through your differential diagnosis and the next imaging step.",
+      "expected": "differential + imaging",
+      "answer": "Thinking...\nDisclaimer: I am an AI assistant and not a medical professional. This information is for educational purposes only and should not replace professional medical advice, diagnosis, or treatment from a qualified healthcare provider. The patient should be evaluated by a physician immediately.**\nDifferential DiagnosisFor a5-year-old woman presenting with sudden-onset right lower quadrant pain, the differential diagnosis includes:*Appendicitis: Although less common in this age group, it remains a primary consideration.*Urinary Tract Infection (UTI): Pain can be localized to the lower abdomen.",
+      "verdict": "ANSWERED",
+      "elapsed_s": 69.1,
+      "info": {
+        "first_token_s": 45.8,
+        "completed_log": false,
+        "recovery_log": false,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc5_Q3_DIFFERENTIAL.png"
+    },
+    {
+      "tag": "Q4_PATIENT_COMM",
+      "prompt": "How would you explain a positive BRCA1 mutation result to a 38-year-old patient who is anxious about her cancer risk and has two young children? Outline what you would say.",
+      "expected": "communication + empathy",
+      "answer": "Quick question first \u2014 to give you a useful answer:1. What is the patient's primary concern? (Cancer risk / Next steps / Family history)2. What is the desired tone? (Very reassuring / Factual / Balanced)3. What is the desired length? (Short summary / Detailed outline)If you'd like me to proceed without these questions, I will provide a balanced, reassuring outline.",
+      "verdict": "ANSWERED",
+      "elapsed_s": 47.9,
+      "info": {
+        "first_token_s": 0.0,
+        "completed_log": true,
+        "recovery_log": false,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc5_Q4_PATIENT_COMM.png"
+    },
+    {
+      "tag": "Q5_DOC_FORMAT",
+      "prompt": "Briefly explain the components of a SOAP note and how it differs from a HEADSS assessment. When would you use each?",
+      "expected": "medical documentation",
+      "answer": "",
+      "verdict": "EMPTY",
+      "elapsed_s": 81.7,
+      "info": {
+        "first_token_s": 22.9,
+        "completed_log": true,
+        "recovery_log": false,
+        "saw_generating": true
+      },
+      "screenshot": "/tmp/doc5_Q5_DOC_FORMAT.png"
+    }
+  ]
+}

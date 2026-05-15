@@ -1,0 +1,923 @@
+{
+  "records": [
+    {
+      "id": "Q001",
+      "fingerprint": "fact_geo_capital",
+      "prompt": "What's the capital of Japan?",
+      "category": "fact_geography",
+      "answer": "The capital of Japan is Tokyo.",
+      "answer_len": 30,
+      "elapsed_s": 15.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Tokyo"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q031",
+      "fingerprint": "fact_science_speed_of_light",
+      "prompt": "What is the speed of light?",
+      "category": "fact_science",
+      "answer": "The speed of light in a vacuum is approximately 299,792,458 meters per second, about 300,000 kilometers per second.",
+      "answer_len": 115,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "299",
+        "300,000",
+        "light"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q066",
+      "fingerprint": "fact_history_ww2",
+      "prompt": "When did World War 2 end?",
+      "category": "fact_history",
+      "answer": "World War II ended in 1945.",
+      "answer_len": 27,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "1945"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q091",
+      "fingerprint": "fact_general_shakespeare",
+      "prompt": "Who wrote Romeo and Juliet?",
+      "category": "fact_general",
+      "answer": "William Shakespeare wrote Romeo and Juliet.",
+      "answer_len": 43,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Shakespeare"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q100",
+      "fingerprint": "fact_general",
+      "prompt": "Who painted Starry Night?",
+      "category": "fact_general",
+      "answer": "Vincent van Gogh painted Starry Night.",
+      "answer_len": 38,
+      "elapsed_s": 114.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Van Gogh"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q121",
+      "fingerprint": "math_basic_percentage",
+      "prompt": "What is 20% of 200?",
+      "category": "math_basic",
+      "answer": "200 \u00d7 20 \u00f7 100 = 40.",
+      "answer_len": 20,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "40"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q151",
+      "fingerprint": "math_word_tip",
+      "prompt": "If a meal costs $40 and I want to tip 20%, how much is the tip?",
+      "category": "math_word",
+      "answer": "40 \u00d7 20 \u00f7 100 = 8.",
+      "answer_len": 18,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "8"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q171",
+      "fingerprint": "unit_convert_temp_F_to_C",
+      "prompt": "Convert 100 F to Celsius.",
+      "category": "unit_convert",
+      "answer": "100 \u00b0F = 37.7778 \u00b0C.",
+      "answer_len": 20,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "37.7",
+        "37.8",
+        "38"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q196",
+      "fingerprint": "daily_life_egg",
+      "prompt": "How long should I boil an egg for medium-soft yolk?",
+      "category": "daily_life",
+      "answer": "For a medium-soft yolk, you should boil an egg for about 6 to 7 minutes.\n6 minutes: This will give you a slightly firmer white and a jammy, runny yolk.\n7 minutes: This will result in a more set yolk that is still soft and creamy in the center.\nAlways start your timer once the water is at a rolling boil, and consider letting the eggs sit in an ice bath immediately after cooking to stop the cooking process and help with peeling.",
+      "answer_len": 430,
+      "elapsed_s": 142.1,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "6",
+        "7",
+        "minute"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q226",
+      "fingerprint": "tech_howto_screenshot",
+      "prompt": "How do I take a screenshot on Android?",
+      "category": "tech_howto",
+      "answer": "2m ago\nThe standard way to take a screenshot on Android devices is to use the Power button and the Volume Down button simultaneously.\n1.\nPress and hold the Power button and Volume Down button at the same time.\n2.\nRelease both buttons when the screen flashes or you hear a shutter sound, which indicates the screenshot has been captured.\n3.",
+      "answer_len": 339,
+      "elapsed_s": 135.4,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "power",
+        "volume",
+        "down"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q256",
+      "fingerprint": "writing_thank_you",
+      "prompt": "Write a thank-you note to my coworker for helping with a project.",
+      "category": "writing",
+      "answer": "2m ago\nHere are a few options for a thank-you note, ranging from casual to more formal. Choose the one that best fits your relationship with your coworker and the project's tone.\nOption 1: Casual and friendly\nHi [Coworker's Name],",
+      "answer_len": 230,
+      "elapsed_s": 160.3,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Thank",
+        "appreciate",
+        "Dear",
+        "Best"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q281",
+      "fingerprint": "definition",
+      "prompt": "What is inflation?",
+      "category": "definitions",
+      "answer": "Inflation is the rate at which the general level of prices for goods and services is rising, and subsequently, the purchasing power of currency is falling.",
+      "answer_len": 155,
+      "elapsed_s": 119.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "prices",
+        "rise",
+        "purchasing"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q311",
+      "fingerprint": "code_snippet",
+      "prompt": "How do I reverse a string in Python?",
+      "category": "code",
+      "answer": "1m ago\nYou can reverse a string in Python using a slicing technique: my_string[::-1].\nHere is an example:\npython\nAlternatively, you can use the reversed() function combined with the join() method:",
+      "answer_len": 196,
+      "elapsed_s": 131.3,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "[::-1]",
+        "reverse"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q336",
+      "fingerprint": "translation",
+      "prompt": "How do you say 'thank you' in Spanish?",
+      "category": "translation",
+      "answer": "",
+      "answer_len": 0,
+      "elapsed_s": 117.0,
+      "completed_log": true,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['gracias']"
+      ],
+      "expected_keywords": [
+        "gracias"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q351",
+      "fingerprint": "current_events",
+      "prompt": "What's the current price of Bitcoin?",
+      "category": "current_events",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhy are you asking? (buying now / selling now / investing / just curious)\n2.\nRegion / market? (US / India / UK / global spot)\n3.\nTime horizon? (today / next month / long-term)",
+      "answer_len": 230,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['bitcoin', '$', 'price']"
+      ],
+      "expected_keywords": [
+        "bitcoin",
+        "$",
+        "price"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q376",
+      "fingerprint": "fin_viz",
+      "prompt": "Show me Apple's revenue for the last 3 years.",
+      "category": "financial_visualization",
+      "answer": "Answer\nI found annual revenue data for Apple.\n#\nApple Revenue (Last 3 Fiscal Years)\nApple's revenue increased from $383.3B in FY2023 to $416.2B in FY2025. The latest year-over-year change was 6.4%.\nFiscal year\nRevenue (USD billions)\n2023\n383.3\n2024\n391.0\n2025\n416.2",
+      "answer_len": 265,
+      "elapsed_s": 23.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Apple",
+        "revenue"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q411",
+      "fingerprint": "creative",
+      "prompt": "Tell me a short joke.",
+      "category": "creative",
+      "answer": "Why don't scientists trust atoms? Because they make up everything!",
+      "answer_len": 66,
+      "elapsed_s": 114.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "?"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q441",
+      "fingerprint": "personal_advice",
+      "prompt": "How can I be more productive in the morning?",
+      "category": "personal_advice",
+      "answer": "2m ago\nHere are a few ways to increase your productivity in the morning:\nEstablish a consistent wake-up time: Waking up at the same time every day helps regulate your body's natural sleep-wake cycle (circadian rhythm), making you feel more alert and energized when you need to start your day.\nMost Important Task). Your willpower and focus are typically highest early in the morning.\nIncorporate movement: Even a short burst of activity, like a 10-minute walk, stretching routine, or quick yoga session, can boost circulation and improve your mood and focus.",
+      "answer_len": 558,
+      "elapsed_s": 141.6,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "routine",
+        "morning",
+        "wake"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q471",
+      "fingerprint": "business",
+      "prompt": "How do I market my new small business?",
+      "category": "business_general",
+      "answer": "Quick question first \u2014 to give you a useful answer:\n1.\nWhat type of business is it? (e.g., retail, service-based, online product)\n2.\nWhat is your target market? (e.g., local community, specific demographic online)",
+      "answer_len": 213,
+      "elapsed_s": 121.1,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "social media",
+        "market",
+        "audience"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q491",
+      "fingerprint": "edge_case",
+      "prompt": "hi",
+      "category": "edge_case",
+      "answer": "Hello! I am Localyze.ai, your on-device AI assistant. How can I help you today?",
+      "answer_len": 79,
+      "elapsed_s": 117.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "hi",
+        "hello",
+        "hey"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q501",
+      "fingerprint": "regression_kantara_movie",
+      "prompt": "Kantara movie",
+      "category": "web_search_regression",
+      "answer": "Kantara is a Kannada-language action thriller film released in 2022. It is known for its strong blend of folk culture, folklore, and intense action sequences. The movie is highly regarded for its cultural depth and the powerful performances of its cast.",
+      "answer_len": 253,
+      "elapsed_s": 121.1,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Kantara"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q502",
+      "fingerprint": "regression_oppenheimer",
+      "prompt": "Tell me about the movie Oppenheimer",
+      "category": "web_search_regression",
+      "answer": "1m ago\nOppenheimer is a 2023 historical drama film directed by Christopher Nolan. It centers on the life of J. Robert Oppenheimer, the theoretical physicist who played a pivotal role as the director of the Los Alamos Laboratory during World War II.\nThe film explores his role in the development of the atomic bomb, known as the Manhattan Project. It delves into the immense scientific achievement, the political and ethical dilemmas surrounding the creation of the weapon, and the subsequent fallout during the McCarthy era, particularly the security hearings he faced.\nThe movie is known for its intense performances, complex narrative structure, and its exploration of the moral weight of scientific discovery.",
+      "answer_len": 712,
+      "elapsed_s": 133.3,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Oppenheimer",
+        "Nolan",
+        "atomic",
+        "bomb"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q503",
+      "fingerprint": "regression_messi",
+      "prompt": "Who is Lionel Messi",
+      "category": "web_search_regression",
+      "answer": "Lionel Messi is an Argentine professional footballer widely regarded as one of the greatest players of all time. He is renowned for his exceptional dribbling skills, incredible goal-scoring ability, and playmaking talent. He has achieved numerous accolades throughout his career, including multiple Ballon d'Or awards and leading Argentina to victory in the FIFA World Cup. He has spent the majority of his career playing for FC Barcelona before moving to Inter Miami CF.",
+      "answer_len": 471,
+      "elapsed_s": 125.2,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Argentin",
+        "football",
+        "soccer",
+        "Barcelona",
+        "Inter Miami"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q504",
+      "fingerprint": "regression_rrr",
+      "prompt": "What is RRR movie about",
+      "category": "web_search_regression",
+      "answer": "3m ago",
+      "answer_len": 6,
+      "elapsed_s": 613.4,
+      "completed_log": false,
+      "assert_status": "FAIL",
+      "assert_hits": [
+        "missing_expected:['RRR', 'Telugu', 'Rajamouli', 'India']"
+      ],
+      "expected_keywords": [
+        "RRR",
+        "Telugu",
+        "Rajamouli",
+        "India"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q505",
+      "fingerprint": "regression_demon_slayer",
+      "prompt": "Demon Slayer latest season",
+      "category": "web_search_regression",
+      "answer": "1m ago\nThe latest season of Demon Slayer: Kimetsu no Yaiba that has been released is Season 3: Hashira Training Arc. This season covers the training period where the Demon Slayer Corps members undergo rigorous training to prepare for the final battles against powerful demons.\nArc Covered: Hashira Training Arc\nRelease Status: Completed (as of the most recent major release).\nDisclaimer: My knowledge cutoff is prior to the most recent updates in 2026; therefore, I cannot confirm if a subsequent season has been officially announced or released after my last update.",
+      "answer_len": 567,
+      "elapsed_s": 131.2,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Demon",
+        "Slayer",
+        "Kimetsu",
+        "anime",
+        "season"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q002",
+      "fingerprint": "fact_geography_extra1",
+      "prompt": "What is the capital of France?",
+      "category": "fact_geography",
+      "answer": "The capital of France is Paris.",
+      "answer_len": 31,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Paris"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q003",
+      "fingerprint": "fact_geography_extra2",
+      "prompt": "What's the capital of Australia?",
+      "category": "fact_geography",
+      "answer": "The capital of Australia is Canberra.",
+      "answer_len": 37,
+      "elapsed_s": 115.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Canberra"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q032",
+      "fingerprint": "fact_science_extra1",
+      "prompt": "What is the chemical symbol for gold?",
+      "category": "fact_science",
+      "answer": "The chemical symbol for gold is Au.",
+      "answer_len": 35,
+      "elapsed_s": 114.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Au"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q033",
+      "fingerprint": "fact_science_extra2",
+      "prompt": "How many bones are in the adult human body?",
+      "category": "fact_science",
+      "answer": "There are typically 206 bones in the adult human body.",
+      "answer_len": 54,
+      "elapsed_s": 116.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "206"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q067",
+      "fingerprint": "fact_history_extra1",
+      "prompt": "When did World War 1 start?",
+      "category": "fact_history",
+      "answer": "World War 1 started on July 28, 1914.",
+      "answer_len": 37,
+      "elapsed_s": 117.1,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "1914"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q068",
+      "fingerprint": "fact_history_extra2",
+      "prompt": "Who was the first president of the United States?",
+      "category": "fact_history",
+      "answer": "George Washington was the first president of the United States.",
+      "answer_len": 63,
+      "elapsed_s": 115.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Washington"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q092",
+      "fingerprint": "fact_general_extra1",
+      "prompt": "Who painted the Sistine Chapel ceiling?",
+      "category": "fact_general",
+      "answer": "Michelangelo painted the Sistine Chapel ceiling.",
+      "answer_len": 48,
+      "elapsed_s": 114.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Michelangelo"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q093",
+      "fingerprint": "fact_general_extra2",
+      "prompt": "Who composed the Ninth Symphony?",
+      "category": "fact_general",
+      "answer": "Ludwig van Beethoven composed the Ninth Symphony.",
+      "answer_len": 49,
+      "elapsed_s": 115.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Beethoven"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q122",
+      "fingerprint": "math_basic_extra1",
+      "prompt": "What's 15% of 80?",
+      "category": "math_basic",
+      "answer": "80 \u00d7 15 \u00f7 100 = 12.",
+      "answer_len": 19,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "12"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q123",
+      "fingerprint": "math_basic_extra2",
+      "prompt": "Calculate 25 times 4.",
+      "category": "math_basic",
+      "answer": "25\u00d74 = 100.",
+      "answer_len": 11,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "100"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q152",
+      "fingerprint": "math_word_extra1",
+      "prompt": "A shirt is $50 with 25% off. What's the discounted price?",
+      "category": "math_word",
+      "answer": "50 \u00d7 (1 \u2212 25\u00f7100) = 37.5.",
+      "answer_len": 25,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "37.5",
+        "37.50"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q153",
+      "fingerprint": "math_word_extra2",
+      "prompt": "Split a $120 bill three ways. How much does each pay?",
+      "category": "math_word",
+      "answer": "120 \u00f7 3 = 40.",
+      "answer_len": 13,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "40"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q172",
+      "fingerprint": "unit_convert_extra1",
+      "prompt": "How many kilometers in 10 miles?",
+      "category": "unit_convert",
+      "answer": "10 mi = 16.0934 km.",
+      "answer_len": 19,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "16.09",
+        "16.1"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q173",
+      "fingerprint": "unit_convert_extra2",
+      "prompt": "Convert 5 feet to centimeters.",
+      "category": "unit_convert",
+      "answer": "5 ft = 152.4 centimeters.",
+      "answer_len": 25,
+      "elapsed_s": 15.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "152.4",
+        "152"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q197",
+      "fingerprint": "daily_life_extra1",
+      "prompt": "How many hours of sleep do adults need?",
+      "category": "daily_life",
+      "answer": "Adults generally need 7 to 9 hours of sleep per night.",
+      "answer_len": 54,
+      "elapsed_s": 117.0,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "7",
+        "8",
+        "hours"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q198",
+      "fingerprint": "daily_life_extra2",
+      "prompt": "How much water should I drink a day?",
+      "category": "daily_life",
+      "answer": "1m ago\nGeneral health guidelines suggest that the average adult needs to drink about 8 glasses (2 liters or half a gallon) of water per day.\nHowever, this amount can vary based on several factors, such as:\nActivity Level: If you exercise, you need more to replace fluids lost through sweat.\nClimate: In hot or humid weather, increased water intake is necessary.\nOverall Health: Illnesses like fever or vomiting require higher intake.\nA simple way to monitor is to drink when you feel thirsty and ensure your urine is pale yellow.",
+      "answer_len": 529,
+      "elapsed_s": 131.4,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "8",
+        "glasses",
+        "liters",
+        "2"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q227",
+      "fingerprint": "tech_howto_extra1",
+      "prompt": "How do I turn off Wi-Fi on my phone?",
+      "category": "tech_howto",
+      "answer": "1m ago\nI do not have the ability to directly interact with your phone's operating system to change settings like turning off Wi-Fi.\nHowever, here are the general steps for most modern smartphones:\nFor Android: Swipe down from the top of the screen to open the Quick Settings panel. Look for the Wi-Fi icon and tap it to toggle it off.\nFor iPhone: Swipe down from the top-right corner (or up from the bottom on older models) to open the Control Center. Tap the Wi-Fi icon to turn it off.",
+      "answer_len": 486,
+      "elapsed_s": 133.4,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "settings",
+        "Wi-Fi",
+        "toggle"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q228",
+      "fingerprint": "tech_howto_extra2",
+      "prompt": "How do I clear browser cache in Chrome?",
+      "category": "tech_howto",
+      "answer": "To clear your browser cache in Google Chrome:\n1.\nOpen Chrome and click the three vertical dots (\u22ee) in the top right corner.\n2.\nSelect More Tools, and then click Clear browsing data...\n3.\n4.\n5.\nClick the Clear data button.",
+      "answer_len": 221,
+      "elapsed_s": 137.6,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "settings",
+        "clear",
+        "browsing"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q257",
+      "fingerprint": "writing_extra1",
+      "prompt": "Write a short apology email for missing a meeting.",
+      "category": "writing",
+      "answer": "Subject: Apology for missing today's meeting\nDear [Name],\nPlease accept my sincere apologies for missing our meeting today. I unfortunately [briefly state reason, e.g., had an unforeseen conflict/ran into an urgent issue] and was unable to attend.\nI am very sorry for any inconvenience this caused. Could you please let me know what I missed and when we might be able to reschedule?\nBest regards,\n[Your Name]",
+      "answer_len": 408,
+      "elapsed_s": 129.4,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Subject",
+        "apologize",
+        "sorry",
+        "Best"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q258",
+      "fingerprint": "writing_extra2",
+      "prompt": "Help me write a polite email to my landlord about a leaky faucet.",
+      "category": "writing",
+      "answer": "2m ago\nHere is a draft for a polite email you can send to your landlord:\nSubject: Maintenance Request: Leaky Faucet in [Your Apartment Number/Unit]\nDear [Landlord's Name],\nI hope this email finds you well. I am writing to respectfully request a repair for a leaky faucet in my [Kitchen/Bathroom] at [Your Apartment Number/Address].\nThe faucet has developed a steady drip that has become quite constant. While it is a minor issue, I am concerned about the potential for water waste and damage if it is not addressed soon.",
+      "answer_len": 520,
+      "elapsed_s": 143.7,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "Subject",
+        "Dear",
+        "faucet",
+        "Regards"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q282",
+      "fingerprint": "definitions_extra1",
+      "prompt": "Explain blockchain in simple terms.",
+      "category": "definitions",
+      "answer": "2m ago\nBlockchain is essentially a digital, decentralized ledger. Instead of having a single person or company control a database (like a bank's ledger), the data is spread across a vast network of computers.\nHere are the key concepts broken down:\nChain: Once a block is verified and added to the chain, it is cryptographically linked to the previous block. This creates a continuous, chronological chain of data.\nDecentralization: No single entity owns or controls the ledger. Copies of the entire chain are maintained by every computer (node) in the network.",
+      "answer_len": 560,
+      "elapsed_s": 143.5,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "chain",
+        "blocks",
+        "distributed",
+        "ledger"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q283",
+      "fingerprint": "definitions_extra2",
+      "prompt": "What is machine learning?",
+      "category": "definitions",
+      "answer": "Machine Learning\nMachine learning teaches computers patterns from examples instead of hand-writing every rule.\nExample: if you show a model thousands of labeled photos of cats and dogs, it learns patterns like ears, fur, shapes, and faces. Then it can make a good guess on a new photo.\nHow it works:\n1.\nCollect examples.\n2.\nTrain a model to find patterns.\n3.\nTest it on new examples.\n4.\nImprove it with better data and feedback.\nLarge language models do this with text: they learn language patterns and use them to predict helpful responses.",
+      "answer_len": 541,
+      "elapsed_s": 15.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "data",
+        "algorithm",
+        "learn"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q312",
+      "fingerprint": "code_extra1",
+      "prompt": "Write a Python function to check if a number is prime.",
+      "category": "code",
+      "answer": "2m ago\nHere is a Python function to check if a number is prime.\nThis function efficiently checks for primality by testing divisibility only up to the square root of the number.\npython",
+      "answer_len": 183,
+      "elapsed_s": 157.9,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "def",
+        "prime",
+        "return"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q313",
+      "fingerprint": "code_extra2",
+      "prompt": "How do I sort a list in JavaScript?",
+      "category": "code",
+      "answer": "2m ago\nYou can sort a list (an array) in JavaScript using the built-in .sort() method. However, it is important to know that .sort() converts elements to strings and sorts them based on their UTF-16 code unit values by default. For numerical sorting, you must provide a comparison function.\nHere are the three main ways to sort:\n#\n1. Sorting Numbers (Numerical)\nTo sort numbers correctly, you provide a function that tells JavaScript how to compare two elements (a and b).\nAscending Order (Smallest to Largest):\njavascript",
+      "answer_len": 522,
+      "elapsed_s": 151.8,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        ".sort",
+        "sort"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    },
+    {
+      "id": "Q337",
+      "fingerprint": "translation_extra1",
+      "prompt": "Translate 'good morning' to French.",
+      "category": "translation",
+      "answer": "Bonjour.\nDisclaimer: This translation is based on my training data and may not capture all regional nuances or formal/informal contexts.",
+      "answer_len": 136,
+      "elapsed_s": 216.5,
+      "completed_log": true,
+      "assert_status": "PASS",
+      "assert_hits": [],
+      "expected_keywords": [
+        "bonjour"
+      ],
+      "must_contain": [],
+      "must_not_contain": []
+    }
+  ]
+}

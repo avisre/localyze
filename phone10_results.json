@@ -1,0 +1,133 @@
+[
+  {
+    "id": "Q001",
+    "cat": "fact_geography",
+    "prompt": "What's the capital of Japan?",
+    "kws": [
+      "Tokyo"
+    ],
+    "answer": "The capital of Japan is Tokyo.",
+    "elapsed_s": 19.9,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q031",
+    "cat": "fact_science",
+    "prompt": "What is the speed of light?",
+    "kws": [
+      "299",
+      "300,000",
+      "light"
+    ],
+    "answer": "The speed of light in a vacuum is approximately 299,792,458 meters per second, about 300,000 kilometers per second.",
+    "elapsed_s": 18.0,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q066",
+    "cat": "fact_history",
+    "prompt": "When did World War 2 end?",
+    "kws": [
+      "1945"
+    ],
+    "answer": "World War II ended in 1945.",
+    "elapsed_s": 18.4,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q091",
+    "cat": "fact_general",
+    "prompt": "Who wrote Romeo and Juliet?",
+    "kws": [
+      "Shakespeare"
+    ],
+    "answer": "William Shakespeare wrote Romeo and Juliet.",
+    "elapsed_s": 17.5,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q121",
+    "cat": "math_basic",
+    "prompt": "What is 20% of 200?",
+    "kws": [
+      "40"
+    ],
+    "answer": "200 \u00d7 20 \u00f7 100 = 40.",
+    "elapsed_s": 17.7,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q151",
+    "cat": "math_word",
+    "prompt": "If a meal costs $40 and I want to tip 20%, how much is the tip?",
+    "kws": [
+      "8"
+    ],
+    "answer": "40 \u00d7 20 \u00f7 100 = 8.",
+    "elapsed_s": 17.9,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q171",
+    "cat": "unit_convert",
+    "prompt": "Convert 100 F to Celsius.",
+    "kws": [
+      "37.7",
+      "37.8",
+      "38"
+    ],
+    "answer": "100 \u00b0F = 37.7778 \u00b0C.",
+    "elapsed_s": 20.4,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q196",
+    "cat": "daily_life",
+    "prompt": "How long should I boil an egg for medium-soft yolk?",
+    "kws": [
+      "6",
+      "7",
+      "minute"
+    ],
+    "answer": "Thinking...\nThe user is asking for the boiling time required to achieve a medium-soft yolk in an egg. This is a general knowledge question that does not require a tool call. I will answer directly based on my knowledge.&lt;channel|&gt;You should boil an egg for approximately 6 to 7 minutes for a medium-soft yolk.\nFor the best results, start by placing the eggs in cold water and bringing the water to a boil, then reduce the heat and boil for the specified time.",
+    "elapsed_s": 56.6,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q226",
+    "cat": "tech_howto",
+    "prompt": "How do I take a screenshot on Android?",
+    "kws": [
+      "power",
+      "volume",
+      "down"
+    ],
+    "answer": "To take a screenshot on Android, the method depends on your specific device, but the most common ways are:\nPower Button + Volume Down Button: Press and hold the Power button and the Volume Down button simultaneously until the screenshot appears.\nPower Button (Some Models): On some newer devices, pressing and holding the Power button for a few seconds will bring up a screenshot options.",
+    "elapsed_s": 65.5,
+    "verdict": "PASS",
+    "completed": true
+  },
+  {
+    "id": "Q256",
+    "cat": "writing",
+    "prompt": "Write a thank-you note to my coworker for helping with a project.",
+    "kws": [
+      "Thank",
+      "appreciate",
+      "Dear",
+      "Best"
+    ],
+    "answer": "Here is a draft you can use:\nHi [Coworker's Name],\nI wanted to send a quick note to say thank you so much for all your help with the [Project Name] project. Your assistance with [mention specific task, e.g., data analysis, design, client calls] was invaluable, and really helped us meet our deadline. I truly appreciate your time and expertise!\nBest,\n[Your Name]",
+    "elapsed_s": 57.1,
+    "verdict": "PASS",
+    "completed": true
+  }
+]
