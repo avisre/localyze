@@ -1,8 +1,0 @@
-INFO         | Android emulator version 36.5.11.0 (build_id 15261927) (CL:N/A)
-INFO         | Graphics backend: gfxstream
-INFO         | AVD localyze_eval has path /home/hardoker77/.android/avd/../avd/localyze_eval.avd
-INFO         | trying to check whether /home/hardoker77/Android/Sdk is a valid sdk root
-WARNING      | /home/hardoker77/Android/Sdk/system-images/android-35/google_apis/x86_64/ is not a valid directory.
-WARNING      | emulator has searched the above paths but found no valid sdk root directory.
-FATAL        | Broken AVD system path. Check your ANDROID_SDK_ROOT value [/home/hardoker77/Downloads/new/localyze-main (Copy)/.codex-tools/android-sdk]!
-
