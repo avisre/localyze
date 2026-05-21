@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import com.localyze.ai.ContextWindowManager
 import com.localyze.ai.GemmaInferenceEngine
 import com.localyze.ai.InferenceToken
+import com.localyze.ai.InputGuardrails
+import com.localyze.ai.ResponsePostProcessor
 import com.localyze.ai.SystemPromptBuilder
 import com.localyze.data.local.SettingsDataStore
 import com.localyze.data.repository.ChatRepository
@@ -24,12 +26,14 @@ import com.localyze.tools.companyFinancialWebSearchQueryFor
 import com.localyze.tools.parseCompanyFinancialIntent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -68,13 +72,34 @@ class SendMessageUseCase @Inject constructor(
     private val chatRepository: ChatRepository,
     private val memoryRepository: MemoryRepository,
     private val settingsDataStore: SettingsDataStore,
-    private val clarificationOrchestrator: ClarificationOrchestrator
+    private val clarificationOrchestrator: ClarificationOrchestrator,
+    private val crashRecoveryStore: com.localyze.util.CrashRecoveryStore,
+    private val responsePostProcessor: ResponsePostProcessor,
+    private val inputGuardrails: InputGuardrails
 ) {
 
     companion object {
         private const val MAX_TOOL_ITERATIONS = 3
         private const val TITLE_MAX_LENGTH = 40
-        private const val CONTEXT_RESET_THRESHOLD_TOKENS = 10_000
+
+        // KV-cache safety threshold. LiteRT-LM Conversation's real ceiling
+        // is ~4096 tokens; we trip the summarize-and-drop path at ~70% so
+        // the recompacted window fits comfortably back inside the cache.
+        private const val CONTEXT_RESET_THRESHOLD_TOKENS = 2_800
+
+        // How many recent USER+ASSISTANT messages we keep verbatim in the
+        // restored-context block. Older turns get collapsed into the
+        // persistent conversation summary instead.
+        private const val KEEP_RECENT_MESSAGES = 16
+
+        // Hard cap on the on-disk conversation summary. Anything past this
+        // gets re-summarized into itself on the next reset.
+        private const val MAX_SUMMARY_CHARS = 600
+
+        // Hard cap on summarizer-output collection (chars). The engine
+        // can keep going for a while; we don't need more than this for a
+        // 3-bullet recap.
+        private const val SUMMARIZER_OUTPUT_CHAR_CAP = 500
     }
 
     private var generationJob: Job? = null
@@ -91,6 +116,24 @@ class SendMessageUseCase @Inject constructor(
     fun resetClarification(conversationId: Long) {
         clarifyStates.remove(conversationId)
     }
+
+    /**
+     * Push the current user-memory snapshot into the engine so it gets
+     * baked into the next Conversation's system instruction. Cheap to
+     * call repeatedly — the engine no-ops if the snapshot didn't change.
+     *
+     * Respects the memoryEnabled setting: when off, the snapshot is cleared.
+     */
+    private suspend fun refreshMemorySnapshot() {
+        val enabled = settingsDataStore.memoryEnabled.first()
+        val snapshot = if (enabled) {
+            memoryRepository.getAllMemories().map { it.content }
+        } else {
+            emptyList()
+        }
+        gemmaInferenceEngine.setMemorySnapshot(snapshot)
+    }
+
     /**
      * Called when starting a new conversation or switching modes.
      * Resets the LiteRT-LM Conversation so it starts fresh.
@@ -120,6 +163,7 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
+        refreshMemorySnapshot()
         // Save user message to DB first.
         val userMsg = Message(
             conversationId = conversationId,
@@ -129,13 +173,80 @@ class SendMessageUseCase @Inject constructor(
         )
         chatRepository.saveMessage(userMsg)
 
+        // Greeting / acknowledgement preflight: bare social tokens like
+        // "hi", "thanks", "ok" re-fire the model on whatever context is
+        // still in the KV cache, which produces nonsense ("hi" → repeat of
+        // the prior CEO answer). Short-circuit them with a canned reply so
+        // the model never sees the prompt.
+        cannedGreetingReply(userMessage)?.let { reply ->
+            reply.chunked(48).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = reply,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            emit(ChatResponseEvent.Completed(fullText = reply, thinkingText = null))
+            return@flow
+        }
+
+        // ── Input guardrail ──────────────────────────────────────────
+        // Short-circuit prompt-injection attempts in Kotlin so we never
+        // hit the model with them. The model's old INJECTION_RESISTANCE
+        // prompt block (~200 tokens) was removed in favor of this gate.
+        when (val guard = inputGuardrails.check(userMessage)) {
+            is InputGuardrails.Decision.Refuse -> {
+                chatRepository.saveMessage(
+                    Message(
+                        conversationId = conversationId,
+                        role = MessageRole.ASSISTANT,
+                        content = guard.reply,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
+                emit(ChatResponseEvent.StreamingToken(guard.reply))
+                emit(ChatResponseEvent.Completed(fullText = guard.reply, thinkingText = null))
+                return@flow
+            }
+            InputGuardrails.Decision.Allow -> { /* fall through */ }
+        }
+
         // ── Clarification gate ───────────────────────────────────────
         // Before sending to Gemma / web router, ask the orchestrator if
         // we should clarify first. North star is accuracy: a 1-2 round
         // clarification loop beats a generic guess.
+        //
+        // BUT: if a deterministic preflight tool (weather/time/currency/
+        // news) can answer this directly, skip clarification — the tools
+        // accept the raw query and don't need disambiguation. Otherwise
+        // "news about Tesla" gets a "what topic?" prompt instead of the
+        // actual answer.
+        // Detect once, reuse twice: previously these four detectors ran here
+        // (just for the boolean below) AND again inside generateWithToolLoop
+        // for the actual dispatch. The detectors are regex-heavy enough
+        // that the dup matters on hot paths.
+        val preflightWeatherCall = buildPreflightWeatherCallIfNeeded(userMessage)
+        val preflightTimeCall = buildPreflightTimeCallIfNeeded(userMessage)
+        val preflightCurrencyCall = buildPreflightCurrencyCallIfNeeded(userMessage)
+        val preflightNewsCall = buildPreflightNewsCallIfNeeded(userMessage)
+        val preflightCanHandle = preflightWeatherCall != null ||
+            preflightTimeCall != null ||
+            preflightCurrencyCall != null ||
+            preflightNewsCall != null
+        val precomputedPreflight = PrecomputedPreflight(
+            weather = preflightWeatherCall,
+            time = preflightTimeCall,
+            currency = preflightCurrencyCall,
+            news = preflightNewsCall
+        )
         val priorState = clarifyStates[conversationId]
         val effectiveQuery: String = when (
-            val decision = clarificationOrchestrator.analyze(userMessage, priorState)
+            val decision = if (preflightCanHandle) ClarificationDecision.PassThrough
+                else clarificationOrchestrator.analyze(userMessage, priorState)
         ) {
             is ClarificationDecision.AskMore -> {
                 // Save the assistant clarify message; keep the
@@ -180,9 +291,9 @@ class SendMessageUseCase @Inject constructor(
             }
 
         emitAll(
-            generateWithToolLoop(conversationId, effectiveQuery, effectiveMode, enableThinking)
+            generateWithToolLoop(conversationId, effectiveQuery, effectiveMode, enableThinking, precomputedPreflight)
         )
-    }
+    }.flowOn(Dispatchers.Default)
 
     /**
      * Detect a token-repetition loop in model output (e.g. "yyyyyyyyyyyy"
@@ -243,7 +354,10 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
-        // Save bitmap to cache directory and store path in imageUris
+        refreshMemorySnapshot()
+        // Save bitmap to cache directory then persist the message.
+        // If the DB write fails, delete the orphaned cache file so
+        // the cache directory doesn't fill up over time.
         val imagePath = saveBitmapToCache(imageBitmap)
         val userMsg = Message(
             conversationId = conversationId,
@@ -252,7 +366,32 @@ class SendMessageUseCase @Inject constructor(
             imageUris = imagePath?.let { listOf(it) } ?: emptyList(),
             timestamp = System.currentTimeMillis()
         )
-        chatRepository.saveMessage(userMsg)
+        try {
+            chatRepository.saveMessage(userMsg)
+        } catch (e: Exception) {
+            imagePath?.let { java.io.File(it).delete() }
+            throw e
+        }
+
+        // Emulator guard: LiteRT-LM's multimodal pipeline crashes on x86_64
+        // emulators the same way the text pipeline does. Bail with a clear
+        // message instead of SIGSEGV-ing.
+        if (isRunningOnEmulator()) {
+            val banner = "Image analysis uses the on-device model, which crashes its native " +
+                "library on Android emulators (a known LiteRT-LM bug on x86_64). Install the " +
+                "APK on a real Android phone to use image input."
+            banner.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = banner,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            emit(ChatResponseEvent.Completed(fullText = banner, thinkingText = null))
+            return@flow
+        }
 
         val fullTextBuilder = StringBuilder()
         val thinkingTextBuilder = StringBuilder()
@@ -300,6 +439,12 @@ class SendMessageUseCase @Inject constructor(
         catch (e: Exception) {
             emit(ChatResponseEvent.Error(e.message ?: "Generation failed"))
             return@flow
+        } finally {
+            // The bitmap has been written to disk (PNG cache) AND consumed
+            // by the vision encoder by this point. ARGB_8888 1024x1024 is
+            // ~4MB — release it now so a 5-image session doesn't accumulate
+            // 20MB of heap on its way to GC.
+            if (!imageBitmap.isRecycled) imageBitmap.recycle()
         }
 
         if (generationError != null) {
@@ -311,10 +456,7 @@ class SendMessageUseCase @Inject constructor(
             return@flow
         }
 
-        var finalContent = fullTextBuilder.toString()
-        finalContent = finalContent.replace(Regex("(\\d)([a-zA-Z])"), "$1 $2")
-        finalContent = finalContent.replace(Regex("([a-zA-Z])(\\d)"), "$1 $2")
-        finalContent = formatDateStrings(stripThinkingPrefix(finalContent))
+        val finalContent = polishWithFallback(fullTextBuilder.toString())
         val assistantMsg = Message(
             conversationId = conversationId,
             role = MessageRole.ASSISTANT,
@@ -325,16 +467,16 @@ class SendMessageUseCase @Inject constructor(
         chatRepository.saveMessage(assistantMsg)
         autoGenerateTitle(conversationId, fullTextBuilder.toString())
 
-        gemmaInferenceEngine.setRestoredConversationContext(
-            buildRestoredConversationContext(conversationId)
-        )
-        gemmaInferenceEngine.resetConversation(capabilityMode, enableThinking)
+        // Used to unconditionally reset the conversation after every image
+        // turn, which nuked the KV cache (and re-prefilled the ~2700-token
+        // system prompt) regardless of need. LiteRT-LM tracks history
+        // internally; we only need to reset when context overflows.
 
         emit(ChatResponseEvent.Completed(
             fullText = fullTextBuilder.toString(),
             thinkingText = thinkingTextBuilder.toString().ifBlank { null }
         ))
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun sendMessageWithAudio(
         conversationId: Long,
@@ -342,6 +484,7 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
+        refreshMemorySnapshot()
         val userMsg = Message(
             conversationId = conversationId,
             role = MessageRole.USER,
@@ -349,6 +492,26 @@ class SendMessageUseCase @Inject constructor(
             timestamp = System.currentTimeMillis()
         )
         chatRepository.saveMessage(userMsg)
+
+        // Emulator guard: same x86_64 LiteRT-LM SIGSEGV as text/image. The
+        // audio pipeline runs the same sampler/tokenizer at the end of its
+        // ASR + chat handoff, so it crashes too.
+        if (isRunningOnEmulator()) {
+            val banner = "Voice messages use the on-device model, which crashes its native " +
+                "library on Android emulators. Install the APK on a real Android phone to " +
+                "use voice input."
+            banner.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = banner,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            emit(ChatResponseEvent.Completed(fullText = banner, thinkingText = null))
+            return@flow
+        }
 
         val fullTextBuilder = StringBuilder()
         val thinkingTextBuilder = StringBuilder()
@@ -394,10 +557,7 @@ class SendMessageUseCase @Inject constructor(
             return@flow
         }
 
-        var finalContent = fullTextBuilder.toString()
-        finalContent = finalContent.replace(Regex("(\\d)([a-zA-Z])"), "$1 $2")
-        finalContent = finalContent.replace(Regex("([a-zA-Z])(\\d)"), "$1 $2")
-        finalContent = formatDateStrings(stripThinkingPrefix(finalContent))
+        val finalContent = polishWithFallback(fullTextBuilder.toString())
         val assistantMsg = Message(
             conversationId = conversationId,
             role = MessageRole.ASSISTANT,
@@ -412,7 +572,7 @@ class SendMessageUseCase @Inject constructor(
             fullText = fullTextBuilder.toString(),
             thinkingText = thinkingTextBuilder.toString().ifBlank { null }
         ))
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun stopGeneration() {
         gemmaInferenceEngine.stopGeneration()
@@ -424,6 +584,7 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
+        refreshMemorySnapshot()
         val recentMessages = chatRepository.getRecentMessages(conversationId, 1)
         val lastMessage = recentMessages.firstOrNull()
         if (lastMessage != null && lastMessage.role == MessageRole.ASSISTANT) {
@@ -447,7 +608,7 @@ class SendMessageUseCase @Inject constructor(
                 enableThinking
             )
         )
-    }
+    }.flowOn(Dispatchers.Default)
 
     /**
      * Continue generation after a tool was confirmed by the user.
@@ -459,6 +620,7 @@ class SendMessageUseCase @Inject constructor(
         capabilityMode: String,
         enableThinking: Boolean
     ): Flow<ChatResponseEvent> = flow {
+        refreshMemorySnapshot()
         chatRepository.saveMessage(
             Message(
                 conversationId = conversationId,
@@ -484,7 +646,9 @@ class SendMessageUseCase @Inject constructor(
                     timestamp = System.currentTimeMillis()
                 )
             ),
-            systemPrompt = buildRichSystemPrompt(capabilityMode, enableThinking, conversationId),
+            // Engine builds its own system instruction at Conversation creation
+            // and ignores this arg; pass empty to avoid the per-turn DB hit.
+            systemPrompt = "",
             capabilityMode = capabilityMode,
             enableThinking = enableThinking
         )
@@ -548,10 +712,11 @@ class SendMessageUseCase @Inject constructor(
         }
 
         if (fullTextBuilder.isNotEmpty()) {
+            val polished = polishWithFallback(fullTextBuilder.toString())
             val assistantMsg = Message(
                 conversationId = conversationId,
                 role = MessageRole.ASSISTANT,
-                content = fullTextBuilder.toString(),
+                content = polished,
                 thinkingContent = thinkingTextBuilder.toString().ifBlank { null },
                 timestamp = System.currentTimeMillis()
             )
@@ -563,7 +728,7 @@ class SendMessageUseCase @Inject constructor(
             fullText = fullTextBuilder.toString(),
             thinkingText = thinkingTextBuilder.toString().ifBlank { null }
         ))
-    }
+    }.flowOn(Dispatchers.Default)
 
 
     // â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -572,11 +737,36 @@ class SendMessageUseCase @Inject constructor(
         conversationId: Long,
         userMessage: String,
         capabilityMode: String,
-        enableThinking: Boolean
+        enableThinking: Boolean,
+        precomputed: PrecomputedPreflight? = null
     ): Flow<ChatResponseEvent> = flow {
+        // Hard short-circuit: if this exact prompt crashed the model on the
+        // previous run (CrashRecoveryStore detected the sentinel at boot),
+        // do not let the user re-fire it — that loop SIGSEGVs the app again.
+        if (crashRecoveryStore.isBlocked(userMessage)) {
+            val banner = "That last message ('${userMessage.take(60)}…') crashed the on-device model. " +
+                "I've stopped it from being re-fired this session — try rephrasing it."
+            banner.chunked(48).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            emit(ChatResponseEvent.Completed(fullText = banner, thinkingText = null))
+            return@flow
+        }
         var iteration = 0
         var pendingToolResults: List<ToolResult>? = null
         val collectedToolResults = mutableListOf<ToolResult>()
+        // Per-turn tool-result cache keyed on (toolName, normalized args).
+        // The model often re-fires the same tool inside one turn ("weather
+        // in X" then "and tomorrow") — caching avoids duplicate network
+        // round-trips. callId is excluded from the key since it's a UUID.
+        val turnToolCache = mutableMapOf<String, com.localyze.domain.models.ToolResult>()
+        suspend fun dispatchCached(call: ToolCall): com.localyze.domain.models.ToolResult {
+            val key = "${call.name}|${call.arguments}"
+            turnToolCache[key]?.let { return it }
+            val result = toolDispatcher.dispatch(call)
+            if (!result.isError) turnToolCache[key] = result
+            return result
+        }
         // Clear any stale tool-result captures from prior turns; the engine's
         // OpenApiTool wrappers will append to this during generation.
         gemmaInferenceEngine.clearRecentToolResults()
@@ -592,7 +782,7 @@ class SendMessageUseCase @Inject constructor(
         val preflightCalcCall = buildPreflightCalculatorCallIfNeeded(userMessage)
         val preflightCalcResult = if (preflightCalcCall != null) {
             emit(ChatResponseEvent.ToolCallStarted(preflightCalcCall.name))
-            val result = toolDispatcher.dispatch(preflightCalcCall)
+            val result = dispatchCached(preflightCalcCall)
             emit(ChatResponseEvent.ToolCallCompleted(result.name, result.result))
             chatRepository.saveMessage(
                 Message(
@@ -679,7 +869,124 @@ class SendMessageUseCase @Inject constructor(
             }
         }
 
-        // Skip web preflight when calculator already produced an answer.
+        // Time / currency / news preflights: same idea as weather — direct
+        // structured-API answer instead of routing through model + web_search.
+        //
+        // Order matters: time and currency are cheap/deterministic so check
+        // them first. News calls Google News RSS which takes longer.
+        val preflightTimeCall = if (calcContextMessage == null) (precomputed?.time ?: buildPreflightTimeCallIfNeeded(userMessage)) else null
+        val preflightTimeResult = if (preflightTimeCall != null) {
+            emit(ChatResponseEvent.ToolCallStarted(preflightTimeCall.name))
+            val r = dispatchCached(preflightTimeCall)
+            emit(ChatResponseEvent.ToolCallCompleted(r.name, r.result))
+            r
+        } else null
+        val timeCuratedAnswer = preflightTimeResult
+            ?.takeUnless { it.isError }
+            ?.let { curatedTimeAnswerFor(it.result) }
+        if (timeCuratedAnswer != null) {
+            timeCuratedAnswer.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = timeCuratedAnswer,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            autoGenerateTitle(conversationId, timeCuratedAnswer)
+            emit(ChatResponseEvent.Completed(fullText = timeCuratedAnswer, thinkingText = null))
+            return@flow
+        }
+
+        val preflightCurrencyCall = if (calcContextMessage == null) (precomputed?.currency ?: buildPreflightCurrencyCallIfNeeded(userMessage)) else null
+        val preflightCurrencyResult = if (preflightCurrencyCall != null) {
+            emit(ChatResponseEvent.ToolCallStarted(preflightCurrencyCall.name))
+            val r = dispatchCached(preflightCurrencyCall)
+            emit(ChatResponseEvent.ToolCallCompleted(r.name, r.result))
+            r
+        } else null
+        val currencyCuratedAnswer = preflightCurrencyResult
+            ?.takeUnless { it.isError }
+            ?.let { curatedCurrencyAnswerFor(it.result) }
+        if (currencyCuratedAnswer != null) {
+            currencyCuratedAnswer.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = currencyCuratedAnswer,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            autoGenerateTitle(conversationId, currencyCuratedAnswer)
+            emit(ChatResponseEvent.Completed(fullText = currencyCuratedAnswer, thinkingText = null))
+            return@flow
+        }
+
+        val preflightNewsCall = if (calcContextMessage == null) (precomputed?.news ?: buildPreflightNewsCallIfNeeded(userMessage)) else null
+        val preflightNewsResult = if (preflightNewsCall != null) {
+            emit(ChatResponseEvent.ToolCallStarted(preflightNewsCall.name))
+            val r = dispatchCached(preflightNewsCall)
+            emit(ChatResponseEvent.ToolCallCompleted(r.name, r.result))
+            r
+        } else null
+        val newsCuratedAnswer = preflightNewsResult
+            ?.takeUnless { it.isError }
+            ?.let { curatedNewsAnswerFor(it.result) }
+        if (newsCuratedAnswer != null) {
+            newsCuratedAnswer.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = newsCuratedAnswer,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            autoGenerateTitle(conversationId, newsCuratedAnswer)
+            emit(ChatResponseEvent.Completed(fullText = newsCuratedAnswer, thinkingText = null))
+            return@flow
+        }
+
+        // Weather preflight: "what is the weather in <city>" is answered
+        // directly by the weather_lookup tool (Open-Meteo) instead of round-
+        // tripping through web_search + model synthesis. The model goes blank
+        // on a lot of weather queries even with grounded context, so going
+        // straight to a structured weather API gives us a real, usable answer.
+        val preflightWeatherCall = if (calcContextMessage == null) {
+            precomputed?.weather ?: buildPreflightWeatherCallIfNeeded(userMessage)
+        } else {
+            null
+        }
+        val preflightWeatherResult = if (preflightWeatherCall != null) {
+            emit(ChatResponseEvent.ToolCallStarted(preflightWeatherCall.name))
+            val result = dispatchCached(preflightWeatherCall)
+            emit(ChatResponseEvent.ToolCallCompleted(result.name, result.result))
+            result
+        } else {
+            null
+        }
+        val weatherCuratedAnswer = preflightWeatherResult
+            ?.takeUnless { it.isError }
+            ?.let { curatedWeatherAnswerFor(it.result) }
+        if (weatherCuratedAnswer != null) {
+            weatherCuratedAnswer.chunked(48).forEach { chunk ->
+                emit(ChatResponseEvent.StreamingToken(chunk))
+            }
+            val assistantMsg = Message(
+                conversationId = conversationId,
+                role = MessageRole.ASSISTANT,
+                content = weatherCuratedAnswer,
+                timestamp = System.currentTimeMillis()
+            )
+            chatRepository.saveMessage(assistantMsg)
+            autoGenerateTitle(conversationId, weatherCuratedAnswer)
+            emit(ChatResponseEvent.Completed(fullText = weatherCuratedAnswer, thinkingText = null))
+            return@flow
+        }
+
+        // Skip web preflight when calculator (or weather) already produced an answer.
         val preflightWebCall = if (allowWebSearch && calcContextMessage == null) {
             buildPreflightWebSearchCallIfNeeded(userMessage, capabilityMode)
         } else {
@@ -687,7 +994,7 @@ class SendMessageUseCase @Inject constructor(
         }
         val preflightWebResult = if (preflightWebCall != null) {
             emit(ChatResponseEvent.ToolCallStarted(preflightWebCall.name))
-            val result = toolDispatcher.dispatch(preflightWebCall)
+            val result = dispatchCached(preflightWebCall)
             emit(ChatResponseEvent.ToolCallCompleted(result.name, result.result))
             chatRepository.saveMessage(
                 Message(
@@ -747,17 +1054,71 @@ class SendMessageUseCase @Inject constructor(
             return@flow
         }
 
-        // Proactive context-window guardrail: if conversation tokens exceed
-        // a safe threshold, reset the engine conversation with only recent
-        // context so the model does not exhaust its KV cache / context window.
+        // Proactive context-window guardrail: when conversation tokens cross
+        // the KV-cache safe threshold, collapse everything older than the
+        // rolling window into a persistent summary on the Conversation row,
+        // then rebuild with [persisted summary] + [last KEEP_RECENT_MESSAGES
+        // verbatim turns]. The model never sees more than that, and the
+        // user never sees the "Context full — new chat" banner because the
+        // cache is recycled silently.
         val estimatedTokens = contextWindowManager.getTokenCountForMessages(
             getConversationMessages(conversationId)
         )
         if (estimatedTokens > CONTEXT_RESET_THRESHOLD_TOKENS) {
-            val trimmedContext = buildRestoredConversationContext(conversationId, limit = 4)
+            summarizeAndPersistOlderHistory(conversationId, capabilityMode, enableThinking)
+            val trimmedContext = buildRestoredConversationContext(conversationId)
             gemmaInferenceEngine.setRestoredConversationContext(trimmedContext)
             gemmaInferenceEngine.resetConversation(capabilityMode, enableThinking)
             emit(ChatResponseEvent.ContextReset())
+        }
+
+        // EMULATOR GUARD: LiteRT-LM has a reproducible SIGSEGV in its CPU
+        // sampler/tokenizer on x86_64 (memmove overflow in liblitertlm_jni)
+        // that kills the whole process whenever we feed it a non-trivial prompt.
+        // If web search already ran and returned snippets, display them directly
+        // without calling the model (safe path on x86_64). Otherwise show banner.
+        if (isRunningOnEmulator()) {
+            val webFallback = preflightWebResult
+                ?.takeUnless { it.isError }
+                ?.let { buildEmulatorWebSnippetAnswer(userMessage, it.result) }
+            if (webFallback != null) {
+                webFallback.chunked(32).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+                chatRepository.saveMessage(
+                    Message(
+                        conversationId = conversationId,
+                        role = MessageRole.ASSISTANT,
+                        content = webFallback,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
+                autoGenerateTitle(conversationId, webFallback)
+                emit(ChatResponseEvent.Completed(fullText = webFallback, thinkingText = null))
+                return@flow
+            }
+            val banner = buildString {
+                append("**Heads up:** this is an Android emulator. The on-device language ")
+                append("model crashes its own native library here (a known LiteRT-LM bug ")
+                append("on x86_64), so I'm not running it.\n\n")
+                append("**What still works on the emulator:**\n")
+                append("- Weather (\"weather in Tokyo\")\n")
+                append("- Time (\"what time is it in London\")\n")
+                append("- Currency (\"100 USD to INR\")\n")
+                append("- News (\"latest news from India\")\n")
+                append("- Calculator / unit conversions (\"70 kg in lb\")\n\n")
+                append("For everything else, install the APK on a real Android phone.")
+            }
+            banner.chunked(48).forEach { emit(ChatResponseEvent.StreamingToken(it)) }
+            chatRepository.saveMessage(
+                Message(
+                    conversationId = conversationId,
+                    role = MessageRole.ASSISTANT,
+                    content = banner,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            autoGenerateTitle(conversationId, banner)
+            emit(ChatResponseEvent.Completed(fullText = banner, thinkingText = null))
+            return@flow
         }
 
         // One filter instance per generation — buffers the FIRST tokens
@@ -811,7 +1172,9 @@ class SendMessageUseCase @Inject constructor(
                         role = MessageRole.USER,
                         content = "$followupHeader\n$toolResultsText\nPlease use these results to answer my original question."
                     )),
-                    systemPrompt = buildRichSystemPrompt(capabilityMode, enableThinking, conversationId),
+                    // Engine builds its own system instruction at Conversation creation
+                    // and ignores this arg; pass empty to avoid the per-turn DB hit.
+                    systemPrompt = "",
                     capabilityMode = capabilityMode,
                     enableThinking = enableThinking
                 )
@@ -849,7 +1212,9 @@ class SendMessageUseCase @Inject constructor(
                         content = promptForModel,
                         timestamp = System.currentTimeMillis()
                     )),
-                    systemPrompt = buildRichSystemPrompt(capabilityMode, enableThinking, conversationId),
+                    // Engine builds its own system instruction at Conversation creation
+                    // and ignores this arg; pass empty to avoid the per-turn DB hit.
+                    systemPrompt = "",
                     capabilityMode = capabilityMode,
                     enableThinking = enableThinking
                 )
@@ -999,16 +1364,80 @@ class SendMessageUseCase @Inject constructor(
                     // the model actually used) over the iteration-loop captures
                     // (which are only populated for the older non-native path).
                     val engineToolResults = gemmaInferenceEngine.snapshotRecentToolResults()
-                    val anyToolResults = engineToolResults.isNotEmpty() || collectedToolResults.isNotEmpty()
+                    // Also include preflight web_search / calculator results —
+                    // those paths bypass the LiteRT-LM OpenApiTool wrappers
+                    // (dispatched directly via toolDispatcher.dispatch) so they
+                    // don't appear in recentToolResults, but the data is just
+                    // as valid for blank-recovery fallback.
+                    val preflightFallback = buildList<Pair<String, String>> {
+                        preflightWebResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("web_search" to it.result) }
+                        preflightCalcResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("calculator" to it.result) }
+                        preflightWeatherResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("weather_lookup" to it.result) }
+                        preflightTimeResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("time_lookup" to it.result) }
+                        preflightCurrencyResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("currency_convert" to it.result) }
+                        preflightNewsResult
+                            ?.takeUnless { it.isError }
+                            ?.let { add("news_lookup" to it.result) }
+                    }
+                    val combinedEngineResults = engineToolResults + preflightFallback
+                    val anyToolResults = combinedEngineResults.isNotEmpty() || collectedToolResults.isNotEmpty()
                     if (anyToolResults) {
-                        // Tools fired but model produced no narrative. The tool
-                        // results ARE the answer — emit them formatted directly.
-                        // Avoids a second model call, which would hit the 4096
-                        // token limit because LiteRT-LM auto-attaches all tool
-                        // declarations to every conversation.
-                        val formatted = formatToolResultsAsAnswer(
-                            engineToolResults, collectedToolResults
+                        // Tools fired but model produced no narrative. Try a
+                        // recovery synth call in the tool-less "summary" mode
+                        // first — this gives a real natural-language answer
+                        // instead of dumping tool JSON + a disclaimer. Falls
+                        // back to the deterministic formatter only if synth
+                        // errors out or returns blank.
+                        val allToolResults = combinedEngineResults +
+                            collectedToolResults.map { it.name to it.result }
+                        val synthesized = synthesizeAnswerFromToolResults(
+                            userMessage, allToolResults, conversationId
                         )
+                        val formatted = synthesized
+                            ?: formatToolResultsAsAnswer(combinedEngineResults, collectedToolResults)
+                        formatted.chunked(64).forEach { chunk ->
+                            emit(ChatResponseEvent.StreamingToken(chunk))
+                        }
+                        fullTextBuilder.append(formatted)
+                    } else {
+                    // Tool-grounded recovery first: before cold-retrying the
+                    // model on a knowledge-only basis, check if the prompt
+                    // actually matches a live-data intent (weather, time,
+                    // currency, news, calculator). If so, the right answer
+                    // is to re-run those tools and format the result rather
+                    // than retry the model blind — which would happily make
+                    // up a fake weather report.
+                    val recoveryCalls = listOfNotNull(
+                        precomputed?.weather ?: buildPreflightWeatherCallIfNeeded(userMessage),
+                        precomputed?.time ?: buildPreflightTimeCallIfNeeded(userMessage),
+                        precomputed?.currency ?: buildPreflightCurrencyCallIfNeeded(userMessage),
+                        precomputed?.news ?: buildPreflightNewsCallIfNeeded(userMessage),
+                        buildPreflightCalculatorCallIfNeeded(userMessage)
+                    )
+                    val recoveryResults = recoveryCalls
+                        .map { call -> call.name to dispatchCached(call) }
+                        .filter { (_, r) -> !r.isError }
+                        .map { (name, r) -> name to r.result }
+                    val skipColdRetry = recoveryResults.isNotEmpty()
+                    if (skipColdRetry) {
+                        // Same recovery path: synthesize a natural answer from
+                        // the rerun-preflight tool data before falling back to
+                        // the disclaimer-tagged dump.
+                        val synthesized = synthesizeAnswerFromToolResults(
+                            userMessage, recoveryResults, conversationId
+                        )
+                        val formatted = synthesized
+                            ?: formatToolResultsAsAnswer(recoveryResults, emptyList())
                         formatted.chunked(64).forEach { chunk ->
                             emit(ChatResponseEvent.StreamingToken(chunk))
                         }
@@ -1036,12 +1465,9 @@ class SendMessageUseCase @Inject constructor(
                                     timestamp = System.currentTimeMillis()
                                 )
                             ),
-                            systemPrompt = buildRichSystemPrompt(
-                                capabilityMode = capabilityMode,
-                                enableThinking = false,
-                                conversationId = conversationId,
-                                includeToolDescriptions = false
-                            ),
+                            // Engine builds its own system instruction at Conversation creation
+                            // and ignores this arg; pass empty to avoid the per-turn DB hit.
+                            systemPrompt = "",
                             capabilityMode = capabilityMode,
                             enableThinking = false
                         ).collect { token ->
@@ -1072,6 +1498,7 @@ class SendMessageUseCase @Inject constructor(
                             e
                         )
                     }
+                    }  // close cold-retry else branch (skipColdRetry == false)
                     }
                 }
             }
@@ -1260,12 +1687,37 @@ class SendMessageUseCase @Inject constructor(
         // so the chain regex below catches it.
         val msg = digitsForWords(msgRaw)
         val lower = msg.lowercase()
-        // Square root
+        // Square root — supports "square root of N", "sqrt(N)", and bare "sqrt N".
         Regex("square\\s+root\\s+of\\s+(\\d+(?:\\.\\d+)?)").find(lower)?.let {
             return "sqrt(${it.groupValues[1]})"
         }
         Regex("\\bsqrt\\s*\\(\\s*(\\d+(?:\\.\\d+)?)\\s*\\)").find(lower)?.let {
             return "sqrt(${it.groupValues[1]})"
+        }
+        Regex("\\bsqrt\\s+(\\d+(?:\\.\\d+)?)\\b").find(lower)?.let {
+            return "sqrt(${it.groupValues[1]})"
+        }
+        // Logarithms — "log 100", "ln e", "log2 8". Default base of `log` is 10.
+        Regex("\\blog\\s+(\\d+(?:\\.\\d+)?)\\b").find(lower)?.let {
+            return "log(${it.groupValues[1]})"
+        }
+        Regex("\\bln\\s+(\\d+(?:\\.\\d+)?|e)\\b").find(lower)?.let {
+            return "ln(${it.groupValues[1]})"
+        }
+        Regex("\\blog2\\s+(\\d+(?:\\.\\d+)?)\\b").find(lower)?.let {
+            return "log2(${it.groupValues[1]})"
+        }
+        // Trig — assume DEGREES for integer angles (matches user intuition for
+        // sin 90 = 1, cos 0 = 1, etc.). Multiply by pi/180.
+        Regex("\\b(sin|cos|tan)\\s+(-?\\d+(?:\\.\\d+)?)\\b").find(lower)?.let {
+            val fn = it.groupValues[1]
+            val n = it.groupValues[2]
+            return "$fn($n*pi/180)"
+        }
+        // Increased / decreased by N%: "500 increased by 20%" → 500 * 1.2
+        Regex("(\\d+(?:\\.\\d+)?)\\s+(increased|decreased)\\s+by\\s+(\\d+(?:\\.\\d+)?)\\s*(?:%|percent)").find(lower)?.let {
+            val op = if (it.groupValues[2] == "increased") "+" else "-"
+            return "${it.groupValues[1]} * (1 ${op} ${it.groupValues[3]}/100)"
         }
         // Factorial: "N factorial" or "N!"
         Regex("(\\d+)\\s*factorial").find(lower)?.let { return "${it.groupValues[1]}!" }
@@ -1369,6 +1821,18 @@ class SendMessageUseCase @Inject constructor(
                 .replace(Regex("\\s+"), "")
             return expr
         }
+        // Multi-operator infix chain (3+ operands) BEFORE single-op match,
+        // so "69 + 88 * 93" → "69+88*93" with native precedence in the
+        // calculator instead of "69+88" only.
+        Regex(
+            "(-?\\d+(?:\\.\\d+)?)" +
+                "(?:\\s*[+\\-*/×÷^]\\s*-?\\d+(?:\\.\\d+)?){2,}"
+        ).find(msg)?.let {
+            return it.value
+                .replace("×", "*")
+                .replace("÷", "/")
+                .replace(Regex("\\s+"), "")
+        }
         // Pure infix arithmetic with single operator: "2+2", "7*8"
         Regex("(-?\\d+(?:\\.\\d+)?)\\s*([+\\-*/×÷^])\\s*(-?\\d+(?:\\.\\d+)?)").find(msg)?.let {
             val sym = it.groupValues[2].replace("×", "*").replace("÷", "/")
@@ -1466,6 +1930,434 @@ class SendMessageUseCase @Inject constructor(
             conversions, give the converted value with units. Use Markdown if it
             helps readability.
         """.trimIndent()
+    }
+
+    /**
+     * Detect "weather in <city>" intent and build a direct weather_lookup
+     * tool call. Bypasses web_search for the common case of "what is the
+     * weather in <city>" so we hit Open-Meteo's structured API directly
+     * instead of getting back a list of forecast-page links.
+     *
+     * Patterns matched (case-insensitive):
+     *   - "weather in <city>"
+     *   - "what's the weather (in|at) <city>"
+     *   - "what is the weather (like in|at) <city>"
+     *   - "how's the weather in <city>"
+     *   - "temperature in <city>"
+     *   - "<city> weather" (only when "<city>" is at most 4 words and not a
+     *     question fragment)
+     */
+    // Precomputed preflight tool calls from sendMessage(). Lets us skip the
+    // duplicate detector pass that generateWithToolLoop used to do.
+    private data class PrecomputedPreflight(
+        val weather: ToolCall?,
+        val time: ToolCall?,
+        val currency: ToolCall?,
+        val news: ToolCall?
+    )
+
+    // Bare greetings and acknowledgements. When the user types one of these
+    // alone (with optional punctuation/emoji), the model has no real intent
+    // to act on — it should just greet back instead of hallucinating an
+    // answer to the prior turn. Return null for anything substantive.
+    private fun cannedGreetingReply(userMessage: String): String? {
+        val raw = userMessage.trim()
+        if (raw.isEmpty() || raw.length > 32) return null
+        // Strip terminal punctuation and emoji to normalize ("hi!", "hi 👋").
+        val normalized = raw
+            .replace(Regex("[\\p{P}\\p{S}\\p{So}]+$"), "")
+            .trim()
+            .lowercase()
+        if (normalized.isEmpty()) {
+            // Pure emoji / punctuation message.
+            return "Hi! How can I help today?"
+        }
+        // Word-level membership so "hello there", "thanks!", "ok cool"
+        // still match. Keep the set conservative — any token outside it
+        // means there's real content and the model should run.
+        val tokens = normalized.split(Regex("\\s+"))
+        if (tokens.size > 4) return null
+        val greetingWords = setOf(
+            "hi", "hii", "hiii", "hello", "helo", "hey", "heya", "yo", "sup",
+            "hola", "namaste", "namaskar", "salaam", "salam", "shalom", "bonjour",
+            "morning", "evening", "afternoon", "gm", "gn", "wassup", "whats", "whatsup"
+        )
+        val ackWords = setOf(
+            "ok", "okay", "k", "kk", "okk", "okie",
+            "thanks", "thank", "thx", "ty", "tysm", "thnx", "thankyou",
+            "cool", "nice", "great", "awesome", "perfect", "good",
+            "lol", "lmao", "haha", "hehe",
+            "yes", "yeah", "yep", "yup", "sure",
+            "no", "nope", "nah",
+            "bye", "byebye", "cya", "goodbye", "later",
+            "you", "there", "buddy", "friend",
+            // Continuation / "tell me more" — extends the canned-reply
+            // pattern past plain acks. The model would otherwise re-fire on
+            // stale KV context for these and regurgitate prior content.
+            "continue", "more", "go", "on", "elaborate", "expand", "details",
+            "tell", "me", "explain", "further"
+        )
+        val all = greetingWords + ackWords
+        if (tokens.any { it !in all }) return null
+
+        val isGreeting = tokens.any { it in greetingWords }
+        val isFarewell = tokens.any { it in setOf("bye", "byebye", "cya", "goodbye", "later") }
+        val isThanks = tokens.any { it in setOf("thanks", "thank", "thx", "ty", "tysm", "thnx", "thankyou") }
+        val isContinue = tokens.any {
+            it in setOf("continue", "more", "elaborate", "expand", "details", "explain", "further")
+        }
+        return when {
+            isFarewell -> "Take care!"
+            isThanks -> "You're welcome — happy to help."
+            isGreeting -> "Hi! How can I help today?"
+            isContinue -> "Sure — what specifically would you like me to expand on? Long-press my last answer and tap **Regenerate** for a different take."
+            else -> "Got it — what would you like to do next?"
+        }
+    }
+
+    private fun buildPreflightWeatherCallIfNeeded(userMessage: String): ToolCall? {
+        val text = userMessage.trim()
+        if (text.isEmpty()) return null
+        val lower = text.lowercase()
+        // Cheap guard: must mention weather/temperature/forecast somewhere.
+        if (!lower.contains("weather") &&
+            !lower.contains("temperature") &&
+            !lower.contains("forecast")
+        ) return null
+
+        // Location-less weather queries ("what is the weather today",
+        // "how's the weather", "weather today"). Hand off to weather_lookup
+        // with the @here sentinel — the tool will resolve to a city via IP
+        // geolocation. Without this we fall through to web_search and the
+        // model returns a wall of URLs instead of an actual forecast.
+        val hereOnlyPatterns = listOf(
+            Regex("""^(?:what['’]?s|what\s+is|how['’]?s|how\s+is)\s+the\s+(?:weather|temperature|forecast)(?:\s+(?:today|now|right\s+now|outside|like))?\??\s*$""", RegexOption.IGNORE_CASE),
+            Regex("""^(?:weather|temperature|forecast)(?:\s+(?:today|now|right\s+now|outside))?\??\s*$""", RegexOption.IGNORE_CASE),
+            Regex("""^(?:current|today['’]?s)\s+(?:weather|temperature|forecast)\??\s*$""", RegexOption.IGNORE_CASE)
+        )
+        if (hereOnlyPatterns.any { it.matches(text) }) {
+            return ToolCall(
+                name = "weather_lookup",
+                arguments = buildJsonObject { put("location", JsonPrimitive("@here")) },
+                callId = UUID.randomUUID().toString()
+            )
+        }
+
+        val patterns = listOf(
+            Regex("""weather\s+(?:like\s+)?(?:in|at|for|of)\s+([\p{L}\p{M}\p{N}\s.'\-]+?)\??\s*$""", RegexOption.IGNORE_CASE),
+            Regex("""temperature\s+(?:in|at|for|of)\s+([\p{L}\p{M}\p{N}\s.'\-]+?)\??\s*$""", RegexOption.IGNORE_CASE),
+            Regex("""forecast\s+(?:for|in|at)\s+([\p{L}\p{M}\p{N}\s.'\-]+?)\??\s*$""", RegexOption.IGNORE_CASE),
+            // "Tokyo weather", "Trivandrum weather today"
+            Regex("""^([\p{L}\p{M}\p{N}\s.'\-]{2,40}?)\s+weather(?:\s+(?:today|now|right now))?\??\s*$""", RegexOption.IGNORE_CASE)
+        )
+        val rawCity = patterns.firstNotNullOfOrNull { it.find(text)?.groupValues?.get(1)?.trim() }
+            ?: return null
+
+        // Clean up trailing fluff ("right now", "today", "please", punctuation).
+        val cleaned = rawCity
+            .replace(Regex("""\b(right\s+now|today|now|currently|please|like)\b""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""[.?!,;:]+$"""), "")
+            .trim()
+            .trim('"', '\'', '`')
+        if (cleaned.isBlank() || cleaned.length < 2) return null
+        // Reject very generic stand-ins.
+        if (cleaned.equals("the city", ignoreCase = true) ||
+            cleaned.equals("there", ignoreCase = true) ||
+            cleaned.equals("here", ignoreCase = true) ||
+            cleaned.equals("my area", ignoreCase = true)
+        ) return null
+        // Reject captures that are clearly a question fragment, not a place
+        // name. "what is the weather" → "what is the" gets captured by the
+        // trailing "X weather" pattern; we don't want to ship that to the
+        // geocoder. If the captured "city" contains common English stop
+        // words (auxiliaries, articles, interrogatives) anywhere, bail —
+        // real cities don't contain words like "what" or "is".
+        if (looksLikeQuestionFragment(cleaned)) return null
+
+        return ToolCall(
+            name = "weather_lookup",
+            arguments = buildJsonObject { put("location", JsonPrimitive(cleaned)) },
+            callId = UUID.randomUUID().toString()
+        )
+    }
+
+    /**
+     * Heuristic: does the captured "city" contain English question / aux
+     * words? If yes, the trailing pattern matched something like "what is
+     * the weather" → "what is the" and we should NOT pass it to the
+     * geocoder. Real place names don't contain words like "is" or "the".
+     */
+    private fun looksLikeQuestionFragment(captured: String): Boolean {
+        val stopWords = setOf(
+            "what","why","when","where","who","which","how","whom",
+            "is","are","was","were","am","be","been","being",
+            "the","a","an",
+            "do","does","did",
+            "can","could","should","would","will","shall","may","might","must",
+            "you","your","i","me","my","mine","we","our","us",
+            "tell","show","give","find","get","know","want",
+            "about","please"
+        )
+        // Tokenize on whitespace, ignore punctuation. If ANY token in the
+        // captured text is a stop word, treat as a question fragment.
+        val tokens = captured.lowercase()
+            .replace(Regex("""[^\p{L}\p{N}\s]"""), " ")
+            .split(Regex("""\s+"""))
+            .filter { it.isNotBlank() }
+        return tokens.any { it in stopWords }
+    }
+
+    /**
+     * Detect "what time is it in X" / "current time in X" patterns. Returns
+     * a time_lookup ToolCall when matched, else null. Bypasses the model:
+     * Open-Meteo's geocoder gives us an IANA timezone for any city, so we
+     * compute the time locally without a second API.
+     */
+    /**
+     * Detect Android emulators (any flavor). Returns true on QEMU/goldfish/
+     * ranchu/SDK-built images. Used to gate the LiteRT-LM model call —
+     * the JNI sampler has a reproducible SIGSEGV on x86_64 emulators that
+     * we cannot work around. Real phone hardware is unaffected.
+     */
+    private fun buildEmulatorWebSnippetAnswer(userMessage: String, webResult: String): String? {
+        val results = runCatching {
+            val json = Json { ignoreUnknownKeys = true; isLenient = true }
+            val root = json.parseToJsonElement(webResult).jsonObject
+            root["results"]?.jsonArray?.mapNotNull { el ->
+                val obj = el.jsonObject
+                val title = obj["title"]?.jsonPrimitive?.content.orEmpty().trim()
+                val snippet = obj["snippet"]?.jsonPrimitive?.content.orEmpty().trim()
+                val url = obj["url"]?.jsonPrimitive?.content.orEmpty().trim()
+                if (snippet.isBlank()) null else Triple(title, snippet, url)
+            }.orEmpty()
+        }.getOrElse { emptyList() }
+        if (results.isEmpty()) return null
+        val top = results.take(3)
+        val body = top.joinToString("\n\n") { (title, snippet, _) ->
+            if (title.isNotBlank()) "**$title**\n$snippet" else snippet
+        }
+        val sources = results.distinctBy { it.third }.take(3).joinToString("\n") { (title, _, url) ->
+            val label = title.take(80).ifBlank { "link" }
+            "- [$label]($url)"
+        }
+        return "$body\n\n### Sources\n$sources"
+    }
+
+    private fun isRunningOnEmulator(): Boolean {
+        // Real phones are ARM (arm64-v8a / armeabi-v7a). x86/x86_64 is emulator-only.
+        // LiteRT-LM's SIGSEGV only happens on x86_64, so ARM devices are always safe.
+        val abis = android.os.Build.SUPPORTED_ABIS
+        val isArm = abis.any { it.startsWith("arm", ignoreCase = true) }
+        com.localyze.utils.AppLog.d("EmulatorCheck", "SUPPORTED_ABIS=${abis.toList()} isArm=$isArm → isEmulator=${!isArm}")
+        if (isArm) return false
+
+        val fp = android.os.Build.FINGERPRINT.orEmpty()
+        val product = android.os.Build.PRODUCT.orEmpty()
+        val model = android.os.Build.MODEL.orEmpty()
+        val hardware = android.os.Build.HARDWARE.orEmpty()
+        val manufacturer = android.os.Build.MANUFACTURER.orEmpty()
+        val brand = android.os.Build.BRAND.orEmpty()
+        val device = android.os.Build.DEVICE.orEmpty()
+        return fp.startsWith("generic", ignoreCase = true) ||
+            fp.contains("emulator", ignoreCase = true) ||
+            fp.contains("vbox", ignoreCase = true) ||
+            product.startsWith("sdk_gphone", ignoreCase = true) ||
+            product == "sdk" ||
+            product == "google_sdk" ||
+            product.contains("emulator", ignoreCase = true) ||
+            model.contains("sdk_gphone", ignoreCase = true) ||
+            model.contains("Android SDK built for", ignoreCase = true) ||
+            model.contains("Emulator", ignoreCase = true) ||
+            hardware == "goldfish" ||
+            hardware == "ranchu" ||
+            hardware.contains("vbox", ignoreCase = true) ||
+            manufacturer.contains("Genymotion", ignoreCase = true) ||
+            brand == "generic" ||
+            device.startsWith("generic", ignoreCase = true)
+    }
+
+    private fun buildPreflightTimeCallIfNeeded(userMessage: String): ToolCall? {
+        val text = userMessage.trim()
+        // Primary: "what time is it in X" / "current time in X" / "local time in X".
+        val primary = Regex(
+            """(?i)\b(?:what(?:'?s|\s+is)?\s+the\s+(?:current\s+)?time|what\s+time\s+is\s+it|current\s+time|local\s+time|time\s+(?:right\s+)?now)\s+(?:in|at|for)\s+([\p{L}\p{M}\p{N}\s.'\-]+?)\s*\??$"""
+        )
+        // Bare "time in X" / "time at X" — matches when the query begins
+        // with the bare word "time" plus a preposition + city. Doesn't
+        // collide with the primary regex because the primary requires a
+        // qualifier before "time".
+        val bare = Regex(
+            """(?i)^\s*time\s+(?:in|at|for)\s+([\p{L}\p{M}\p{N}\s.'\-]+?)\s*\??$"""
+        )
+        val match = primary.find(text) ?: bare.find(text) ?: return null
+        val location = match.groupValues[1].trim().trim('"', '\'', '`')
+        if (location.length < 2) return null
+        // Same fragment-guard as weather: reject captures containing stop words.
+        if (looksLikeQuestionFragment(location)) return null
+        return ToolCall(
+            name = "time_lookup",
+            arguments = buildJsonObject { put("location", JsonPrimitive(location)) },
+            callId = UUID.randomUUID().toString()
+        )
+    }
+
+    /**
+     * Detect currency conversion intent ("1 USD to INR", "convert 100 EUR
+     * to GBP", "100 USD in JPY"). Returns a currency_convert ToolCall when
+     * matched.
+     */
+    private fun buildPreflightCurrencyCallIfNeeded(userMessage: String): ToolCall? {
+        val text = userMessage.trim()
+        // Primary: amount + from + to. Captures "100 USD to INR",
+        // "convert 50 EUR to GBP", "1.5 USD to JPY".
+        val withAmount = Regex(
+            """(?i)(?:convert\s+)?(\d+(?:[.,]\d+)?)\s*([A-Z]{3})\s+(?:to|in|into|=)\s+([A-Z]{3})\b""",
+            RegexOption.IGNORE_CASE
+        )
+        // Fallback: no amount — "USD to EUR", "convert USD to GBP". Default to 1.
+        // The 3-letter codes must be standalone words to avoid matching e.g.
+        // "are you happy" → "are" "you".
+        val noAmount = Regex(
+            """(?i)(?:convert\s+)?\b([A-Z]{3})\b\s+(?:to|in|into|=)\s+\b([A-Z]{3})\b""",
+            RegexOption.IGNORE_CASE
+        )
+        val match = withAmount.find(text)
+        val (amount, from, to) = if (match != null) {
+            val a = match.groupValues[1].replace(",", "").toDoubleOrNull() ?: return null
+            Triple(a, match.groupValues[2].uppercase(), match.groupValues[3].uppercase())
+        } else {
+            val m = noAmount.find(text) ?: return null
+            // Both must look like ISO codes (3 letters of the alphabet, not
+            // ordinary English words like "AND TO"). Cheap heuristic: reject
+            // common English noise words.
+            val noise = setOf("THE","AND","FOR","NOT","ARE","BUT","YOU","HOW","WHO","WHY","WHAT","WHEN","WHERE","ALL","ANY","CAN","SHE","HER","HIS","HIM","ITS","OUR","OWN","TWO","THIS","THAT")
+            val a = m.groupValues[1].uppercase()
+            val b = m.groupValues[2].uppercase()
+            if (a in noise || b in noise) return null
+            Triple(1.0, a, b)
+        }
+        if (amount < 0.0) return null
+        return ToolCall(
+            name = "currency_convert",
+            arguments = buildJsonObject {
+                put("amount", JsonPrimitive(amount))
+                put("from", JsonPrimitive(from))
+                put("to", JsonPrimitive(to))
+            },
+            callId = UUID.randomUUID().toString()
+        )
+    }
+
+    /**
+     * Detect news intent ("latest news from X", "today's headlines",
+     * "news about Tesla"). Returns a news_lookup ToolCall when matched.
+     */
+    private fun buildPreflightNewsCallIfNeeded(userMessage: String): ToolCall? {
+        val text = userMessage.trim()
+
+        // Unified vocabulary shared across all four regexes.
+        val newsWord = """(?:news|headlines?|stories|updates?)"""
+        val adj = """(?:latest|breaking|top|biggest|recent|current|todays?|today'?s)"""
+        val lead = """(?:(?:tell|give|show)\s+me(?:\s+about)?\s+|i\s+want\s+|can\s+i\s+(?:see|get)\s+|please\s+|any\s+|got\s+)?"""
+
+        // 1) Topic via "news/headlines about X" — accepts any news word + any
+        //    "about/on/regarding/for/covering" preposition.
+        val topicAboutRegex = Regex(
+            """(?i)^${lead}(?:${adj}\s+)?(?:${newsWord}|what'?s\s+the\s+latest)\s+(?:about|on|regarding|for|covering)\s+([\p{L}\p{M}\p{N}\s.'\-]{2,60}?)\s*\??$"""
+        )
+        // 2) Topic embedded: "<topic> news/headlines" — adjective optional,
+        //    allows 1-4 word topics ("World Cup", "Modi G20", "autonomous cars").
+        val topicEmbeddedRegex = Regex(
+            """(?i)^${lead}(?:${adj}\s+)?((?:[\p{L}\p{M}\p{N}.'\-]+\s+){0,3}[\p{L}\p{M}\p{N}.'\-]{2,30})\s+${newsWord}(?:\s+(?:today|now|this\s+week))?\s*\??$"""
+        )
+        // 3) Country/region: any combination of an opening anchor + optional
+        //    "from/in/on/at/around X" + optional trailing time word.
+        val countryRegex = Regex(
+            """(?i)^${lead}(?:(?:${adj}\s+)?${newsWord}|what'?s?\s+(?:happening|going\s+on|the\s+latest)|what\s+(?:is|are)\s+(?:happening|going\s+on)|top\s+stories|today'?s\s+${newsWord})(?:\s+(?:from|in|on|at|around)\s+(?:the\s+)?([\p{L}\p{M}\p{N}\s.'\-]{2,40}?))?(?:\s+(?:today|now|right\s+now|this\s+week|this\s+month))?\s*\??$"""
+        )
+        // 4) Bare query: "news", "headlines", "newz", "the news today", etc.
+        val bareRegex = Regex(
+            """(?i)^\s*(?:the\s+)?(?:news|newz|headlines?|breaking)(?:\s+(?:today|now|updates?|for\s+me))?\s*\??\s*$"""
+        )
+
+        val topicAboutMatch = topicAboutRegex.find(text)
+        val topicEmbeddedMatch = topicEmbeddedRegex.find(text)
+        val countryMatch = countryRegex.find(text)
+        val bareMatch = bareRegex.find(text)
+
+        if (topicAboutMatch == null && topicEmbeddedMatch == null && countryMatch == null && bareMatch == null) return null
+
+        // Pick a query (topic) — "about X" beats "latest X headlines".
+        val topic = topicAboutMatch?.groupValues?.get(1)?.trim()
+            ?: topicEmbeddedMatch?.groupValues?.get(1)?.trim()
+        val country = countryMatch?.groupValues?.get(1)?.trim()?.takeIf { it.isNotBlank() }
+
+        return ToolCall(
+            name = "news_lookup",
+            arguments = buildJsonObject {
+                if (!topic.isNullOrBlank()) put("query", JsonPrimitive(topic))
+                if (!country.isNullOrBlank()) put("country", JsonPrimitive(country))
+            },
+            callId = UUID.randomUUID().toString()
+        )
+    }
+
+    /**
+     * Convert a time_lookup result JSON into a markdown answer.
+     */
+    private fun curatedTimeAnswerFor(json: String): String? = extractToolSummaryOrError(json)
+
+    /**
+     * Convert a currency_convert result JSON into a markdown answer.
+     */
+    private fun curatedCurrencyAnswerFor(json: String): String? = extractToolSummaryOrError(json)
+
+    /**
+     * Convert a news_lookup result JSON into a markdown answer.
+     */
+    private fun curatedNewsAnswerFor(json: String): String? = extractToolSummaryOrError(json)
+
+    /**
+     * All four lookup tools (weather, time, currency, news) use the same
+     * JSON shape: either a `summary` field on success or an `error: true`
+     * + `message` on failure. Centralize the extraction so each curated
+     * answer function is one line.
+     */
+    private fun extractToolSummaryOrError(json: String): String? {
+        val root = runCatching {
+            kotlinx.serialization.json.Json.parseToJsonElement(json)
+                as? kotlinx.serialization.json.JsonObject
+        }.getOrNull() ?: return null
+        val isError = (root["error"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "true"
+        if (isError) {
+            val msg = (root["message"] as? kotlinx.serialization.json.JsonPrimitive)
+                ?.content?.trim().orEmpty()
+            return msg.takeIf { it.isNotBlank() }
+        }
+        val summary = (root["summary"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()
+        return summary?.takeIf { it.isNotBlank() }
+    }
+
+    /**
+     * Convert a weather_lookup result JSON into a markdown answer. Returns
+     * null only if the JSON itself is malformed. For a "not found" /
+     * "service down" error the tool gives us, return the error message as
+     * the answer so the user sees a clear "couldn't find that city" instead
+     * of silently falling through to web_search on an unrelated city.
+     */
+    private fun curatedWeatherAnswerFor(weatherJson: String): String? {
+        val root = runCatching {
+            kotlinx.serialization.json.Json.parseToJsonElement(weatherJson)
+                as? kotlinx.serialization.json.JsonObject
+        }.getOrNull() ?: return null
+        val isError = (root["error"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "true"
+        if (isError) {
+            val msg = (root["message"] as? kotlinx.serialization.json.JsonPrimitive)
+                ?.content?.trim().orEmpty()
+            return msg.takeIf { it.isNotBlank() }
+        }
+        val summary = (root["summary"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()
+        return summary?.takeIf { it.isNotBlank() }
     }
 
     private suspend fun buildPreflightWebSearchCallIfNeeded(
@@ -2218,29 +3110,134 @@ class SendMessageUseCase @Inject constructor(
             .trim()
     }
 
-    private suspend fun getPromptMemories() =
-        if (settingsDataStore.memoryEnabled.first()) {
-            memoryRepository.getAllMemories()
-        } else {
-            emptyList()
-        }
+    /**
+     * Build the prior-context block that gets baked into the next
+     * Conversation's system instruction.
+     *
+     * Shape: `[persisted summary?]\n\n[last N verbatim turns]`
+     *
+     * - The persisted summary lives on `Conversation.summary` and is
+     *   refreshed lazily by [summarizeAndPersistOlderHistory] when the
+     *   context-reset path fires. Anything older than the verbatim window
+     *   is represented there.
+     * - The verbatim block is the last [limit] USER+ASSISTANT messages,
+     *   per-message truncated to keep total prefill bounded.
+     *
+     * The whole result is later hard-capped to 800 chars inside the engine
+     * (see [GemmaInferenceEngine.ensureConversation]).
+     */
+    private suspend fun buildRestoredConversationContext(
+        conversationId: Long,
+        limit: Int = KEEP_RECENT_MESSAGES
+    ): String? {
+        val storedSummary = chatRepository.getConversation(conversationId)
+            ?.summary
+            ?.takeIf { it.isNotBlank() }
 
-    private suspend fun buildRestoredConversationContext(conversationId: Long, limit: Int = 18): String? {
         val recent = chatRepository.getRecentMessages(conversationId, limit)
             .asReversed()
             .filter { it.role == MessageRole.USER || it.role == MessageRole.ASSISTANT }
 
-        if (recent.isEmpty()) return null
+        if (storedSummary == null && recent.isEmpty()) return null
 
-        return recent.joinToString("\n") { message ->
-            val role = when (message.role) {
-                MessageRole.USER -> "User"
-                MessageRole.ASSISTANT -> "Assistant"
-                else -> "Message"
+        val sb = StringBuilder()
+        if (storedSummary != null) {
+            sb.append("Summary of earlier conversation: ")
+            sb.append(storedSummary.take(MAX_SUMMARY_CHARS))
+        }
+        if (recent.isNotEmpty()) {
+            if (sb.isNotEmpty()) sb.append("\n\n")
+            sb.append("Recent messages:\n")
+            recent.forEachIndexed { i, message ->
+                val role = when (message.role) {
+                    MessageRole.USER -> "User"
+                    MessageRole.ASSISTANT -> "Assistant"
+                    else -> "Message"
+                }
+                sb.append("$role: ${message.content.take(400)}")
+                if (i < recent.size - 1) sb.append('\n')
             }
-            "$role: ${message.content.take(800)}"
+        }
+        return sb.toString().ifBlank { null }
+    }
+
+    /**
+     * Collapse everything older than the rolling verbatim window into a
+     * compact persistent summary on `Conversation.summary`. Called from
+     * the reset path just BEFORE [GemmaInferenceEngine.resetConversation]
+     * — the model's KV cache still holds the full history at this point,
+     * so a single one-shot "summarize what we've discussed" call works
+     * even though we never resend the history.
+     *
+     * Latency is paid once per reset (~every 20-ish turns), in exchange
+     * for the user never seeing the "Context X% full" banner.
+     */
+    private suspend fun summarizeAndPersistOlderHistory(
+        conversationId: Long,
+        capabilityMode: String,
+        enableThinking: Boolean
+    ) {
+        val conversation = chatRepository.getConversation(conversationId) ?: return
+        val priorSummary = conversation.summary?.takeIf { it.isNotBlank() }
+
+        val instruction = if (priorSummary != null) {
+            "Update this running summary with anything new from our conversation so far. " +
+                "Output 3-5 short bullets, max 100 tokens, facts only, no preamble.\n\n" +
+                "Existing summary: $priorSummary"
+        } else {
+            "Summarize our conversation so far. " +
+                "Output 3-5 short bullets, max 100 tokens, facts only, no preamble."
+        }
+
+        val summarizerMessage = Message(
+            conversationId = conversationId,
+            role = MessageRole.USER,
+            content = instruction,
+            timestamp = System.currentTimeMillis()
+        )
+
+        val collected = StringBuilder()
+        try {
+            gemmaInferenceEngine.generateResponse(
+                messages = listOf(summarizerMessage),
+                systemPrompt = "",
+                capabilityMode = capabilityMode,
+                enableThinking = enableThinking
+            ).collect { token ->
+                when (token) {
+                    is InferenceToken.TextToken -> {
+                        collected.append(token.text)
+                        if (collected.length >= SUMMARIZER_OUTPUT_CHAR_CAP) {
+                            throw SummarizerCutoffException()
+                        }
+                    }
+                    is InferenceToken.EndOfStream -> throw SummarizerCutoffException()
+                    is InferenceToken.Error -> throw SummarizerCutoffException()
+                    else -> Unit
+                }
+            }
+        } catch (_: SummarizerCutoffException) {
+            // expected
+        } catch (e: Exception) {
+            // If the summarizer call fails outright, fall back to the
+            // deterministic title+topics summary so we never lose the
+            // persisted summary slot.
+            if (priorSummary == null) {
+                val fallback = buildConversationSummaryPrompt(conversationId).take(MAX_SUMMARY_CHARS)
+                if (fallback.isNotBlank()) {
+                    chatRepository.updateConversation(conversation.copy(summary = fallback))
+                }
+            }
+            return
+        }
+
+        val newSummary = collected.toString().trim().take(MAX_SUMMARY_CHARS)
+        if (newSummary.isNotBlank()) {
+            chatRepository.updateConversation(conversation.copy(summary = newSummary))
         }
     }
+
+    private class SummarizerCutoffException : RuntimeException()
 
     private suspend fun buildConversationSummaryPrompt(conversationId: Long): String {
         val conversation = chatRepository.getConversation(conversationId) ?: return ""
@@ -2260,10 +3257,67 @@ class SendMessageUseCase @Inject constructor(
     }
 
     /**
-     * The model called tools but produced no narrative. Surface the tool
-     * results directly as the assistant message — they ARE the answer.
-     * Skips a recovery model call (which would overflow the 4096-token
-     * input limit because LiteRT-LM auto-attaches all tool declarations).
+     * Run a recovery model call in the tool-less "summary" capability mode
+     * that synthesizes a natural-language answer from the tool data the
+     * model gathered but never narrated over. The "summary" mode keeps
+     * its own Conversation in the engine's pool with NO tool declarations
+     * attached (see [GemmaInferenceEngine.modeUsesTools]), so the 4096-
+     * token input limit isn't an issue here.
+     *
+     * Returns the synthesized text, or null if the call errors out or
+     * produces no usable text — callers should fall back to
+     * [formatToolResultsAsAnswer] in that case.
+     */
+    private suspend fun synthesizeAnswerFromToolResults(
+        userMessage: String,
+        toolResults: List<Pair<String, String>>,
+        conversationId: Long
+    ): String? {
+        if (toolResults.isEmpty()) return null
+
+        // Per-tool truncation to keep total prompt < ~2.5k chars (~600 tokens),
+        // which leaves plenty of room in the summary-mode 4096-token cache.
+        val toolBlock = toolResults.joinToString("\n\n") { (name, result) ->
+            "[$name] ${result.take(900)}"
+        }.take(2400)
+
+        val prompt = "Use the tool data below to answer the user's question. " +
+            "Write a direct, natural-language answer (or a markdown table if comparing values). " +
+            "Do not mention that tools were used. Be concise — no preamble.\n\n" +
+            "USER QUESTION: ${userMessage.take(400)}\n\n" +
+            "TOOL DATA:\n$toolBlock"
+
+        val synthMsg = Message(
+            conversationId = conversationId,
+            role = MessageRole.USER,
+            content = prompt,
+            timestamp = System.currentTimeMillis()
+        )
+        val collected = StringBuilder()
+        return try {
+            gemmaInferenceEngine.generateResponse(
+                messages = listOf(synthMsg),
+                systemPrompt = "",
+                capabilityMode = "summary",
+                enableThinking = false
+            ).collect { token ->
+                when (token) {
+                    is InferenceToken.TextToken -> collected.append(token.text)
+                    is InferenceToken.Error -> throw RuntimeException(token.message)
+                    else -> Unit
+                }
+            }
+            collected.toString().trim().takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * The model called tools but produced no narrative AND the synth
+     * recovery call also failed. Surface the tool data directly with a
+     * disclaimer — better than showing the user nothing. Most paths now
+     * go through [synthesizeAnswerFromToolResults] first.
      */
     private fun formatToolResultsAsAnswer(
         engineResults: List<Pair<String, String>>,
@@ -2299,6 +3353,10 @@ class SendMessageUseCase @Inject constructor(
             parsed != null && name == "check_food" -> formatCheckFood(sb, parsed)
             parsed != null && name == "parse_metar" -> formatParseMetar(sb, parsed)
             parsed != null && name == "web_search" -> formatWebSearch(sb, parsed)
+            parsed != null && name == "weather_lookup" -> formatWeatherLookup(sb, parsed)
+            parsed != null && name == "time_lookup" -> formatGenericSummary(sb, parsed, "Time data unavailable.")
+            parsed != null && name == "currency_convert" -> formatGenericSummary(sb, parsed, "Currency data unavailable.")
+            parsed != null && name == "news_lookup" -> formatGenericSummary(sb, parsed, "News data unavailable.")
             else -> {
                 sb.appendLine("**$name**")
                 // Universal JSON-leak guardrail: if the tool returned a JSON
@@ -2315,6 +3373,45 @@ class SendMessageUseCase @Inject constructor(
                     sb.appendLine(result.take(2000))
                 }
             }
+        }
+    }
+
+    /**
+     * Render any tool that follows the {summary, error?, message?} shape
+     * (time_lookup, currency_convert, news_lookup, weather_lookup all
+     * share it). Falls back to [fallbackOnEmpty] when nothing usable is
+     * in the JSON.
+     */
+    private fun formatGenericSummary(
+        sb: StringBuilder,
+        obj: kotlinx.serialization.json.JsonObject,
+        fallbackOnEmpty: String
+    ) {
+        if ((obj["error"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "true") {
+            val msg = (obj["message"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+            sb.appendLine(msg ?: fallbackOnEmpty)
+            return
+        }
+        val summary = (obj["summary"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+        sb.appendLine(if (!summary.isNullOrBlank()) summary else fallbackOnEmpty)
+    }
+
+    /**
+     * Render a weather_lookup tool result. The tool already produces a
+     * `summary` field with a human-readable one-liner, so this just prints
+     * it. Falls back to a graceful error message if the lookup failed.
+     */
+    private fun formatWeatherLookup(sb: StringBuilder, obj: kotlinx.serialization.json.JsonObject) {
+        if ((obj["error"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "true") {
+            val msg = (obj["message"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+            sb.appendLine(msg ?: "Couldn't fetch the weather for that location.")
+            return
+        }
+        val summary = (obj["summary"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+        if (!summary.isNullOrBlank()) {
+            sb.appendLine(summary)
+        } else {
+            sb.appendLine("Weather data unavailable.")
         }
     }
 
@@ -2342,9 +3439,30 @@ class SendMessageUseCase @Inject constructor(
             val title = (o["title"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim().orEmpty()
             val snippet = (o["snippet"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim().orEmpty()
             val source = (o["source"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim().orEmpty()
+            val url = (o["url"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim().orEmpty()
+            // Markdown links break if the URL contains spaces or other
+            // unsafe chars (DuckDuckGo Lite emits unencoded query strings).
+            // Encode the path/query, leaving the scheme + host alone so the
+            // rendered link still works when tapped.
+            val safeUrl = if (url.isBlank()) "" else runCatching {
+                val proto = url.substringBefore("://", "")
+                val rest = if (proto.isNotEmpty()) url.substringAfter("://") else url
+                val hostEnd = rest.indexOfFirst { it == '/' || it == '?' }
+                val host = if (hostEnd >= 0) rest.substring(0, hostEnd) else rest
+                val path = if (hostEnd >= 0) rest.substring(hostEnd) else ""
+                val encodedPath = path
+                    .replace(" ", "%20")
+                    .replace("(", "%28")
+                    .replace(")", "%29")
+                if (proto.isNotEmpty()) "$proto://$host$encodedPath" else "$host$encodedPath"
+            }.getOrDefault(url)
             if (title.isBlank() && snippet.isBlank()) return@forEach
             if (title.isNotBlank()) {
-                sb.append("- **").append(title).append("**")
+                if (safeUrl.isNotBlank()) {
+                    sb.append("- [").append(title).append("](").append(safeUrl).append(")")
+                } else {
+                    sb.append("- **").append(title).append("**")
+                }
                 if (source.isNotBlank()) sb.append(" — _").append(source).append("_")
                 sb.appendLine()
             }
@@ -2443,33 +3561,6 @@ class SendMessageUseCase @Inject constructor(
         str("altimeter_inhg")?.let { sb.appendLine("Altimeter: $it inHg") }
         str("vfr_status")?.let { sb.appendLine("Flight category: $it") }
         str("vfr_status_explanation")?.let { sb.appendLine(it) }
-    }
-
-    private suspend fun buildRichSystemPrompt(
-        capabilityMode: String,
-        enableThinking: Boolean,
-        conversationId: Long,
-        includeToolDescriptions: Boolean = true
-    ): String {
-        val basePrompt = systemPromptBuilder.buildSystemPrompt(
-            capabilityMode = capabilityMode,
-            enableThinking = enableThinking,
-            includeToolDescriptions = includeToolDescriptions
-        )
-        val summary = buildConversationSummaryPrompt(conversationId)
-        val memories = getPromptMemories()
-        val memoryPrompt = systemPromptBuilder.buildMemoryPrompt(memories)
-        return buildString {
-            appendLine(basePrompt)
-            if (summary.isNotBlank()) {
-                appendLine()
-                appendLine(summary)
-            }
-            if (memoryPrompt.isNotBlank()) {
-                appendLine()
-                appendLine(memoryPrompt)
-            }
-        }.trimEnd()
     }
 
     private fun saveBitmapToCache(bitmap: Bitmap): String? {
@@ -2581,6 +3672,29 @@ class SendMessageUseCase @Inject constructor(
      *  build), the answer starts with sentences like "The user is asking
      *  for X. This is a Y question, so I should …" — we want users to
      *  see the answer, not the model narrating itself. */
+    /**
+     * Polish + preamble-strip with a safety net for the case where the model
+     * generated ONLY a thinking preamble ("I will provide translations.")
+     * and then EOS'd. In multi-turn sessions under KV-cache pressure E4B
+     * occasionally does this; without the fallback the user sees an empty
+     * bubble. We try the aggressive strip first; if it leaves <10 chars we
+     * retry with just the channel-markup strip; if still empty we return a
+     * friendly placeholder so the user is never staring at nothing.
+     */
+    private fun polishWithFallback(raw: String): String {
+        if (raw.isBlank()) {
+            return "Sorry, I couldn't generate a response. Try rephrasing or starting a new chat."
+        }
+        val polished = responsePostProcessor.polish(stripThinkingPrefix(raw))
+        if (polished.length >= 10) return polished
+        // Aggressive strip emptied it — try without the preamble strip so
+        // the user at least sees whatever the model did produce.
+        val polishedNoPreambleStrip = responsePostProcessor.polish(raw)
+        if (polishedNoPreambleStrip.length >= 10) return polishedNoPreambleStrip
+        // Model truly produced no substantive content.
+        return "Sorry, I couldn't generate a complete response. Try rephrasing or starting a new chat."
+    }
+
     private fun stripThinkingPrefix(text: String): String {
         // Patterns to strip when found at the START of the answer. Match
         // up to the first sentence-ending punctuation OR newline, then
@@ -2622,15 +3736,4 @@ class SendMessageUseCase @Inject constructor(
         return out
     }
 
-    private fun formatDateStrings(text: String): String {
-        // Format 8-digit YYYYMMDD → YYYY/MM/DD (e.g., 20260506 → 2026/05/06)
-        var result = text.replace(Regex("\\b(20\\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\b")) { match ->
-            "${match.groupValues[1]}/${match.groupValues[2]}/${match.groupValues[3]}"
-        }
-        // Format 8-digit DDMMYYYY → DD/MM/YYYY (e.g., 06052026 → 06/05/2026)
-        result = result.replace(Regex("\\b(0[1-9]|[12]\\d|3[01])(0[1-9]|1[0-2])(20\\d{2})\\b")) { match ->
-            "${match.groupValues[1]}/${match.groupValues[2]}/${match.groupValues[3]}"
-        }
-        return result
-    }
 }

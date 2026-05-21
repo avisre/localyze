@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" data-page="blog-post">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>What is Gemma 4 E4B? Google's local AI model explained — Localyze.ai</title>
+<meta name="description" content="Gemma 4 E4B explained: what the name means, why effective 4B parameters matter, what hardware runs it, and why an open-weight model belongs on your device." />
+<meta name="keywords" content="Gemma 4 E4B explained, Google Gemma local model, how Gemma runs offline, open weights LLM, on-device model" />
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="author" content="Localyze.ai" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://localyze.ai/blog/what-is-gemma-4-e4b.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Localyze.ai" />
+<meta property="og:title" content="What is Gemma 4 E4B?" />
+<meta property="og:description" content="Google's open local AI model, explained. Naming, hardware, and why open weights matter." />
+<meta property="og:url" content="https://localyze.ai/blog/what-is-gemma-4-e4b.html" />
+<meta property="og:image" content="https://localyze.ai/assets/img/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="What is Gemma 4 E4B?" />
+<meta name="twitter:description" content="Google's open model that runs on a phone, explained." />
+<meta name="twitter:image" content="https://localyze.ai/assets/img/og-image.png" />
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/logo-mark.png" />
+<link rel="apple-touch-icon" href="/assets/img/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="/assets/css/styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BlogPosting",
+  "headline":"What is Gemma 4 E4B?",
+  "description":"Google's open Gemma 4 E4B model, explained: what the name means, hardware needs, and why open weights matter for on-device AI.",
+  "datePublished":"2026-05-19",
+  "dateModified":"2026-05-19",
+  "author":{"@type":"Organization","name":"Localyze.ai","url":"https://localyze.ai"},
+  "publisher":{"@type":"Organization","name":"Localyze.ai","logo":{"@type":"ImageObject","url":"https://localyze.ai/assets/img/logo-mark.png"}},
+  "image":"https://localyze.ai/assets/img/og-image.png",
+  "mainEntityOfPage":"https://localyze.ai/blog/what-is-gemma-4-e4b.html"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand">
+      <img src="/assets/img/logo-mark.png" alt="Localyze.ai logo" width="26" height="26" />
+      <span>Localyze.ai</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#compare">Compare</a>
+      <a href="/blog/">Blog</a>
+      <a href="/download.html" class="nav-cta">Download</a>
+    </nav>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+
+  <h1>What is Gemma 4 E4B?</h1>
+  <p><em>Google's open model that's small enough to run on a phone, capable enough to feel like a real assistant.</em></p>
+  <p class="muted" style="font-size:0.9rem;">May 19, 2026 · 4 min read</p>
+
+  <h2>The name, decoded</h2>
+  <p><code>Gemma 4 E4B</code> looks cryptic but reads cleanly once you split it. <em>Gemma</em> is Google DeepMind's family of open-weight models. <em>4</em> is the generation. <em>E4B</em> means <strong>effective 4 billion parameters</strong> — the model behaves like a 4B at inference time while using architectural tricks (sparse activation, smarter attention) to punch above that weight.</p>
+  <p>The "effective" matters. A traditional 4B model and an E4B model use roughly the same memory and compute, but the E4B variant produces noticeably better answers because not every parameter is active on every token.</p>
+
+  <h2>Why open weights matter</h2>
+  <p>Most of the well-known assistants — ChatGPT, Gemini, Copilot — run closed models you can only access through someone's API. Gemma 4 E4B is published under an open licence: the weights file is downloadable, inspectable, and runnable on your own hardware.</p>
+  <p>That changes three things at once:</p>
+  <ul>
+    <li><strong>Portability.</strong> The same weights run on Android, Windows, macOS, and Linux.</li>
+    <li><strong>Auditability.</strong> Researchers can probe behaviour; bugs and biases can be reported and reproduced.</li>
+    <li><strong>Permanence.</strong> A model you have on disk cannot be deprecated, rate-limited, or paywalled away.</li>
+  </ul>
+
+  <h2>How it runs on real hardware</h2>
+  <p>A raw 4B-parameter model in full precision is several gigabytes and slow on consumer chips. To make it phone-sized, the weights are quantised to <code>INT4</code> — four bits per parameter. The file shrinks to roughly 3.6 GB and inference speed roughly doubles, with a small quality cost most people won't notice in chat.</p>
+  <p>Each platform uses its native acceleration stack:</p>
+  <ul>
+    <li><strong>Android</strong> — vendor NNAPI / GPU delegates via TensorFlow Lite.</li>
+    <li><strong>Windows</strong> — <code>DirectML</code> for GPU/NPU.</li>
+    <li><strong>macOS</strong> — <code>MLX</code> on Apple Silicon, Metal underneath.</li>
+    <li><strong>Linux</strong> — Vulkan compute or CPU SIMD via llama.cpp-style runtimes.</li>
+  </ul>
+
+  <h2>What you need to run it</h2>
+  <p>Hardware bar, in plain numbers:</p>
+  <ul>
+    <li><strong>Android.</strong> ~6 GB RAM, Android 9+, a chip from the last four years.</li>
+    <li><strong>Desktop.</strong> Any 64-bit Windows, macOS, or Linux box with 8 GB RAM. More RAM and a recent GPU/NPU help.</li>
+  </ul>
+  <p>Disk: about 4 GB for the model and runtime. Network: only for the one-time download.</p>
+
+  <h2>What it can and can't do</h2>
+  <p>Gemma 4 E4B is strong at the things you do most: drafting, summarising, explaining, rewriting, basic coding help, reading text in screenshots. It will not replace a frontier 400B model for novel research or massive context windows.</p>
+  <p>For day-to-day assistant work, the gap is smaller than the marketing implies — and the model is yours, on your device, forever.</p>
+
+  <hr style="margin:48px 0 32px;border:none;border-top:1px solid var(--border);" />
+  <p class="muted" style="font-size:0.95rem;">More from Localyze.ai: <a href="/blog/why-on-device-ai-matters.html">Why on-device AI matters</a> · <a href="/blog/how-to-run-llm-on-phone.html">How to run an LLM on your phone</a> · <a href="/blog/cloud-ai-privacy-myth.html">The cloud AI privacy myth</a> · <a href="/download.html">Download Localyze.ai</a></p>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="/assets/img/logo-mark.png" alt="" width="24" height="24" />
+          <span>Localyze.ai</span>
+        </div>
+        <p class="footer-tag">Private, on-device AI for every device you own.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/download.html">Download</a></li>
+          <li><a href="/blog/">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Compare</h4>
+        <ul>
+          <li><a href="/vs-chatgpt.html">vs ChatGPT</a></li>
+          <li><a href="/vs-gemini.html">vs Gemini</a></li>
+          <li><a href="/vs-copilot.html">vs Copilot</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Platforms</h4>
+        <ul>
+          <li><a href="/local-ai-windows.html">Windows</a></li>
+          <li><a href="/local-ai-macos.html">macOS</a></li>
+          <li><a href="/local-ai-linux.html">Linux</a></li>
+          <li><a href="/private-ai-assistant.html">Private AI</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Localyze.ai</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@localyze.ai">Contact</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

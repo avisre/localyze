@@ -5,7 +5,7 @@ import android.provider.Settings
 import androidx.core.content.edit
 import androidx.core.util.component1
 import androidx.core.util.component2
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
  */
 object DatabasePassphraseHelper {
 
+    private const val TAG = "DBPassphrase"
     private const val PREFS_NAME = "localyze_db_key"
     private const val KEY_ENCRYPTED_PASSPHRASE = "encrypted_passphrase"
     private const val KEY_IV = "passphrase_iv"
@@ -34,10 +35,31 @@ object DatabasePassphraseHelper {
         val encrypted = prefs.getString(KEY_ENCRYPTED_PASSPHRASE, null)
         // IV is bundled into the encrypted blob (combined = iv || ciphertext), not stored separately.
         return if (encrypted != null) {
-            decryptPassphrase(encrypted, "", context)
+            try {
+                decryptPassphrase(encrypted, "", context)
+            } catch (e: Exception) {
+                // The wrapping key changed between app versions (e.g. ANDROID_ID fallback
+                // migrated from a static string to a per-install UUID in version 4).
+                // The stored passphrase can no longer be decrypted — the database is
+                // inaccessible regardless.  Wipe and regenerate so the app can start
+                // instead of crashing in a loop during Hilt initialization.
+                android.util.Log.w(TAG, "Passphrase decrypt failed; wiping database and regenerating: ${e.message}")
+                wipeAndReset(context, prefs)
+            }
         } else {
             generateAndStorePassphrase(context)
         }
+    }
+
+    private fun wipeAndReset(context: Context, prefs: android.content.SharedPreferences): ByteArray {
+        prefs.edit()
+            .remove(KEY_ENCRYPTED_PASSPHRASE)
+            .remove(KEY_IV)
+            .apply()
+        for (suffix in listOf("", "-shm", "-wal", "-journal")) {
+            context.getDatabasePath("local_assistant_db$suffix").delete()
+        }
+        return generateAndStorePassphrase(context)
     }
 
     private fun generateAndStorePassphrase(context: Context): ByteArray {
@@ -68,9 +90,19 @@ object DatabasePassphraseHelper {
         return cipher.doFinal(ciphertext)
     }
 
+    private fun getOrCreateFallbackDeviceId(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val existing = prefs.getString("fallback_device_id", null)
+        if (existing != null) return existing
+        val newId = java.util.UUID.randomUUID().toString()
+        prefs.edit().putString("fallback_device_id", newId).apply()
+        return newId
+    }
+
     private fun deriveWrappingKey(context: Context): SecretKeySpec {
         val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-            ?: "fallback-android-id"
+            ?.takeIf { it.isNotBlank() && it != "9774d56d682e549c" }
+            ?: getOrCreateFallbackDeviceId(context)
         val packageName = context.packageName
         val signatureHash = kotlin.runCatching {
             val info = context.packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES)
@@ -87,7 +119,10 @@ object DatabasePassphraseHelper {
     }
 }
 
-fun createEncryptedDatabaseFactory(context: Context): SupportFactory {
+fun createEncryptedDatabaseFactory(context: Context): SupportOpenHelperFactory {
+    // sqlcipher-android 4.6+ loads its native library via System.loadLibrary
+    // on the first SupportOpenHelperFactory call; explicit init not needed.
+    System.loadLibrary("sqlcipher")
     val passphrase = DatabasePassphraseHelper.getOrCreatePassphrase(context)
-    return SupportFactory(passphrase)
+    return SupportOpenHelperFactory(passphrase)
 }

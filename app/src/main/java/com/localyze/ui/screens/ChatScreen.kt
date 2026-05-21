@@ -33,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -145,6 +146,7 @@ import com.localyze.ui.components.UserMessageBubble
 import com.localyze.ui.components.rememberToolConfirmationState
 import com.localyze.ui.theme.Background
 import com.localyze.ui.theme.Error
+import com.localyze.ui.theme.Hairline
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
 import com.localyze.ui.theme.Primary
@@ -152,6 +154,8 @@ import com.localyze.ui.theme.Surface as SurfaceColor
 import com.localyze.ui.theme.SurfaceVariant
 import com.localyze.ui.theme.TextSecondary
 import com.localyze.ui.viewmodels.ChatUiState
+import com.localyze.ui.components.AdaptiveWidth
+import com.localyze.ui.components.rememberAdaptiveWidth
 import com.localyze.ui.viewmodels.ChatViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -301,18 +305,15 @@ fun ChatScreen(
         }
     }
 
-    // Show error snackbar
+    // Show error snackbar — no Retry action to prevent accidental regeneration
+    // when the screen wakes up mid-snackbar. Users can regenerate via long-press menu.
     LaunchedEffect(uiState.error) {
         val error = uiState.error
         if (error != null) {
-            val result = snackbarHostState.showSnackbar(
+            snackbarHostState.showSnackbar(
                 message = error,
-                actionLabel = "Retry",
                 duration = SnackbarDuration.Short
             )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.regenerateResponse()
-            }
             viewModel.clearError()
         }
     }
@@ -325,6 +326,20 @@ fun ChatScreen(
                 duration = SnackbarDuration.Short
             )
             viewModel.clearContextResetNotice()
+        }
+    }
+
+    // Show crash-recovery banner when the previous run crashed inside the
+    // native LiteRT-LM layer. The prompt is already blocklisted in
+    // CrashRecoveryStore so the user can't re-fire the same crash this session.
+    LaunchedEffect(uiState.lastCrashedPrompt) {
+        uiState.lastCrashedPrompt?.let { crashed ->
+            val preview = crashed.take(60).let { if (crashed.length > 60) "$it…" else it }
+            snackbarHostState.showSnackbar(
+                message = "Previous run stopped while answering: \"$preview\". Try a different prompt.",
+                duration = SnackbarDuration.Long
+            )
+            viewModel.acknowledgeCrashRecovery()
         }
     }
 
@@ -485,6 +500,16 @@ fun ChatScreen(
 
     val hasMessages = uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()
 
+    val widthBucket = rememberAdaptiveWidth()
+    // On Medium (foldable / small tablet) and Expanded (10"+ tablet) the
+    // chat content is capped so message lines stay readable — un-capped
+    // lines on a 2560px tablet are unergonomic. Compact keeps the original
+    // full-width behaviour on phones.
+    val chatMaxWidth = when (widthBucket) {
+        AdaptiveWidth.Compact -> androidx.compose.ui.unit.Dp.Unspecified
+        AdaptiveWidth.Medium -> 720.dp
+        AdaptiveWidth.Expanded -> 900.dp
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Background,
@@ -493,16 +518,29 @@ fun ChatScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            contentAlignment = Alignment.TopCenter
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (chatMaxWidth == androidx.compose.ui.unit.Dp.Unspecified) Modifier
+                        else Modifier.widthIn(max = chatMaxWidth)
+                    )
             ) {
                 ReferenceHeader(
-                    title = "Localyze.ai",
+                    title = if (hasMessages && uiState.currentConversationTitle.isNotBlank()
+                        && uiState.currentConversationTitle != "New Chat"
+                    ) {
+                        uiState.currentConversationTitle
+                    } else {
+                        "Localyze.ai"
+                    },
                     subtitle = when {
                         uiState.isThinking -> "Thinking..."
                         uiState.isStreaming -> "Generating..."
+                        hasMessages -> "Localyze.ai · On-device"
                         uiState.isUsingThreadContext -> "On-device • Context aware"
                         else -> "On-device"
                     },
@@ -639,6 +677,7 @@ fun ChatScreen(
                             actionMenuMessageIndex = index
                             showActionMenu = true
                         },
+                        onRegenerate = { viewModel.regenerateResponse() },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
@@ -646,6 +685,18 @@ fun ChatScreen(
                 }
 
                 if (hasMessages) {
+                    val contextFill = remember(uiState.messages, uiState.streamingText, uiState.thinkingText) {
+                        estimateContextFill(uiState.messages, uiState.streamingText, uiState.thinkingText)
+                    }
+                    if (contextFill >= 0.75f && !uiState.isStreaming) {
+                        ContextLimitBanner(
+                            fillRatio = contextFill,
+                            onStartNewChat = {
+                                viewModel.createNewConversation()
+                                onNewConversation()
+                            }
+                        )
+                    }
                     ChatComposer(
                         inputText = inputText,
                         onInputTextChange = { inputText = it },
@@ -841,6 +892,7 @@ fun ChatMessageList(
     onToggleThinking: (Int) -> Unit,
     onCopyMessage: (String) -> Unit,
     onLongClickMessage: (Int) -> Unit,
+    onRegenerate: () -> Unit = {},
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
@@ -1019,6 +1071,19 @@ fun ChatMessageList(
                                 isStreaming = false
                             )
                         }
+
+                        // Quick-action chips below the most recent assistant
+                        // bubble — surfaces Copy/Regenerate without needing
+                        // a long-press, which most users don't discover.
+                        val isLastAssistant = originalIndex == uiState.messages.lastIndex &&
+                            !uiState.isStreaming &&
+                            uiState.streamingText.isEmpty()
+                        if (isLastAssistant) {
+                            AssistantActionChips(
+                                onCopy = { onCopyMessage(message.content) },
+                                onRegenerate = onRegenerate
+                            )
+                        }
                     }
 
                     MessageRole.TOOL -> {
@@ -1161,6 +1226,7 @@ private fun ChatHomeContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.Center,
@@ -1202,6 +1268,49 @@ private fun ChatHomeContent(
             onStopGeneration = onStopGeneration,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+/**
+ * Minimal empty-state suggestions. No chips, no borders, no emojis — just
+ * three example phrases as quiet typography. Tappable; gives just enough
+ * affordance to invite a tap without competing with the "How can I help?"
+ * heading or the input. Inspired by Apple's understated empty states.
+ */
+@Composable
+private fun EmptyChatSuggestions(
+    onPrompt: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val suggestions = remember {
+        listOf(
+            "Weather in Tokyo",
+            "100 USD to EUR",
+            "Latest news from India"
+        )
+    }
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        suggestions.forEach { prompt ->
+            androidx.compose.material3.TextButton(
+                onClick = { onPrompt(prompt) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                    contentColor = TextSecondary
+                )
+            ) {
+                Text(
+                    text = prompt,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Normal,
+                        letterSpacing = 0.sp
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -1278,7 +1387,14 @@ private fun HomePromptCard(
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent
                 ),
-                enabled = !isStreaming
+                enabled = !isStreaming,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = androidx.compose.ui.text.input.ImeAction.Send,
+                    capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences
+                ),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                    onSend = { if (isInputValid && !isStreaming) onSend() }
+                )
             )
 
             Row(
@@ -1425,7 +1541,14 @@ private fun ChatComposer(
                             disabledIndicatorColor = Color.Transparent
                         ),
                         shape = RoundedCornerShape(16.dp),
-                        enabled = !isStreaming
+                        enabled = !isStreaming,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Send,
+                            capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences
+                        ),
+                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                            onSend = { if (isInputValid && !isStreaming) onSend() }
+                        )
                     )
                 }
 
@@ -1682,4 +1805,125 @@ private fun shareText(context: Context, text: String) {
     }
     val shareIntent = Intent.createChooser(intent, "Share message")
     context.startActivity(shareIntent)
+}
+
+// Token budget bookkeeping for the context-limit banner.
+// Mirrors the engine's real KV-cache ceiling (LiteRT-LM Conversation with
+// DEFAULT_MAX_TOKEN=4096 in GemmaInferenceEngine) minus the slimmed system
+// prompt (~350-400 tokens after the SystemPromptBuilder rewrite). The
+// remainder is what's available for back-and-forth conversation before
+// the rolling-window + summarize-and-drop path in SendMessageUseCase
+// silently rebuilds the cache.
+private const val CONTEXT_MAX_TOKENS = 4096
+private const val CONTEXT_SYSTEM_PROMPT_TOKENS = 400
+private const val CONTEXT_CHARS_PER_TOKEN = 4
+private const val CONTEXT_PER_MESSAGE_OVERHEAD = 8
+
+private fun estimateContextFill(
+    messages: List<com.localyze.domain.models.Message>,
+    streamingText: String,
+    thinkingText: String
+): Float {
+    val messageTokens = messages.sumOf { m ->
+        val contentLen = m.content.length + (m.thinkingContent?.length ?: 0) + (m.toolResult?.length ?: 0)
+        contentLen / CONTEXT_CHARS_PER_TOKEN + CONTEXT_PER_MESSAGE_OVERHEAD
+    }
+    val liveTokens = (streamingText.length + thinkingText.length) / CONTEXT_CHARS_PER_TOKEN
+    val used = CONTEXT_SYSTEM_PROMPT_TOKENS + messageTokens + liveTokens
+    return used.toFloat() / CONTEXT_MAX_TOKENS
+}
+
+@Composable
+private fun AssistantActionChips(
+    onCopy: () -> Unit,
+    onRegenerate: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        AssistantActionChip(label = "Copy", onClick = onCopy)
+        AssistantActionChip(label = "Regenerate", onClick = onRegenerate)
+    }
+}
+
+@Composable
+private fun AssistantActionChip(
+    label: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.height(28.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = SurfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(0.5.dp, Hairline)
+    ) {
+        Box(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = TextSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContextLimitBanner(
+    fillRatio: Float,
+    onStartNewChat: () -> Unit
+) {
+    val critical = fillRatio >= 0.9f
+    val pct = (fillRatio.coerceIn(0f, 1f) * 100).toInt()
+    val accent = if (critical) Error else Color(0xFFFF9500)
+    val message = if (critical) {
+        "Context $pct% full — start a new chat to keep answers sharp"
+    } else {
+        "Context $pct% full — consider starting a new chat soon"
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = accent.copy(alpha = 0.10f),
+        border = BorderStroke(0.5.dp, accent.copy(alpha = 0.35f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(color = accent, shape = CircleShape)
+            )
+            Text(
+                text = message,
+                color = OnBackground,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.weight(1f),
+                maxLines = 2
+            )
+            TextButton(
+                onClick = onStartNewChat,
+                colors = ButtonDefaults.textButtonColors(contentColor = accent)
+            ) {
+                Text(
+                    text = "New chat",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                )
+            }
+        }
+    }
 }

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Localyze.ai entitlements — hardened runtime for Developer ID distribution.
+
+    We ship OUTSIDE the Mac App Store (MAS) because:
+      1) The model file is ~5 GB and lives in ~/Library/Application Support/Localyze,
+         which the App Sandbox would force into a container-private path that
+         the Process()-spawned llama.cpp helper on Intel can't read.
+      2) MAS forbids `com.apple.security.cs.disable-library-validation`, which
+         mlx-swift currently needs because it dlopen()s Metal shader libraries
+         that aren't team-signed in our build of the dependency.
+      3) MAS forbids spawning untrusted helper binaries via Process(), which the
+         llama.cpp Metal stub on Intel Macs uses.
+
+    Trade-off: users have to right-click → Open on first launch on a fresh
+    install if the signature is Developer ID but not notarised. The build script
+    handles notarisation when APPLE_API_KEY_ID is set.
+
+    Every entitlement below is justified inline. Remove one and the listed
+    feature breaks at runtime — typically with a confusing EXC_BAD_ACCESS.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        Sandbox OFF.
+        Required so we can read/write ~/Library/Application Support/Localyze
+        (large model files), spawn helper processes on Intel (llama.cpp), and
+        write artifacts to ~/Localyze/artifacts without per-folder prompts.
+        Documented trade-off above; we make up the security loss with hardened
+        runtime + Developer ID + notarisation.
+    -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+
+    <!--
+        Network client.
+        Needed for: (a) ModelDownloader fetching weights from cdn.localyze.app,
+        (b) the optional SearxNG web-search tool, (c) the optional manifest
+        refresh on launch. We never act as a server.
+    -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!--
+        Allow JIT.
+        mlx-swift compiles Metal shader pipelines at runtime via MTLCompileOptions
+        with the equivalent of JIT codegen. Without this entitlement the first
+        token generation call traps with a `SIGKILL: CODESIGNING` from the kernel.
+    -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+
+    <!--
+        Allow unsigned executable memory.
+        Belt-and-braces companion to allow-jit. MLX's `MLXFast` extension and
+        some Accelerate fallbacks map RWX pages on first use; without this
+        entitlement they fault on the first store after `mprotect(PROT_EXEC)`.
+    -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+
+    <!--
+        Disable library validation.
+        mlx-swift links several Metal shader libraries (.metallib) that are not
+        signed by our Developer ID in the upstream SPM checkout. Library
+        validation would refuse to load them at runtime. Re-evaluate on every
+        mlx-swift bump; if upstream starts signing, remove this entitlement.
+    -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!--
+        Permit DYLD environment variables.
+        Used by `build-app.sh`'s test mode to point at a development copy of
+        mlx-swift via DYLD_FRAMEWORK_PATH. In release builds dyld ignores these
+        anyway under hardened runtime; this entitlement only re-enables the
+        debug knob for our own QA harness. Safe to ship.
+    -->
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+
+    <!--
+        File access.
+        Even with sandbox off, hardened-runtime apps need these to read user
+        files dragged into chat without a per-file consent prompt under stricter
+        TCC profiles (Sonoma+).
+    -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+</dict>
+</plist>

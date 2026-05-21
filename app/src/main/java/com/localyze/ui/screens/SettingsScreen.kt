@@ -298,14 +298,7 @@ private fun SettingsReferenceContent(
                 value = if (uiState.modelInfo.isDownloaded) "Installed" else "Missing",
                 onClick = onOpenModelInfo
             )
-            ReferenceDivider()
-            ReferenceSettingsRow(
-                icon = Icons.Outlined.Tune,
-                title = "Switch model",
-                subtitle = "Choose between Gemma 4 E4B and E2B",
-                value = uiState.modelInfo.selectedModelName,
-                onClick = onOpenModelInfo
-            )
+            // Switch-model row removed: single-model build (Gemma 3n E2B only).
         }
 
         ReferenceSettingsGroup(title = "Memory (Opt-In)") {
@@ -1280,7 +1273,7 @@ private fun AboutDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Localyze.ai is a private, on-device AI assistant based on Google's Gemma 4 E4B model. All processing happens locally, and your data stays on your device.",
+                    text = "Localyze.ai is a private, on-device AI assistant based on Google's Gemma 3n E2B model. All processing happens locally, and your data stays on your device.",
                     fontFamily = Nunito,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,

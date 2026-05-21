@@ -38,35 +38,37 @@ class ModelRepository @Inject constructor(
         const val MODEL_DIR = "models"
         private const val TAG = "ModelRepository"
 
-        // Gemma 4 E4B (original default)
-        // SHA-256 hashes must be populated with the actual checksums of the published model files.
-        // Compute with: shasum -a 256 gemma-4-E4B-it.litertlm
-        val MODEL_E4B = ModelEntry(
-            name = "gemma-4-E4B",
-            displayName = "Gemma 4 E4B",
-            filename = "gemma-4-E4B-it.litertlm",
-            url = "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/main/gemma-4-E4B-it.litertlm?download=true",
-            sizeBytes = 3_654_467_584L,
-            description = "Gemma 4 E4B – best quality, ~3.6 GB",
-            sha256Hash = "" // TODO: populate with real hash before release
-        )
-
-        val MODEL_E2B = ModelEntry(
-            name = "gemma-4-E2B",
-            displayName = "Gemma 4 E2B",
+        // Single-model build for the Play Store ship: Gemma 3n E2B is the only
+        // shipped model. Head-to-head benchmarking on OnePlus 10 Pro showed
+        // Gemma 3n E2B was 1.4-1.8x faster end-to-end and more correct on the
+        // hard reasoning prompts where E4B digit-garbled. Legacy MODEL_E4B and
+        // MODEL_E2B are retained as @Deprecated aliases so straggler callers
+        // still compile without behavioural change.
+        val MODEL_E2B_3N = ModelEntry(
+            name = "gemma-3n-E2B",
+            displayName = "Gemma 3n E2B",
+            // On-disk filename kept as "gemma-4-E2B-it.litertlm" so existing
+            // user installs that already cached the file under the legacy
+            // name don't re-download. Downstream code only reads
+            // ModelEntry.filename.
             filename = "gemma-4-E2B-it.litertlm",
-            url = "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true",
-            sizeBytes = 2_590_000_000L,
-            description = "Gemma 4 E2B – lighter, faster, ~2.6 GB",
-            sha256Hash = "" // TODO: populate with real hash before release
+            url = "https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm?download=true",
+            sizeBytes = 3_655_827_456L,
+            description = "Gemma 3n E2B – the on-device model.",
+            sha256Hash = "" // TODO: pin hash once Google publishes one
         )
 
-        val ALL_MODELS = listOf(MODEL_E4B, MODEL_E2B)
+        @Deprecated("Single-model build; alias retained for legacy callers.", ReplaceWith("MODEL_E2B_3N"))
+        val MODEL_E4B = MODEL_E2B_3N
+        @Deprecated("Single-model build; alias retained for legacy callers.", ReplaceWith("MODEL_E2B_3N"))
+        val MODEL_E2B = MODEL_E2B_3N
+
+        val ALL_MODELS = listOf(MODEL_E2B_3N)
 
         // Legacy constants for backward compatibility
-        const val MODEL_FILENAME = "gemma-4-E4B-it.litertlm"
-        const val MODEL_URL = "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/main/gemma-4-E4B-it.litertlm?download=true"
-        const val MODEL_SIZE_BYTES = 3_654_467_584L
+        const val MODEL_FILENAME = "gemma-4-E2B-it.litertlm"
+        const val MODEL_URL = "https://huggingface.co/google/gemma-3n-E2B-it-litert-lm/resolve/main/gemma-3n-E2B-it-int4.litertlm?download=true"
+        const val MODEL_SIZE_BYTES = 3_655_827_456L
 
         const val TEST_DOWNLOAD_URL = "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
         const val TEST_FILE_SIZE_BYTES = 700_000L
@@ -105,8 +107,8 @@ class ModelRepository @Inject constructor(
         get() = File(modelDir, TEMP_FILENAME)
 
     fun getSelectedModel(): ModelEntry {
-        val selectedName = prefs.getString(PREF_SELECTED_MODEL, MODEL_E4B.name) ?: MODEL_E4B.name
-        return ALL_MODELS.find { it.name == selectedName } ?: MODEL_E4B
+        // Single-model build: always returns Gemma 3n E2B.
+        return MODEL_E2B_3N
     }
 
     fun setSelectedModel(model: ModelEntry) {

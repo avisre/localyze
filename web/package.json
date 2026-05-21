@@ -1,0 +1,16 @@
+{
+  "name": "localyze-ai-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Marketing website for Localyze.ai — static HTML/CSS/JS, generated assets via Node + Sharp.",
+  "type": "module",
+  "scripts": {
+    "build:og": "node assets/img/make-og.mjs",
+    "build:screenshots": "node assets/img/make-screenshots.mjs",
+    "build": "npm run build:og && npm run build:screenshots",
+    "serve": "node serve.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

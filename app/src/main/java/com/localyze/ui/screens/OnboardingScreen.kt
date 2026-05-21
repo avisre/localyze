@@ -57,6 +57,9 @@ import com.localyze.R
 import com.localyze.data.repository.DownloadProgress
 import com.localyze.data.repository.ModelEntry
 import com.localyze.ui.components.RobotMascot
+import com.localyze.ui.components.AdaptiveWidth
+import com.localyze.ui.components.contentMaxWidth
+import com.localyze.ui.components.rememberAdaptiveWidth
 import com.localyze.ui.theme.Background
 import com.localyze.ui.theme.OnBackground
 import com.localyze.ui.theme.OnPrimary
@@ -74,6 +77,21 @@ fun OnboardingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val widthBucket = rememberAdaptiveWidth()
+    // Compact phones get the original 400dp column; Medium (foldable/small
+    // tablet) widens to 560dp; Expanded (10" tablet+) widens to 760dp so
+    // content actually fills the screen instead of marooning a phone-width
+    // card in a sea of whitespace.
+    val maxColumnWidth = when (widthBucket) {
+        AdaptiveWidth.Compact -> 400.dp
+        AdaptiveWidth.Medium -> 560.dp
+        AdaptiveWidth.Expanded -> 760.dp
+    }
+    val horizontalPadding = when (widthBucket) {
+        AdaptiveWidth.Compact -> 24.dp
+        AdaptiveWidth.Medium -> 40.dp
+        AdaptiveWidth.Expanded -> 56.dp
+    }
     Surface(
         color = Background,
         modifier = Modifier.fillMaxSize()
@@ -86,8 +104,8 @@ fun OnboardingScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 400.dp)
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                    .widthIn(max = maxColumnWidth)
+                    .padding(horizontal = horizontalPadding, vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -234,7 +252,7 @@ private fun WelcomeContent(onGetStarted: () -> Unit) {
             FeatureCard(
                 emoji = "\uD83E\uDDE0",
                 title = "Localyze.ai",
-                description = "Powered by Google's Gemma 4 on-device AI models"
+                description = "Powered by Google's Gemma 3n E2B on-device model"
             )
 
             Spacer(modifier = Modifier.height(32.dp))

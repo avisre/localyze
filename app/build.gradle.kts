@@ -29,7 +29,6 @@ val debugUseTestDownload = providers.gradleProperty("LOCALYZE_USE_TEST_DOWNLOAD"
     .orElse("false")
     .map { it.equals("true", ignoreCase = true).toString() }
     .get()
-
 android {
     namespace = "com.localyze"
     compileSdk = 35
@@ -38,8 +37,8 @@ android {
         applicationId = "com.localyze"
         minSdk = 28
         targetSdk = 35
-            versionCode = 4
-            versionName = "1.0.3"
+            versionCode = 13
+            versionName = "1.1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,17 +64,14 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
             isDebuggable = false
-            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
             buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
+            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", "false")
         }
         debug {
             isMinifyEnabled = false
             isDebuggable = true
-            // Mock mode removed — always use real Gemma 4 E4B model
-            // Set to false to download real model (3.65 GB)
-            // Set to true for test download (small tokenizer.json file)
-            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", debugUseTestDownload)
             buildConfigField("String", "PREMIUM_SUBSCRIPTION_PRODUCT_ID", "\"$premiumSubscriptionProductId\"")
+            buildConfigField("Boolean", "USE_TEST_DOWNLOAD", debugUseTestDownload)
         }
     }
 
@@ -100,6 +96,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    // Crashlytics mapping upload requires a real Firebase project.
+    // Using placeholder project ID — disable the upload to unblock release builds.
+    firebaseCrashlytics {
+        mappingFileUploadEnabled = false
     }
 
     lint {
@@ -130,6 +132,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-process:2.8.7")
     implementation("androidx.activity:activity-compose:1.10.1")
 
     // Compose BOM â€” updated to match AI Edge Gallery's version
@@ -156,17 +159,6 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.0")
     ksp("androidx.room:room-compiler:2.7.0")
 
-    // â”€â”€ AI / ML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // LiteRT-LM: The official Google runtime for running .litertlm models
-    // This replaces the old MediaPipe GenAI (tasks-genai) which had NO NPU support.
-    // LiteRT-LM natively supports Backend.NPU() for Hexagon HTP on Snapdragon.
-    // Matches AI Edge Gallery's litertlm dependency.
-    //
-    // NOTE: No separate QNN dependencies needed! LiteRT-LM bundles the
-    // necessary QNN/Hexagon libraries internally. The Gallery app does NOT
-    // include separate qnn-runtime or qnn-litert-delegate deps.
-    implementation("com.google.ai.edge.litertlm:litertlm-android:0.10.0")
-
     // Work Manager
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
@@ -188,11 +180,22 @@ dependencies {
     implementation("androidx.paging:paging-compose:3.3.6")
 
     // SQLCipher for encrypted database at rest
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("net.zetetic:sqlcipher-android:4.9.0")
+    implementation("androidx.sqlite:sqlite:2.4.0")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // Play Integrity API for purchase verification
     implementation("com.google.android.play:integrity:1.4.0")
+
+    // LiteRT-LM: The official Google runtime for running .litertlm models
+    // This replaces the old MediaPipe GenAI (tasks-genai) which had NO NPU support.
+    // LiteRT-LM natively supports Backend.NPU() for Hexagon HTP on Snapdragon.
+    // Matches AI Edge Gallery's litertlm dependency.
+    //
+    // NOTE: No separate QNN dependencies needed! LiteRT-LM bundles the
+    // necessary QNN/Hexagon libraries internally. The Gallery app does NOT
+    // include separate qnn-runtime or qnn-litert-delegate deps.
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.10.0")
 
     // Firebase Crashlytics for crash reporting (opt-out)
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
@@ -214,4 +217,12 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+}
+
+// Placeholder Firebase project — disable Crashlytics mapping upload so release
+// builds don't fail attempting to contact a non-existent Firebase project.
+afterEvaluate {
+    tasks.matching { it.name.startsWith("uploadCrashlyticsMappingFile") }.configureEach {
+        enabled = false
+    }
 }

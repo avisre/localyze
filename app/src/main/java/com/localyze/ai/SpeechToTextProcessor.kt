@@ -83,7 +83,10 @@ class SpeechToTextProcessor @Inject constructor(
         }
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            showErrorThenReset("Speech recognition is not available on this device")
+            showErrorThenReset(
+                "Voice input isn't set up on this device. " +
+                    "Install Google's speech service from Play Store, or type your question instead."
+            )
             throw IllegalStateException("Speech recognition is not available")
         }
 
@@ -302,15 +305,15 @@ class SpeechToTextProcessor @Inject constructor(
 
     private fun speechErrorMessage(error: Int): String =
         when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording failed"
-            SpeechRecognizer.ERROR_CLIENT -> "Speech recognition was cancelled"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission is not granted"
-            SpeechRecognizer.ERROR_NETWORK -> "Speech recognition network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Speech recognition timed out"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No speech was recognized"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech recognizer is busy"
-            SpeechRecognizer.ERROR_SERVER -> "Speech recognition service error"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech was heard"
+            SpeechRecognizer.ERROR_AUDIO -> "Mic isn't producing audio — check the device microphone (or the emulator doesn't have one)."
+            SpeechRecognizer.ERROR_CLIENT -> "Speech recognition was cancelled."
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission is not granted. Open Settings → Apps → Localyze → Permissions and enable Microphone."
+            SpeechRecognizer.ERROR_NETWORK -> "Voice input needs internet — check your connection and try again."
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Voice input timed out. Check your connection."
+            SpeechRecognizer.ERROR_NO_MATCH -> "I didn't catch that — try again, speak more clearly, or type your question."
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech service is busy — wait a moment and try again."
+            SpeechRecognizer.ERROR_SERVER -> "Google's speech service rejected the request. Try again in a moment."
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "I didn't hear anything — tap the mic and try again."
             else -> "Speech recognition failed"
         }
 }

@@ -14,6 +14,7 @@ import com.localyze.domain.usecases.RecordAudioUseCase
 import com.localyze.domain.usecases.SendMessageUseCase
 import com.localyze.tools.DispatchResult
 import com.localyze.tools.ToolDispatcher
+import com.localyze.util.CrashRecoveryStore
 import com.localyze.utils.InputValidator
 import com.localyze.utils.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,11 +38,17 @@ class ChatViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val toolDispatcher: ToolDispatcher,
     private val performanceMonitor: PerformanceMonitor,
+    private val crashRecoveryStore: CrashRecoveryStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     companion object {
         const val CONVERSATION_ID_KEY = "conversationId"
+        // Hoisted out of the per-token hot path. Previously each
+        // StreamingToken rebuilt these Regex instances and applied them
+        // to the entire accumulated text — O(n²) main-thread cost.
+        private val DIGIT_LETTER = Regex("(\\d)([a-zA-Z])")
+        private val LETTER_DIGIT = Regex("([a-zA-Z])(\\d)")
         // 180s on real devices is plenty, but emulator CPU prefill on a
         // 5000+ token system prompt + web context easily exceeds that.
         // Bump to 1200s on emulator so the ViewModel doesn't kill long
@@ -77,6 +84,7 @@ class ChatViewModel @Inject constructor(
 
     init {
         observeSettings()
+        observeCrashRecovery()
         val cid = readInitialConversationId(savedStateHandle)
         when {
             cid == 0L -> {
@@ -91,14 +99,28 @@ class ChatViewModel @Inject constructor(
         observeConversations()
     }
 
+    private fun observeCrashRecovery() {
+        viewModelScope.launch {
+            crashRecoveryStore.lastCrashedPrompt.collect { prompt ->
+                _uiState.update { it.copy(lastCrashedPrompt = prompt) }
+            }
+        }
+    }
+
+    fun acknowledgeCrashRecovery() {
+        crashRecoveryStore.acknowledgeCrash()
+    }
+
     private fun observeSettings() {
         viewModelScope.launch {
             settingsDataStore.thinkingMode.collect { enabled ->
-                val previous = _uiState.value.enableThinking
+                // Thinking channels are always-on in the engine after the
+                // refactor — the UI just hides thought tokens when this
+                // toggle is off. So we update local state without
+                // resetting the conversation (used to invalidate KV cache
+                // on every toggle, also raced with releaseForBackground
+                // and crashed the app).
                 _uiState.update { it.copy(enableThinking = enabled) }
-                if (previous != enabled && !_uiState.value.isStreaming) {
-                    resetEngineForCurrentConversation(_uiState.value.capabilityMode, enabled)
-                }
             }
         }
         viewModelScope.launch {
@@ -131,7 +153,9 @@ class ChatViewModel @Inject constructor(
         loadConversationJob = viewModelScope.launch {
             val conversation = chatRepository.getConversation(id)
             if (conversation == null) {
-                _uiState.update { it.copy(error = "Conversation not found") }
+                // Silently fall back to the most recent conversation instead
+                // of showing a "Conversation not found" snackbar — the user
+                // just tapped a stale link, no error worth surfacing.
                 loadMostRecentConversation()
                 return@launch
             }
@@ -460,10 +484,14 @@ class ChatViewModel @Inject constructor(
                 performanceMonitor.addToken(event.text)
                 _uiState.update { s ->
                     if (s.streamTokens) {
-                        val newText = s.streamingText + event.text
-                        var fixedText = newText.replace(Regex("(\\d)([a-zA-Z])"), "$1 $2")
-                        fixedText = fixedText.replace(Regex("([a-zA-Z])(\\d)"), "$1 $2")
-                        s.copy(streamingText = fixedText, isStreaming = true, isThinking = false, generationStatus = "Writing answer")
+                        // Apply digit/letter spacing only to the new delta,
+                        // not to the entire accumulated text. The model
+                        // emits these one token at a time so re-running the
+                        // fixup on the full string every token is O(n²).
+                        val fixedDelta = event.text
+                            .replace(DIGIT_LETTER, "$1 $2")
+                            .replace(LETTER_DIGIT, "$1 $2")
+                        s.copy(streamingText = s.streamingText + fixedDelta, isStreaming = true, isThinking = false, generationStatus = "Writing answer")
                     } else {
                         s.copy(isStreaming = true, isThinking = false, generationStatus = "Writing answer")
                     }

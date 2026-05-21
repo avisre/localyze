@@ -1,0 +1,23 @@
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Build / temp
+*.log
+.cache/
+
+# Local secrets (never)
+.env
+.env.*
+!.env.example

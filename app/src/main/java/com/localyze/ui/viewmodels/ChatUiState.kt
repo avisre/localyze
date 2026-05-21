@@ -9,6 +9,7 @@ import com.localyze.tools.DispatchResult
  * All state required by [ChatScreen] is captured here so the composable
  * can be a pure function of this data class.
  */
+@androidx.compose.runtime.Immutable
 data class ChatUiState(
     /** ID of the currently active conversation, or -1L if none. */
     val currentConversationId: Long = -1L,
@@ -47,7 +48,9 @@ data class ChatUiState(
     /** Optional error message to display in a Snackbar. */
     val error: String? = null,
     /** Pending tool confirmation that requires user approval. */
-    val pendingToolConfirmation: DispatchResult.PendingConfirmation? = null
+    val pendingToolConfirmation: DispatchResult.PendingConfirmation? = null,
+    /** Non-null when the previous app run crashed mid-inference; shown as a recovery Snackbar. */
+    val lastCrashedPrompt: String? = null
 )
 
 /**
@@ -56,6 +59,7 @@ data class ChatUiState(
  * When [isExecuting] is true, the tool is being called and a spinner is shown.
  * When false, the tool has completed and [result] contains the outcome.
  */
+@androidx.compose.runtime.Immutable
 data class ActiveToolCall(
     /** The name of the tool being called. */
     val toolName: String,

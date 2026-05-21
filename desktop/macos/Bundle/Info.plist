@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Localyze.ai — Info.plist for the SwiftUI .app bundle.
+
+    This is the single source of truth for the bundle identity. `build-app.sh`
+    copies this verbatim into `.app/Contents/Info.plist`. Edit the version
+    strings here, not in the build script.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- ===== Bundle identity ===== -->
+    <key>CFBundleIdentifier</key>
+    <string>com.localyze.desktop</string>
+
+    <key>CFBundleName</key>
+    <string>Localyze.ai</string>
+
+    <key>CFBundleDisplayName</key>
+    <string>Localyze.ai</string>
+
+    <key>CFBundleExecutable</key>
+    <string>Localyze</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+
+    <!-- ===== Version ===== -->
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+
+    <!-- ===== Platform requirements ===== -->
+    <!--
+        Ventura (macOS 13.0) was the first OS to ship with MLX support out of the
+        box. Earlier OSes can't load the mlx-swift runtime, so we refuse to launch
+        rather than crash mid-init.
+    -->
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+
+    <key>LSRequiresNativeExecution</key>
+    <true/>
+
+    <!--
+        Universal binary: built via `swift build` with two `arch` flags (arm64
+        and x86_64); see build-app.sh. On Intel Macs the BackendSelector falls
+        back to the llama.cpp Metal stub.
+    -->
+    <key>LSArchitecturePriority</key>
+    <array>
+        <string>arm64</string>
+        <string>x86_64</string>
+    </array>
+
+    <!-- ===== Appearance ===== -->
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- ===== Copyright ===== -->
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 Localyze. All rights reserved.</string>
+
+    <!-- ===== Usage descriptions =====
+         macOS requires a human-readable string for every privacy-protected API
+         the app might touch, even if we don't currently call it. Without these
+         the first call returns -1/null and the app appears to silently fail.
+    -->
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Localyze uses Apple Events to launch helper tools the ReAct agent needs (for example, opening the Finder to a saved artifact).</string>
+
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Localyze writes generated artifacts (charts, tables, code outputs) to ~/Localyze/artifacts. Allow access if you want to keep them on your Desktop instead.</string>
+
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Localyze reads and writes documents you ask it to summarise, edit, or compare.</string>
+
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Localyze reads files you drop into chat from your Downloads folder.</string>
+
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Localyze can call a self-hosted SearxNG instance on your local network when Web Search is enabled.</string>
+
+    <!-- ===== Document types =====
+         Allow drag-and-drop of common text formats into the chat window.
+    -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Plain text</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.plain-text</string>
+                <string>public.text</string>
+                <string>public.source-code</string>
+                <string>net.daringfireball.markdown</string>
+                <string>public.json</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

@@ -16,7 +16,13 @@ import javax.inject.Inject
 class NotificationReplyListenerService : NotificationListenerService() {
     @Inject lateinit var replyDraftRepository: ReplyDraftRepository
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.IO)
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val packageName = sbn.packageName ?: return

@@ -10,8 +10,8 @@ import javax.inject.Singleton
  * V1 is heuristic-only: a curated pattern table catches the common
  * vague openers (top-N news, recommendations, "help me with X", etc.)
  * with canned options-style follow-ups. The long tail passes through
- * to the LLM, which still has the system-prompt CLARIFICATION_POLICY
- * as a backstop.
+ * to the LLM, which will answer with confidence using the system
+ * prompt's "use the user's data, don't ask back" rule.
  *
  * V2 will add a small Gemma-judge call for the long tail; the pattern
  * table stays as a fast pre-filter.
@@ -74,7 +74,8 @@ class ClarificationOrchestrator @Inject constructor() {
             ClarificationDecision.AskMore(pattern.questions, topic = trimmed)
         } else {
             // Long-tail vague queries fall through to the LLM, which has
-            // CLARIFICATION_POLICY in its system prompt as a backstop.
+            // the shared "use the user's data, don't ask back" rule in its
+            // system prompt as a backstop.
             ClarificationDecision.PassThrough
         }
     }
@@ -334,11 +335,19 @@ internal object VaguePatterns {
             ),
         ),
         // ── Events / exhibitions / shows in a city this month/year ───
+        //
+        // NOTE: `shows?` is dangerous standalone — it matches the verb form
+        // ("show in a table", "show me the data"). Require an adjective
+        // anchor (art/live/broadway/comedy/music) so we only catch the
+        // noun form "art shows", not the verb. Same for `events?` to be
+        // safe against "events in my calendar".
         Pattern(
             regex = Regex(
                 "(?i)" + listOf(
-                    "\\b(exhibitions?|shows?|concerts?|festivals?|events?|conferences?)\\s+" +
-                        "(in|at|near)\\s+\\w+",
+                    "\\b(exhibitions?|festivals?|conferences?)\\s+(in|at|near)\\s+\\w+",
+                    "\\b(art|live|broadway|comedy|music|theatre|theater)\\s+" +
+                        "(shows?|events?|concerts?)\\s+(in|at|near|this)\\s+\\w+",
+                    "\\bconcerts?\\s+(in|at|near)\\s+\\w+",
                     "^\\s*(must.?see|must.?do|must.?try)\\s+\\w+",
                     "\\b(auction\\s+sales?|auction\\s+results?)\\b",
                 ).joinToString("|")

@@ -122,6 +122,10 @@ private fun executingLabel(toolName: String): String = when (toolName) {
     "task" -> "Updating tasks…"
     "email_draft" -> "Drafting email…"
     "sms_draft" -> "Drafting SMS…"
+    "weather_lookup" -> "Fetching weather…"
+    "time_lookup" -> "Checking the time…"
+    "currency_convert" -> "Converting currency…"
+    "news_lookup" -> "Fetching news…"
     else -> "Calling $toolName…"
 }
 
@@ -138,5 +142,9 @@ private fun completedLabel(toolName: String): String = when (toolName) {
     "task" -> "Task updated"
     "email_draft" -> "Email drafted"
     "sms_draft" -> "SMS drafted"
+    "weather_lookup" -> "Weather ready"
+    "time_lookup" -> "Time looked up"
+    "currency_convert" -> "Currency converted"
+    "news_lookup" -> "News ready"
     else -> "Used $toolName"
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -48,7 +49,7 @@ fun StructuredMarkdownText(
     markdown: String,
     modifier: Modifier = Modifier
 ) {
-    val blocks = parseMarkdownBlocks(markdown)
+    val blocks = remember(markdown) { parseMarkdownBlocks(markdown) }
     SelectionContainer {
         Column(
             modifier = modifier,
@@ -118,6 +119,36 @@ private fun ListBlock(items: List<String>, numbered: Boolean) {
 private val MARKDOWN_LINK_RE = Regex("\\[([^\\]]+)]\\(([^)]+)\\)")
 private val BARE_URL_RE = Regex("(?<![(\\[])\\bhttps?://\\S+")
 
+// Hoisted to file-level so they're compiled once at class init, not on every
+// recomposition during streaming (30+ tokens/sec). All previously-inline
+// `Regex(...)` calls below now refer to these constants.
+private val BACKSLASH_SPACE_RE = Regex("\\s*\\\\\\s*")
+private val MISSING_SPACE_BEFORE_KEYWORDS_RE =
+    Regex("(?<=[a-z0-9)])(?=(Year|New Balance|Compound Interest|Simple Interest|As you can see)\\b)")
+private val BOLD_STAR_RE = Regex("\\*\\*([^*]+)\\*\\*")
+private val BOLD_UNDERSCORE_RE = Regex("__([^_]+)__")
+private val ITALIC_UNDERSCORE_PHRASE_RE =
+    Regex("(?<![\\w])_([^_\\n]{0,200}\\s[^_\\n]{0,200})_(?![\\w])")
+private val ITALIC_UNDERSCORE_WORD_RE = Regex("(?<![\\w])_([^_\\n]{1,80})_(?![\\w])")
+private val INLINE_CODE_RE = Regex("`([^`]+)`")
+private val MD_LINK_FLATTEN_RE = Regex("\\[([^\\]]+)]\\(([^)]+)\\)")
+
+private val HEADING_LINE_RE = Regex("^#{1,4}\\s+.+")
+private val NUMBERED_LIST_LINE_RE = Regex("^\\d+[.)]\\s+.+")
+private val NUMBERED_LIST_STRIP_RE = Regex("^\\d+[.)]\\s+")
+private val TABLE_SEPARATOR_CELL_RE = Regex(":?-{3,}:?")
+
+private val ITALIC_STAR_RE =
+    Regex("(?<![*\\w])\\*(?=\\S)([^*\\n]+?)(?<=\\S)\\*(?![*\\w])")
+private val HEADING_LEADING_BLANK_RE = Regex("(?<!\\n)(#{1,4}\\s+)")
+private val STAR_AFTER_PUNCT_RE = Regex("([:.!?])\\*(?=[A-Za-z0-9\\[])")
+private val STAR_AFTER_HEADING_RE = Regex("(#{1,4}\\s+[^\\n*]+)\\*(?=[A-Za-z0-9\\[])")
+private val STAR_BULLET_PROMOTE_RE = Regex("(?<![\\n*])\\*\\s*(?=[A-Za-z0-9\\[])")
+private val DASH_BULLET_PROMOTE_RE = Regex("(?<![\\n\\w])-\\s+(?=[A-Za-z0-9\\[])")
+private val NUMBERED_LINE_START_RE = Regex("(?<=^|\\n)(\\d+[.)])\\s+(?=\\S)")
+private val SOURCES_HEADING_RE = Regex("(?i)(?<![#\\n])\\bSources\\s*:")
+private val MULTI_NEWLINE_RE = Regex("\n{3,}")
+
 /**
  * Build an AnnotatedString that:
  *  - renders `[label](url)` as a clickable link (label only, no URL shown).
@@ -129,11 +160,16 @@ private fun buildInlineAnnotated(raw: String): AnnotatedString {
     // bracket→"label (url)" rewrite so we can still see the link tokens.
     val cleaned = raw
         .replace("\\${'$'}", "${'$'}")
-        .replace(Regex("\\s*\\\\\\s*"), " ")
-        .replace(Regex("(?<=[a-z0-9)])(?=(Year|New Balance|Compound Interest|Simple Interest|As you can see)\\b)"), " ")
-        .replace(Regex("\\*\\*([^*]+)\\*\\*"), "$1")
-        .replace(Regex("__([^_]+)__"), "$1")
-        .replace(Regex("`([^`]+)`"), "$1")
+        .replace(BACKSLASH_SPACE_RE, " ")
+        .replace(MISSING_SPACE_BEFORE_KEYWORDS_RE, " ")
+        .replace(BOLD_STAR_RE, "$1")
+        .replace(BOLD_UNDERSCORE_RE, "$1")
+        // Strip single-underscore italics: _Source: Open-Meteo_ → Source: Open-Meteo.
+        // Anchored so we don't eat snake_case identifiers — requires a word
+        // boundary on one side and at least one space inside.
+        .replace(ITALIC_UNDERSCORE_PHRASE_RE, "$1")
+        .replace(ITALIC_UNDERSCORE_WORD_RE, "$1")
+        .replace(INLINE_CODE_RE, "$1")
         .trim()
 
     val linkStyle = TextLinkStyles(
@@ -332,7 +368,7 @@ internal fun parseMarkdownBlocks(input: String): List<MarkdownBlock> {
             blocks += MarkdownBlock.CodeBlock(language, codeLines.joinToString("\n").trimEnd())
         } else if (trimmed.isBlank()) {
             flushAll()
-        } else if (trimmed.matches(Regex("^#{1,4}\\s+.+"))) {
+        } else if (trimmed.matches(HEADING_LINE_RE)) {
             flushAll()
             val level = trimmed.takeWhile { it == '#' }.length.coerceIn(1, 4)
             blocks += MarkdownBlock.Heading(level, trimmed.drop(level).trim())
@@ -357,10 +393,10 @@ internal fun parseMarkdownBlocks(input: String): List<MarkdownBlock> {
             flushParagraph()
             if (numbers.isNotEmpty()) flushLists()
             bullets += trimmed.drop(2).trim()
-        } else if (trimmed.matches(Regex("^\\d+[.)]\\s+.+"))) {
+        } else if (trimmed.matches(NUMBERED_LIST_LINE_RE)) {
             flushParagraph()
             if (bullets.isNotEmpty()) flushLists()
-            numbers += trimmed.replaceFirst(Regex("^\\d+[.)]\\s+"), "").trim()
+            numbers += trimmed.replaceFirst(NUMBERED_LIST_STRIP_RE, "").trim()
         } else {
             flushLists()
             paragraph += trimmed
@@ -387,7 +423,7 @@ private fun isTableSeparator(line: String): Boolean {
     return line
         .trim('|')
         .split('|')
-        .all { cell -> cell.trim().matches(Regex(":?-{3,}:?")) }
+        .all { cell -> cell.trim().matches(TABLE_SEPARATOR_CELL_RE) }
 }
 
 private fun parseTableCells(line: String): List<String> {
@@ -414,33 +450,38 @@ internal fun normalizeMarkdownForDisplay(input: String): String {
         // and the inner span must not contain another `*` or newline — this
         // avoids matching list-marker `*` (which has a trailing space) and
         // bold `**X**` pairs.
-        .replace(Regex("(?<![*\\w])\\*(?=\\S)([^*\\n]+?)(?<=\\S)\\*(?![*\\w])"), "$1")
-        .replace(Regex("(?<!\\n)(#{1,4}\\s+)"), "\n\n$1")
-        .replace(Regex("([:.!?])\\*(?=[A-Za-z0-9\\[])"), "$1\n- ")
-        .replace(Regex("(#{1,4}\\s+[^\\n*]+)\\*(?=[A-Za-z0-9\\[])"), "$1\n- ")
-        .replace(Regex("(?<![\\n*])\\*\\s*(?=[A-Za-z0-9\\[])"), "\n- ")
-        .replace(Regex("(?<![\\n\\w])-\\s+(?=[A-Za-z0-9\\[])"), "\n- ")
+        .replace(ITALIC_STAR_RE, "$1")
+        .replace(HEADING_LEADING_BLANK_RE, "\n\n$1")
+        .replace(STAR_AFTER_PUNCT_RE, "$1\n- ")
+        .replace(STAR_AFTER_HEADING_RE, "$1\n- ")
+        .replace(STAR_BULLET_PROMOTE_RE, "\n- ")
+        .replace(DASH_BULLET_PROMOTE_RE, "\n- ")
         // Promote run-on numbered list markers to their own line, but ONLY at
         // a true line start. Previously we matched ANYWHERE that wasn't
         // preceded by `\n\w,$`, which caught the trailing digits of URLs
         // like `wikipedia.org/?curid=42400)` and corrupted them into a
         // numbered list, breaking the Markdown link.
-        .replace(Regex("(?<=^|\\n)(\\d+[.)])\\s+(?=\\S)"), "$1 ")
-        .replace(Regex("(?i)(?<![#\\n])\\bSources\\s*:"), "\n\n## Sources")
+        .replace(NUMBERED_LINE_START_RE, "$1 ")
+        .replace(SOURCES_HEADING_RE, "\n\n## Sources")
         .lines()
         .joinToString("\n") { it.trimEnd() }
-        .replace(Regex("\n{3,}"), "\n\n")
+        .replace(MULTI_NEWLINE_RE, "\n\n")
         .trim()
 }
 
 private fun cleanInlineMarkdown(text: String): String {
     return text
         .replace("\\${'$'}", "${'$'}")
-        .replace(Regex("\\s*\\\\\\s*"), " ")
-        .replace(Regex("(?<=[a-z0-9)])(?=(Year|New Balance|Compound Interest|Simple Interest|As you can see)\\b)"), " ")
-        .replace(Regex("\\*\\*([^*]+)\\*\\*"), "$1")
-        .replace(Regex("__([^_]+)__"), "$1")
-        .replace(Regex("`([^`]+)`"), "$1")
-        .replace(Regex("\\[([^\\]]+)]\\(([^)]+)\\)"), "$1 ($2)")
+        .replace(BACKSLASH_SPACE_RE, " ")
+        .replace(MISSING_SPACE_BEFORE_KEYWORDS_RE, " ")
+        .replace(BOLD_STAR_RE, "$1")
+        .replace(BOLD_UNDERSCORE_RE, "$1")
+        // Strip single-underscore italics in cells/links — same rules as
+        // buildInlineAnnotated above. Identifiers like snake_case are safe
+        // because we require a space or word break on each side.
+        .replace(ITALIC_UNDERSCORE_PHRASE_RE, "$1")
+        .replace(ITALIC_UNDERSCORE_WORD_RE, "$1")
+        .replace(INLINE_CODE_RE, "$1")
+        .replace(MD_LINK_FLATTEN_RE, "$1 ($2)")
         .trim()
 }

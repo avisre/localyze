@@ -47,7 +47,7 @@ class OnboardingViewModel @Inject constructor(
         com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: isTestModel=${modelRepository.isTestModelFile()}")
         com.localyze.utils.AppLog.d("OnboardingVM", "checkIfModelAlreadyDownloaded: USE_TEST_DOWNLOAD=${com.localyze.BuildConfig.USE_TEST_DOWNLOAD}")
         if (modelRepository.isModelDownloaded()) {
-            // Model file exists â€” load it into memory before showing the chat
+            // Model file exists — load it into memory before showing the chat
             com.localyze.utils.AppLog.d("OnboardingVM", "Model already downloaded, initializing...")
             initializeModel()
         } else {
@@ -75,13 +75,9 @@ class OnboardingViewModel @Inject constructor(
                 return@launch
             }
 
-            // All prerequisites met, show model selection
-            val models = modelRepository.getAllModels()
-            val selectedModel = modelRepository.getSelectedModel()
-            _uiState.value = OnboardingUiState.ModelSelection(
-                models = models,
-                selectedModel = selectedModel
-            )
+            // Single-model build: skip the picker and go straight to
+            // ReadyToDownload with the only model we ship.
+            _uiState.value = OnboardingUiState.ReadyToDownload(modelRepository.getSelectedModel())
         }
     }
 

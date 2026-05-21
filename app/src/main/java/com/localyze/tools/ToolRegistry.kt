@@ -20,7 +20,11 @@ class ToolRegistry @Inject constructor(
     private val calculatorTool: CalculatorTool,
     private val metarDecoderTool: MetarDecoderTool,
     private val drugInteractionTool: DrugInteractionTool,
-    private val foodSafetyTool: FoodSafetyTool
+    private val foodSafetyTool: FoodSafetyTool,
+    private val weatherLookupTool: WeatherLookupTool,
+    private val timeLookupTool: TimeLookupTool,
+    private val currencyTool: CurrencyTool,
+    private val newsTool: NewsTool
 ) {
     private val tools: MutableMap<String, Tool> = mutableMapOf()
 
@@ -40,6 +44,10 @@ class ToolRegistry @Inject constructor(
         register(metarDecoderTool)
         register(drugInteractionTool)
         register(foodSafetyTool)
+        register(weatherLookupTool)
+        register(timeLookupTool)
+        register(currencyTool)
+        register(newsTool)
     }
 
     fun register(tool: Tool) {

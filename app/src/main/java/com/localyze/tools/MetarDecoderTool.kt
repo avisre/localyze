@@ -74,40 +74,48 @@ class MetarDecoderTool @Inject constructor() : Tool {
             when {
                 station == null && stationRe.matches(t) -> station = t
                 observed == null && timeRe.matches(t) -> {
-                    val m = timeRe.find(t)!!
+                    val m = timeRe.find(t) ?: continue
+                    if (m.groupValues.size < 4) continue
                     observed = "day ${m.groupValues[1]} at ${m.groupValues[2]}:${m.groupValues[3]} UTC"
                 }
                 wind == null && windRe.matches(t) -> {
-                    val m = windRe.find(t)!!
+                    val m = windRe.find(t) ?: continue
+                    if (m.groupValues.size < 3) continue
                     wind = buildJsonObject {
                         put("direction", if (m.groupValues[1] == "VRB") "variable" else "${m.groupValues[1]}°")
-                        put("speed_kt", m.groupValues[2].toInt())
-                        if (m.groupValues[3].isNotEmpty()) put("gust_kt", m.groupValues[3].toInt())
+                        put("speed_kt", m.groupValues[2].toIntOrNull() ?: 0)
+                        if (m.groupValues.size > 3 && m.groupValues[3].isNotEmpty())
+                            put("gust_kt", m.groupValues[3].toIntOrNull() ?: 0)
                     }
                 }
                 visibilitySm == null && visRe.matches(t) -> {
-                    val raw = visRe.find(t)!!.groupValues[1]
+                    val raw = visRe.find(t)?.groupValues?.getOrNull(1) ?: continue
                     visibilitySm = if ("/" in raw) {
-                        val (n, d) = raw.split("/").map { it.toDouble() }
+                        val parts = raw.split("/")
+                        val n = parts.getOrNull(0)?.toDoubleOrNull() ?: continue
+                        val d = parts.getOrNull(1)?.toDoubleOrNull()?.takeIf { it != 0.0 } ?: continue
                         n / d
-                    } else raw.toDouble()
+                    } else raw.toDoubleOrNull() ?: continue
                 }
                 cloudRe.matches(t) -> {
-                    val m = cloudRe.find(t)!!
+                    val m = cloudRe.find(t) ?: continue
+                    if (m.groupValues.size < 3) continue
                     clouds.add(buildJsonObject {
                         put("coverage", coverageDescription(m.groupValues[1]))
-                        put("base_ft_agl", m.groupValues[2].toInt() * 100)
-                        if (m.groupValues[3].isNotEmpty()) put("type", m.groupValues[3])
+                        put("base_ft_agl", (m.groupValues[2].toIntOrNull() ?: 0) * 100)
+                        if (m.groupValues.size > 3 && m.groupValues[3].isNotEmpty())
+                            put("type", m.groupValues[3])
                     })
                 }
                 tempC == null && tempRe.matches(t) -> {
-                    val m = tempRe.find(t)!!
+                    val m = tempRe.find(t) ?: continue
+                    if (m.groupValues.size < 3) continue
                     tempC = parseSignedTemp(m.groupValues[1])
                     dewpointC = parseSignedTemp(m.groupValues[2])
                 }
                 altimeterInHg == null && altRe.matches(t) -> {
-                    val raw = altRe.find(t)!!.groupValues[1]
-                    altimeterInHg = raw.toDouble() / 100.0
+                    val raw = altRe.find(t)?.groupValues?.getOrNull(1) ?: continue
+                    altimeterInHg = (raw.toDoubleOrNull() ?: continue) / 100.0
                 }
             }
         }

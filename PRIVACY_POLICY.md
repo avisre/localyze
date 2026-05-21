@@ -1,100 +1,37 @@
-# Localyze Privacy Policy
+# Localyze.ai Privacy Policy
 
-Last updated: April 23, 2026
+_Last updated: 2026-05-20_
 
-Localyze is a privacy-first Android app that provides an on-device AI assistant powered by Google's Gemma 4 E4B model.
+Localyze.ai is a privacy-first Android assistant. Chat runs entirely on your phone via an on-device LLM (Gemma 4 E4B). This policy explains what stays local, what touches the network, and how to control it.
 
-## Summary
+## 1. On-device processing
+All chat prompts, responses, and voice-to-text are processed locally by the Gemma 4 E4B model. **Your conversation content never leaves your phone** — we operate no chat servers.
 
-- Core text, image, and audio inference runs locally on your device.
-- Your chats, memories, tasks, attachments, and model files are stored locally on your device unless you export or back them up yourself.
-- We do not sell your personal data.
-- We do not run advertising SDKs in the app.
-- We do not use Stripe. Subscription billing is handled by Google Play.
+## 2. Local storage
+Chat history, settings, memories, and attachments live in a local Room database **encrypted at rest with SQLCipher**. Model weights stay in your app-private files directory. Nothing in this database is uploaded.
 
-## Data the app may access
+## 3. Audio
+Voice input is captured and transcribed on-device. Raw audio is discarded after transcription and never transmitted.
 
-Depending on the features you choose to use, Localyze may access:
+## 4. Optional network activity
+- **Model download** (~3.6 GB, one time) from HuggingFace via HTTPS.
+- **Web search tool**: only when you enable it in Settings and the model invokes it. Queries go to a public search endpoint over HTTPS. Disabled by default.
+- **Google Play Billing** for the optional "Localyze Premium" subscription, plus **Play Integrity** for purchase verification.
+- **Firebase Crashlytics** (opt-out) and the Firebase Analytics dependency. The build currently uses a **placeholder Firebase project**, but the Crashlytics SDK is active and **may collect crash stack traces, device model, OS version, and a Firebase install ID** once a real project is wired. Disable in Settings → Privacy.
 
-- Microphone audio for voice input
-- Photos or files that you explicitly select with Android system pickers or share into the app
-- Contacts for the contact-search tool
-- Calendar data for reading or creating calendar events
-- Notification content if you enable the notification reply-drafts feature (the app reads notification text to suggest quick replies)
-- Exact alarms if you enable alarm or reminder features
-- Local app data such as chats, memories, tasks, attachments, reply drafts, backups, and model files
+All traffic uses TLS 1.2+.
 
-## How data is handled
+## 5. We do NOT collect
+Advertising IDs, location, contacts, chat content, prompt/response telemetry, or third-party ad SDKs.
 
-### 1. On-device assistant processing
+## 6. Retention & deletion
+- **Clear chats**: Settings → Data → Clear all chats.
+- **Delete model**: Settings → Storage → Remove model file.
+- **Full wipe**: uninstall — Android removes all app-private data.
 
-Localyze is designed so that assistant inference happens locally on your device. Your chat prompts, generated responses, selected images, and audio inputs are processed on-device by the local model for the app's core assistant features.
+## 7. Children
+Not directed at children under 13.
 
-### 2. Notification content access
-
-If you enable the notification reply-drafts feature, the app uses a `NotificationListenerService` to read the text content of incoming notifications. This is used only to generate draft replies and stays entirely on your device. You can disable this feature at any time in Settings, and the listener service will stop collecting notification content.
-
-### 3. Local storage
-
-The app stores data locally on your device to provide its features. This can include:
-
-- Conversations and messages
-- Saved memories and tasks
-- Attachment metadata
-- Downloaded model files and related caches
-- Local backups or exports that you choose to create
-
-### 3. Optional network activity
-
-Although the assistant itself is designed for on-device use, some app features use the network:
-
-- Model download: the local model file is downloaded from Hugging Face when you choose to install it
-- Optional web search: if you enable web search in Settings, search queries are sent to DuckDuckGo's Instant Answer API to fetch results
-- Google Play Billing: subscription purchase, restore, entitlement, and management flows communicate with Google Play
-
-## Data sharing
-
-We do not sell your personal data.
-
-We do not share your chats, memories, contacts, calendar data, selected images, or audio recordings with the app developer's own servers for analytics, advertising, or profiling.
-
-Data may be sent to third-party services only when needed for features you choose to use, such as:
-
-- Hugging Face for model download
-- DuckDuckGo for optional web search queries
-- Google Play for billing and purchase management
-
-## Permissions
-
-Localyze may request permissions only for features you use:
-
-- `RECORD_AUDIO` for voice input
-- `READ_CONTACTS` for contact search
-- `READ_CALENDAR` and `WRITE_CALENDAR` for calendar features
-- `POST_NOTIFICATIONS` for notification features on supported Android versions
-- `SCHEDULE_EXACT_ALARM` for alarm and reminder features
-
-Photo and file selection uses Android system picker/share flows where possible.
-
-## Your choices
-
-You can:
-
-- Decline optional permissions
-- Keep memory disabled
-- Keep web search disabled
-- Delete the local model from Settings
-- Delete chats and memories from within the app
-- Uninstall the app to remove app-private local data stored by Android
-
-## Children
-
-Localyze is intended for adults and is not designed for children.
-
-## Security
-
-We aim to minimize data access and keep core assistant processing on-device. No method of storage or transmission is perfectly secure, but the app is designed to reduce unnecessary data transfer.
-
-## Contact
-
-For privacy questions about Localyze, use the developer contact details listed on the app's Google Play listing.
+## 8. Contact
+Questions or deletion requests: **report@localyze.ai**
+Full policy: **[YOUR-WEBSITE]/privacy**

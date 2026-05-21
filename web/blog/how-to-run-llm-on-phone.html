@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-page="blog-post">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>How to run an LLM on your phone — Android local AI guide — Localyze.ai</title>
+<meta name="description" content="A short, practical guide to running a real LLM on your Android phone. What hardware works, what to expect, and a clean step-by-step install. No tinkering." />
+<meta name="keywords" content="run LLM on phone, Android local LLM, on-device LLM tutorial, how to run AI on Android, local AI phone" />
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="author" content="Localyze.ai" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://localyze.ai/blog/how-to-run-llm-on-phone.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Localyze.ai" />
+<meta property="og:title" content="How to run an LLM on your phone" />
+<meta property="og:description" content="What hardware works, what to expect, and a clean step-by-step install for on-device AI." />
+<meta property="og:url" content="https://localyze.ai/blog/how-to-run-llm-on-phone.html" />
+<meta property="og:image" content="https://localyze.ai/assets/img/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How to run an LLM on your phone" />
+<meta name="twitter:description" content="A short, practical guide to on-device AI on Android." />
+<meta name="twitter:image" content="https://localyze.ai/assets/img/og-image.png" />
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/logo-mark.png" />
+<link rel="apple-touch-icon" href="/assets/img/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="/assets/css/styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BlogPosting",
+  "headline":"How to run an LLM on your phone",
+  "description":"A short, practical guide to running a real LLM on Android. Hardware needs, expectations, and a step-by-step install.",
+  "datePublished":"2026-05-19",
+  "dateModified":"2026-05-19",
+  "author":{"@type":"Organization","name":"Localyze.ai","url":"https://localyze.ai"},
+  "publisher":{"@type":"Organization","name":"Localyze.ai","logo":{"@type":"ImageObject","url":"https://localyze.ai/assets/img/logo-mark.png"}},
+  "image":"https://localyze.ai/assets/img/og-image.png",
+  "mainEntityOfPage":"https://localyze.ai/blog/how-to-run-llm-on-phone.html"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand">
+      <img src="/assets/img/logo-mark.png" alt="Localyze.ai logo" width="26" height="26" />
+      <span>Localyze.ai</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#compare">Compare</a>
+      <a href="/blog/">Blog</a>
+      <a href="/download.html" class="nav-cta">Download</a>
+    </nav>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+
+  <h1>How to run an LLM on your phone</h1>
+  <p><em>Real on-device AI on Android — no rooting, no terminal, no waiting for a cloud reply.</em></p>
+  <p class="muted" style="font-size:0.9rem;">May 19, 2026 · 4 min read</p>
+
+  <h2>What you'll actually get</h2>
+  <p>A chat assistant that lives in your app drawer, answers in plain English, reads images, accepts voice — and never sends any of it to a server. Inference happens on the same chip that runs your camera filters.</p>
+  <p>Expect roughly conversational speed on a mid-range phone (10-25 tokens per second on <code>Gemma 4 E4B</code> at <code>INT4</code>). Faster on flagships with an NPU. Slower on the very oldest devices.</p>
+
+  <h2>Hardware that works</h2>
+  <p>Three things matter, in order: RAM, chip generation, storage.</p>
+  <ul>
+    <li><strong>RAM.</strong> 6 GB is the floor. 8 GB and above feels comfortable.</li>
+    <li><strong>Chip.</strong> Anything from the last four years — Snapdragon 7-series and above, Tensor G2+, Dimensity 8000+, recent Exynos. Older chips work but slowly.</li>
+    <li><strong>Storage.</strong> 4 GB free for the model and runtime.</li>
+    <li><strong>OS.</strong> Android 9 or newer.</li>
+  </ul>
+  <p>iPhone users: on-device LLMs are coming, but App Store policy and the closed ML stack make the same install flow harder today.</p>
+
+  <h2>The step-by-step</h2>
+  <p>Using Localyze.ai as the example, but the shape is the same for any well-built on-device app:</p>
+  <ul>
+    <li><strong>1. Install the app.</strong> Grab the APK from the <a href="/download.html">download page</a> or the Play Store listing. The app itself is small — about 30 MB.</li>
+    <li><strong>2. First launch downloads the model.</strong> Roughly 3.6 GB. Use Wi-Fi. It happens once, then you can go offline forever.</li>
+    <li><strong>3. Grant the permissions you actually want.</strong> Microphone for voice, photos for image input. Skip them and the rest still works.</li>
+    <li><strong>4. Start typing.</strong> No account, no email, no onboarding wall.</li>
+  </ul>
+  <p>That's the whole flow. There is no "connect your API key" step because there is no API.</p>
+
+  <h2>What to try first</h2>
+  <p>Good prompts to confirm everything is local:</p>
+  <ul>
+    <li>Turn on airplane mode and chat anyway. It still works.</li>
+    <li>Send a screenshot and ask what it says — image input handled on-device.</li>
+    <li>Hold the mic button, speak, release. Transcription is local too.</li>
+    <li>Open <em>battery use</em> in Android settings after a long chat. The work shows up under the app, not the network stack.</li>
+  </ul>
+
+  <h2>The honest expectations</h2>
+  <p>An on-device model is not a frontier cloud model. It will be slightly less clever at unusual reasoning tasks. It will not browse the web. The first token will sometimes take a second to appear while the model warms up.</p>
+  <p>In exchange: privacy, offline, one-time payment, no rate limits, no account, no telemetry. For 90% of how people actually use AI — write this, explain that, summarise this email, what's in this photo — the trade is worth it almost every time.</p>
+
+  <hr style="margin:48px 0 32px;border:none;border-top:1px solid var(--border);" />
+  <p class="muted" style="font-size:0.95rem;">More from Localyze.ai: <a href="/blog/what-is-gemma-4-e4b.html">What is Gemma 4 E4B?</a> · <a href="/blog/why-on-device-ai-matters.html">Why on-device AI matters</a> · <a href="/blog/cloud-ai-privacy-myth.html">The cloud AI privacy myth</a> · <a href="/download.html">Download Localyze.ai</a></p>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="/assets/img/logo-mark.png" alt="" width="24" height="24" />
+          <span>Localyze.ai</span>
+        </div>
+        <p class="footer-tag">Private, on-device AI for every device you own.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/download.html">Download</a></li>
+          <li><a href="/blog/">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Compare</h4>
+        <ul>
+          <li><a href="/vs-chatgpt.html">vs ChatGPT</a></li>
+          <li><a href="/vs-gemini.html">vs Gemini</a></li>
+          <li><a href="/vs-copilot.html">vs Copilot</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Platforms</h4>
+        <ul>
+          <li><a href="/local-ai-windows.html">Windows</a></li>
+          <li><a href="/local-ai-macos.html">macOS</a></li>
+          <li><a href="/local-ai-linux.html">Linux</a></li>
+          <li><a href="/private-ai-assistant.html">Private AI</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Localyze.ai</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@localyze.ai">Contact</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

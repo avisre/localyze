@@ -22,6 +22,7 @@ import androidx.room.TypeConverter
         )
     ]
 )
+@androidx.compose.runtime.Immutable
 data class Message(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val conversationId: Long,

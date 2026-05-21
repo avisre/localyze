@@ -1,7 +1,8 @@
-﻿package com.localyze
+package com.localyze
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.content.IntentCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -134,15 +135,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleDebugChatIntent(intent: Intent?) {
-        if (!BuildConfig.DEBUG) return
+        if (!BuildConfig.DEBUG || intent == null) return
 
-        val debugMsg = intent?.getStringExtra("chat_msg")
+        val debugMsg = intent.getStringExtra("chat_msg")
             ?.let(::decodeDebugMessage)
             ?.trim()
         if (!debugMsg.isNullOrEmpty()) {
             com.localyze.utils.AppLog.d("MainActivity", "Debug chat_msg received: $debugMsg")
             sharedText = debugMsg
             sharedImageUris = emptyList()
+            // Strip the extra so a config change (rotation, screen-on)
+            // doesn't replay the same message via Activity recreation.
+            intent.removeExtra("chat_msg")
         }
     }
 
@@ -162,6 +166,9 @@ class MainActivity : ComponentActivity() {
             val prompt = decodeDebugMessage(rawPrompt)
             com.localyze.utils.AppLog.d("MainActivity", "Code test prompt: $prompt")
             codeTestPrompt = prompt
+            // Consume the trigger so config changes don't replay the test.
+            intent.removeExtra("triggerTest")
+            intent.removeExtra("testPrompt")
         }
     }
 
@@ -173,19 +180,25 @@ class MainActivity : ComponentActivity() {
                 if (intent.type?.startsWith("text/") == true) {
                     sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
                     sharedImageUris = emptyList()
+                    intent.removeExtra(Intent.EXTRA_TEXT)
+                    intent.action = null
                 } else if (intent.type?.startsWith("image/") == true) {
-                    val uri = intent.getParcelableExtra<android.net.Uri>(Intent.EXTRA_STREAM)
+                    val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, android.net.Uri::class.java)
                     if (uri != null) {
                         sharedImageUris = listOf(uri.toString())
                     }
                     sharedText = null
+                    intent.removeExtra(Intent.EXTRA_STREAM)
+                    intent.action = null
                 }
             }
             Intent.ACTION_SEND_MULTIPLE -> {
                 if (intent.type?.startsWith("image/") == true) {
-                    val uris = intent.getParcelableArrayListExtra<android.net.Uri>(Intent.EXTRA_STREAM)
+                    val uris = IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, android.net.Uri::class.java)
                     sharedImageUris = uris?.map { it.toString() } ?: emptyList()
                     sharedText = null
+                    intent.removeExtra(Intent.EXTRA_STREAM)
+                    intent.action = null
                 }
             }
         }

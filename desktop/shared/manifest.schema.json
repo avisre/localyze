@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://localyze.app/schemas/manifest.schema.json",
+  "title": "Localyze Desktop Hardware-Tier Manifest",
+  "description": "Maps a user's detected hardware to the runtime + model artifacts to download. Each tier is tried in order; the first match wins.",
+  "type": "object",
+  "required": ["version", "tiers"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semver of the manifest schema."
+    },
+    "tiers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "match", "model"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "match": {
+            "type": "object",
+            "description": "Predicate evaluated against the hardware probe. All present keys must match. Numeric strings like '>=16' are parsed as comparators.",
+            "additionalProperties": false,
+            "properties": {
+              "os": { "enum": ["windows", "macos", "linux"] },
+              "chip": { "enum": ["apple-silicon", "intel", "amd", "arm"] },
+              "cpu_features": {
+                "type": "array",
+                "items": { "enum": ["avx2", "avx512", "neon", "sve"] }
+              },
+              "npu": {
+                "enum": ["qualcomm-hexagon", "intel-meteor-lake", "intel-lunar-lake", "amd-xdna", "apple-neural-engine", "none"]
+              },
+              "gpu_api": {
+                "enum": ["cuda", "metal", "directml", "vulkan", "rocm", "none"]
+              },
+              "vram_gb": { "type": "string", "pattern": "^(>=|<=|==|<|>)?\\d+$" },
+              "ram_gb":  { "type": "string", "pattern": "^(>=|<=|==|<|>)?\\d+$" }
+            }
+          },
+          "runtime": {
+            "type": ["object", "null"],
+            "description": "Inference runtime to download. May be null if the runtime is bundled with the app.",
+            "required": ["url", "sha256"],
+            "additionalProperties": false,
+            "properties": {
+              "url":    { "type": "string", "format": "uri" },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "size_mb": { "type": "number" },
+              "unpack_to": { "type": "string" }
+            }
+          },
+          "model": {
+            "type": "object",
+            "required": ["url", "sha256", "format"],
+            "additionalProperties": false,
+            "properties": {
+              "url":    { "type": "string", "format": "uri" },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "format": { "enum": ["onnx", "gguf", "mlx", "openvino-ir", "coreml"] },
+              "quantization": { "enum": ["fp16", "int8", "int4"] },
+              "size_mb": { "type": "number" },
+              "context_length": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

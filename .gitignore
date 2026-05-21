@@ -59,3 +59,34 @@ device-local-assistant-db*
 /screenshots/
 /*.png
 /*.xml
+
+# Local tooling
+.codex-tools/
+
+# Eval / test runs
+eval50user_*/
+chatbot_test_results/
+output/
+
+# Old release artifacts (signed APKs/AABs)
+releases/
+
+# Desktop expansion build artifacts (massive llama.cpp builds)
+desktop/linux/third_party/llama.cpp/build*/
+desktop/windows/third_party/llama.cpp/build*/
+desktop/mac/third_party/llama.cpp/build*/
+
+# Bundled JSON test data
+*_results.json
+*_results_final.json
+verify_*.json
+phone_viz_*.json
+emu_*.json
+quality_*_online.json
+general*_results*.json
+
+# Vendored llama.cpp source (too large; build/use as submodule or external)
+desktop/*/third_party/llama.cpp/
+# Python cache
+__pycache__/
+*.pyc

@@ -107,14 +107,22 @@ fun MainNavigation(
 
     // Determine start destination: onboarding if model not ready, else chat.
     // Debug code-workspace launches are allowed to bypass model setup for device UI tests.
+    // Guard with runCatching: isModelDownloaded() reads from storage and can throw
+    // on devices with restricted file access or a corrupted app data directory.
     val isModelReady = remember {
-        val downloaded = modelRepository.isModelDownloaded()
-        val ready = downloaded
-        com.localyze.utils.AppLog.d("MainNavigation", "isModelDownloaded=$downloaded, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
-        ready
+        runCatching {
+            val downloaded = modelRepository.isModelDownloaded()
+            com.localyze.utils.AppLog.d("MainNavigation", "isModelDownloaded=$downloaded, modelPath=${modelRepository.getModelFilePath()}, modelSize=${modelRepository.getModelFileSize()}")
+            downloaded
+        }.getOrElse { e ->
+            android.util.Log.e("MainNavigation", "isModelDownloaded threw: ${e.message}", e)
+            false
+        }
     }
     val shouldInitializeRealModel = remember {
-        modelRepository.isModelDownloaded() && !BuildConfig.USE_TEST_DOWNLOAD
+        runCatching {
+            modelRepository.isModelDownloaded() && !BuildConfig.USE_TEST_DOWNLOAD
+        }.getOrDefault(false)
     }
 
     val startDestination = when {

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-page="blog-post">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The cloud AI privacy myth — is ChatGPT really private? — Localyze.ai</title>
+<meta name="description" content="Cloud AI privacy is a paper-thin promise. What the policies actually allow, what gets retained, and why "we don't train on your data" isn't a guarantee." />
+<meta name="keywords" content="cloud AI privacy, is ChatGPT private, AI data privacy, ChatGPT privacy, AI privacy policy" />
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="author" content="Localyze.ai" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://localyze.ai/blog/cloud-ai-privacy-myth.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Localyze.ai" />
+<meta property="og:title" content="The cloud AI privacy myth" />
+<meta property="og:description" content="A privacy promise is not a privacy guarantee. What cloud AI policies actually allow." />
+<meta property="og:url" content="https://localyze.ai/blog/cloud-ai-privacy-myth.html" />
+<meta property="og:image" content="https://localyze.ai/assets/img/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The cloud AI privacy myth" />
+<meta name="twitter:description" content="Why "we don't train on your data" isn't a guarantee." />
+<meta name="twitter:image" content="https://localyze.ai/assets/img/og-image.png" />
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/logo-mark.png" />
+<link rel="apple-touch-icon" href="/assets/img/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="/assets/css/styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BlogPosting",
+  "headline":"The cloud AI privacy myth",
+  "description":"Cloud AI privacy is a paper-thin promise. What the policies actually allow, what gets retained, and why on-device wins.",
+  "datePublished":"2026-05-19",
+  "dateModified":"2026-05-19",
+  "author":{"@type":"Organization","name":"Localyze.ai","url":"https://localyze.ai"},
+  "publisher":{"@type":"Organization","name":"Localyze.ai","logo":{"@type":"ImageObject","url":"https://localyze.ai/assets/img/logo-mark.png"}},
+  "image":"https://localyze.ai/assets/img/og-image.png",
+  "mainEntityOfPage":"https://localyze.ai/blog/cloud-ai-privacy-myth.html"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand">
+      <img src="/assets/img/logo-mark.png" alt="Localyze.ai logo" width="26" height="26" />
+      <span>Localyze.ai</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#compare">Compare</a>
+      <a href="/blog/">Blog</a>
+      <a href="/download.html" class="nav-cta">Download</a>
+    </nav>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+
+  <h1>The cloud AI privacy myth</h1>
+  <p><em>"We don't train on your data" is a sentence, not a guarantee. The policies say much more.</em></p>
+  <p class="muted" style="font-size:0.9rem;">May 19, 2026 · 5 min read</p>
+
+  <h2>The line everyone quotes</h2>
+  <p>Every major cloud assistant has, somewhere on its marketing page, a friendly version of the same sentence: <em>your conversations aren't used to train our models</em>. It is technically true. It is also not the whole privacy story.</p>
+  <p>Training is one use of your data. Storage is another. Human review is another. Abuse detection is another. Subpoena response is another. The promise covers exactly one of those.</p>
+
+  <h2>What the policies actually allow</h2>
+  <p>Read past the headline and the same pattern repeats across providers:</p>
+  <ul>
+    <li><strong>Retention.</strong> Conversations are stored for 30 days "for safety" by default — sometimes longer for flagged content.</li>
+    <li><strong>Human review.</strong> A subset of conversations is routed to human reviewers for quality and safety work. You usually cannot opt out of this.</li>
+    <li><strong>Sub-processors.</strong> Data may be shared with cloud hosts, moderation vendors, and analytics processors listed deep in a sub-page.</li>
+    <li><strong>Legal access.</strong> Lawful requests are honoured. End-to-end encrypted? No.</li>
+    <li><strong>Setting drift.</strong> Defaults change. The opt-out you toggled last year may not exist in the same place today.</li>
+  </ul>
+  <p>None of this is hidden. It is in the policies, written by lawyers, and binding on you the moment you typed a prompt.</p>
+
+  <h2>The structural problem</h2>
+  <p>Even if a provider behaves perfectly, the architecture itself is the issue. Your prompt has to leave your device, travel over a network, terminate on a server, get logged for at least milliseconds, get processed, get logged again, and then come back. At each hop, the data exists in a place you don't control.</p>
+  <p>A privacy policy is a promise about how that data <em>will</em> be treated. It is not a constraint on what is <em>possible</em>. If the data is on someone else's machine, the constraint is them.</p>
+
+  <h2>The breaches that already happened</h2>
+  <p>A short, incomplete list from the last few years:</p>
+  <ul>
+    <li>Cross-user conversation leakage from a caching bug at a major chatbot provider.</li>
+    <li>Internal employees discovered with broad access to user prompts during an audit.</li>
+    <li>Prompt and image data appearing in third-party training sets after a vendor mishandled storage.</li>
+    <li>"Anonymous" conversation samples re-identified through quoted personal context.</li>
+  </ul>
+  <p>Every one of those companies had a perfectly fine privacy policy at the time.</p>
+
+  <h2>What changes on-device</h2>
+  <p>Move the model to the device and the entire category of risks above stops existing. There is no retention server, because there is no server. There is no human reviewer queue, because no review pipeline exists. A subpoena to the AI vendor returns nothing about your chats, because the vendor doesn't have them.</p>
+  <p>This isn't a clever opt-out — it's the absence of the data path that creates the risk in the first place.</p>
+
+  <h2>The honest comparison</h2>
+  <p>Cloud AI privacy isn't a lie. It's a promise that's only as strong as the company, its staff, its sub-processors, its legal environment, and its current quarterly priorities. On-device AI doesn't ask you to model any of that. The data simply never leaves.</p>
+  <p>For anything you wouldn't shout across a café, that asymmetry is the entire argument.</p>
+
+  <hr style="margin:48px 0 32px;border:none;border-top:1px solid var(--border);" />
+  <p class="muted" style="font-size:0.95rem;">More from Localyze.ai: <a href="/blog/why-on-device-ai-matters.html">Why on-device AI matters</a> · <a href="/blog/what-is-gemma-4-e4b.html">What is Gemma 4 E4B?</a> · <a href="/blog/how-to-run-llm-on-phone.html">How to run an LLM on your phone</a> · <a href="/download.html">Download Localyze.ai</a></p>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="/assets/img/logo-mark.png" alt="" width="24" height="24" />
+          <span>Localyze.ai</span>
+        </div>
+        <p class="footer-tag">Private, on-device AI for every device you own.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/download.html">Download</a></li>
+          <li><a href="/blog/">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Compare</h4>
+        <ul>
+          <li><a href="/vs-chatgpt.html">vs ChatGPT</a></li>
+          <li><a href="/vs-gemini.html">vs Gemini</a></li>
+          <li><a href="/vs-copilot.html">vs Copilot</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Platforms</h4>
+        <ul>
+          <li><a href="/local-ai-windows.html">Windows</a></li>
+          <li><a href="/local-ai-macos.html">macOS</a></li>
+          <li><a href="/local-ai-linux.html">Linux</a></li>
+          <li><a href="/private-ai-assistant.html">Private AI</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Localyze.ai</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@localyze.ai">Contact</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

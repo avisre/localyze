@@ -40,10 +40,11 @@ class SettingsDataStore @Inject constructor(
     }
 
     val darkMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_DARK_MODE] ?: false }
-    // Default ON: thinking mode lets the model reason through ambiguous
-    // / vague prompts before answering. Users can still toggle it off in
-    // Settings if they want lower-latency responses.
-    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: true }
+    // Default OFF: the single-model build (Gemma 3n E2B) mishandles the
+    // <thought>...</thought> framework, dumping the whole response into a
+    // hidden channel and producing empty chat bubbles. Keep it off unless
+    // the user explicitly toggles it on in Settings.
+    val thinkingMode: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_THINKING_MODE] ?: false }
     val streamTokens: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_STREAM_TOKENS] ?: true }
     val voiceAutoPlay: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_VOICE_AUTO_PLAY] ?: false }
     val allowWebSearch: Flow<Boolean> = context.settingsDataStore.data.map { it[KEY_ALLOW_WEB_SEARCH] ?: true }

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-page="blog-post">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Why on-device AI matters — privacy by architecture — Localyze.ai</title>
+<meta name="description" content="On-device AI replaces a privacy promise with a privacy guarantee. Why local inference is the only model that actually keeps your prompts on your hardware." />
+<meta name="keywords" content="on-device AI, why local AI is private, edge AI privacy, local LLM, private AI assistant" />
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+<meta name="author" content="Localyze.ai" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://localyze.ai/blog/why-on-device-ai-matters.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Localyze.ai" />
+<meta property="og:title" content="Why on-device AI matters" />
+<meta property="og:description" content="Privacy by architecture, not privacy by promise. The case for local-only inference." />
+<meta property="og:url" content="https://localyze.ai/blog/why-on-device-ai-matters.html" />
+<meta property="og:image" content="https://localyze.ai/assets/img/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Why on-device AI matters" />
+<meta name="twitter:description" content="Privacy by architecture, not by promise." />
+<meta name="twitter:image" content="https://localyze.ai/assets/img/og-image.png" />
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/logo-mark.png" />
+<link rel="apple-touch-icon" href="/assets/img/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="/assets/css/styles.css" />
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BlogPosting",
+  "headline":"Why on-device AI matters",
+  "description":"On-device AI replaces a privacy promise with a privacy guarantee. Why local inference is the only model that keeps prompts on your hardware.",
+  "datePublished":"2026-05-19",
+  "dateModified":"2026-05-19",
+  "author":{"@type":"Organization","name":"Localyze.ai","url":"https://localyze.ai"},
+  "publisher":{"@type":"Organization","name":"Localyze.ai","logo":{"@type":"ImageObject","url":"https://localyze.ai/assets/img/logo-mark.png"}},
+  "image":"https://localyze.ai/assets/img/og-image.png",
+  "mainEntityOfPage":"https://localyze.ai/blog/why-on-device-ai-matters.html"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand">
+      <img src="/assets/img/logo-mark.png" alt="Localyze.ai logo" width="26" height="26" />
+      <span>Localyze.ai</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="/#features">Features</a>
+      <a href="/#compare">Compare</a>
+      <a href="/blog/">Blog</a>
+      <a href="/download.html" class="nav-cta">Download</a>
+    </nav>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+
+  <h1>Why on-device AI matters</h1>
+  <p><em>Cloud AI asks you to trust a policy. On-device AI doesn't ask.</em></p>
+  <p class="muted" style="font-size:0.9rem;">May 19, 2026 · 4 min read</p>
+
+  <h2>The promise problem</h2>
+  <p>Every cloud assistant ships with a privacy page. It says the right things: encryption in transit, encryption at rest, opt-outs, regional data centres. It is also, by design, a promise. Someone at the other end is choosing to behave well.</p>
+  <p>Promises break. Logs get retained for "abuse review". Training opt-outs flip default in a quiet update. A subpoena lands. A misconfigured bucket leaks. None of this is paranoia — it is the public record of the last five years.</p>
+
+  <h2>Privacy by architecture</h2>
+  <p>On-device AI removes the trust step entirely. There is no server to log your prompt because the prompt never leaves the device. The model file sits on your disk. The inference loop runs on your CPU, GPU, or NPU. The reply appears, and nothing crosses the network.</p>
+  <p>This is privacy by architecture: a property of the system, not a clause in a document. You don't need to read the policy. You can put the phone in airplane mode and watch it still work.</p>
+
+  <h2>What "edge AI" really buys you</h2>
+  <p>Three concrete things change when inference moves to the device.</p>
+  <ul>
+    <li><strong>No data exhaust.</strong> Prompts, attached images, voice clips — none of it becomes someone else's training corpus or retention liability.</li>
+    <li><strong>No outage dependency.</strong> The model works on a plane, in a tunnel, in a country where the provider is blocked.</li>
+    <li><strong>No silent policy drift.</strong> An app update can change defaults; the laws of physics on your SoC cannot exfiltrate data you never sent.</li>
+  </ul>
+
+  <h2>"But the cloud is smarter"</h2>
+  <p>It used to be. The gap has collapsed for the things most people actually use AI for: drafting, summarising, rewriting, explaining, coding help, reading an image. A 4B-parameter open model like <code>Gemma 4 E4B</code> handles those well on a mid-range phone, and runs faster than a round trip to a data centre.</p>
+  <p>The remaining frontier — agentic long-horizon work, billion-token retrieval — still benefits from cloud scale. Most chat does not.</p>
+
+  <h2>The honest case</h2>
+  <p>On-device AI is not magic. The model is smaller. It will not browse the live web. It will not call a paid GPU farm for you. Those are real trade-offs.</p>
+  <p>In exchange you get a system that is private the way a notebook is private: because the data is in your hand, not on a server you cannot inspect. For most daily AI work, that trade is the right one.</p>
+
+  <hr style="margin:48px 0 32px;border:none;border-top:1px solid var(--border);" />
+  <p class="muted" style="font-size:0.95rem;">More from Localyze.ai: <a href="/blog/cloud-ai-privacy-myth.html">The cloud AI privacy myth</a> · <a href="/blog/what-is-gemma-4-e4b.html">What is Gemma 4 E4B?</a> · <a href="/blog/how-to-run-llm-on-phone.html">How to run an LLM on your phone</a> · <a href="/download.html">Download Localyze.ai</a></p>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="/assets/img/logo-mark.png" alt="" width="24" height="24" />
+          <span>Localyze.ai</span>
+        </div>
+        <p class="footer-tag">Private, on-device AI for every device you own.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/download.html">Download</a></li>
+          <li><a href="/blog/">Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Compare</h4>
+        <ul>
+          <li><a href="/vs-chatgpt.html">vs ChatGPT</a></li>
+          <li><a href="/vs-gemini.html">vs Gemini</a></li>
+          <li><a href="/vs-copilot.html">vs Copilot</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Platforms</h4>
+        <ul>
+          <li><a href="/local-ai-windows.html">Windows</a></li>
+          <li><a href="/local-ai-macos.html">macOS</a></li>
+          <li><a href="/local-ai-linux.html">Linux</a></li>
+          <li><a href="/private-ai-assistant.html">Private AI</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> Localyze.ai</span>
+      <span><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@localyze.ai">Contact</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

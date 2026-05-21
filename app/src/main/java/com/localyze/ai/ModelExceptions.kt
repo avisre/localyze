@@ -19,3 +19,4 @@ class InferenceException(message: String, cause: Throwable? = null) : Exception(
  * Thrown when the combined input exceeds the model's context window capacity.
  */
 class ContextWindowExceededException(message: String) : Exception(message)
+

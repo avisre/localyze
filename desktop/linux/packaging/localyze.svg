@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Localyze.ai application icon: green rounded square with a white "L". -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 256 256"
+     width="256" height="256">
+  <!-- Subtle vertical gradient on the green tile. -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#16A34A"/>
+      <stop offset="100%" stop-color="#0E7A37"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Rounded-square background. -->
+  <rect x="8" y="8" width="240" height="240" rx="48" ry="48"
+        fill="url(#tile)"/>
+
+  <!-- White "L" glyph (block-serif feel via two rectangles). -->
+  <g filter="url(#shadow)" fill="#FFFFFF">
+    <rect x="78"  y="60"  width="34" height="136" rx="4"/>
+    <rect x="78"  y="162" width="100" height="34" rx="4"/>
+  </g>
+</svg>

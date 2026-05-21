@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(adb devices *)",
-      "Bash(./gradlew assembleDebug)"
+      "Bash(./gradlew assembleDebug)",
+      "Bash(:)",
+      "Bash(mkdir -p /tmp/v3/e2b_shots)",
+      "Bash(rm -rf /tmp/v3/e2b_shots/*)",
+      "Bash(sed -e 's|SHOTS=$DIR/turn_shots_15|SHOTS=$DIR/e2b_shots|g' -e 's|LOG=$DIR/drv15.log|LOG=$DIR/drv15_e2b.log|g' /tmp/drv15.sh)",
+      "Bash(chmod +x /tmp/drv15_e2b.sh)",
+      "Read(//tmp/v3/**)"
     ]
   }
 }

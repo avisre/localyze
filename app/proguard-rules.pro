@@ -41,9 +41,9 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# SQLCipher
--keep class net.sqlcipher.** { *; }
--keep class net.sqlcipher.database.** { *; }
+# SQLCipher (net.zetetic:sqlcipher-android 4.6+)
+-keep class net.zetetic.database.** { *; }
+-keep class net.zetetic.database.sqlcipher.** { *; }
 
 # Firebase Crashlytics
 -keep class com.google.firebase.crashlytics.** { *; }

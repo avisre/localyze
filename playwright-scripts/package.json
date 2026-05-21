@@ -5,7 +5,8 @@
   "main": "play-console-health-check.js",
   "scripts": {
     "health-check": "node play-console-health-check.js",
-    "setup-closed-testing": "node setup-closed-testing.js"
+    "setup-closed-testing": "node setup-closed-testing.js",
+    "upload-localyze": "node upload-localyze-release.js"
   },
   "keywords": [
     "playwright",

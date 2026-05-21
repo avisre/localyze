@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Localyze.ai
+GenericName=Local AI Chat
+Comment=Private, on-device AI assistant powered by Gemma running locally via Vulkan
+Exec=Localyze %U
+Icon=localyze
+Terminal=false
+StartupNotify=true
+Categories=Network;Chat;Utility;
+Keywords=AI;LLM;Chat;Assistant;Local;Offline;Gemma;Vulkan;
+StartupWMClass=Localyze

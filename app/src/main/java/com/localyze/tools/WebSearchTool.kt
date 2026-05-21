@@ -49,6 +49,14 @@ class WebSearchTool @Inject constructor(
         .readTimeout(6, TimeUnit.SECONDS)
         .build()
 
+    // Separate, shorter-timeout client for the per-page readable-content
+    // extraction so a single slow page can't stall the whole pipeline.
+    private val contentClient = okHttpClient.newBuilder()
+        .callTimeout(4, TimeUnit.SECONDS)
+        .connectTimeout(3, TimeUnit.SECONDS)
+        .readTimeout(4, TimeUnit.SECONDS)
+        .build()
+
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -127,10 +135,20 @@ class WebSearchTool @Inject constructor(
                     }
                 }
 
+                // Dedupe by URL, then rank by domain-trust + snippet-strength +
+                // query-term overlap so we keep the best results (not just the
+                // first the providers returned). Group by host afterward so
+                // we don't ship 3 results from a single domain.
+                val deduped = results.distinctBy { it.url.ifBlank { it.title } }
+                val ranked = deduped
+                    .sortedByDescending { scoreResult(it, normalizedQuery) }
+                val grouped = groupByHostKeepingBest(ranked, maxResults)
+                // Extract readable content from top 3 pages so the on-device
+                // model has real text to summarize, not anti-scrape stub
+                // snippets.
+                val enriched = enrichWithExtractedContent(grouped)
                 formatResults(
-                    results = results
-                        .distinctBy { it.url.ifBlank { it.title } }
-                        .take(maxResults),
+                    results = enriched,
                     query = normalizedQuery,
                     plannedQueries = plannedQueries,
                     searchedProviders = searchedProviders.toList()
@@ -923,6 +941,149 @@ class WebSearchTool @Inject constructor(
         return runCatching { block() }.getOrDefault(emptyList())
     }
 
+    // Score a result by domain trust + snippet strength + query-term overlap.
+    // Higher is better. Used to sort before .take(maxResults) so we keep the
+    // strongest results regardless of which provider returned them first.
+    private fun scoreResult(result: SearchResult, query: String): Int {
+        val host = hostOf(result.url).lowercase()
+        val trust = domainTrustFor(host)
+        val snippetScore = (result.snippet.length / 100).coerceAtMost(3)
+        val queryTerms = query.lowercase()
+            .split(Regex("\\W+"))
+            .filter { it.length >= 3 }
+            .toSet()
+        val haystack = (result.title + " " + result.snippet).lowercase()
+        val overlap = queryTerms.count { term -> haystack.contains(term) }
+        return trust + snippetScore + overlap
+    }
+
+    private fun domainTrustFor(host: String): Int {
+        if (host.isBlank()) return 0
+        // gov/edu suffix check
+        if (host.endsWith(".gov") || host.contains(".gov.")) return 5
+        if (host.endsWith(".edu") || host.contains(".edu.")) return 4
+        // Match against the static map by suffix so subdomains
+        // (en.wikipedia.org, www.bbc.com) still get credit.
+        for ((domain, score) in DOMAIN_TRUST) {
+            if (host == domain || host.endsWith(".$domain")) return score
+        }
+        return 0
+    }
+
+    private fun hostOf(url: String): String {
+        if (url.isBlank()) return ""
+        return runCatching { java.net.URI(url).host.orEmpty() }.getOrDefault("")
+    }
+
+    // Round-robin pick results across distinct hosts so we don't ship three
+    // results from the same domain. Falls back to remaining results once each
+    // host bucket is exhausted, in case maxResults > distinct host count.
+    private fun groupByHostKeepingBest(
+        ranked: List<SearchResult>,
+        maxResults: Int
+    ): List<SearchResult> {
+        if (ranked.isEmpty() || maxResults <= 0) return emptyList()
+        val byHost = linkedMapOf<String, MutableList<SearchResult>>()
+        ranked.forEach { r ->
+            val host = hostOf(r.url).ifBlank { r.source }
+            byHost.getOrPut(host) { mutableListOf() }.add(r)
+        }
+        val picked = mutableListOf<SearchResult>()
+        // First pass: one per host (best-scoring, since ranked was sorted).
+        for ((_, list) in byHost) {
+            if (picked.size >= maxResults) break
+            picked.add(list.removeAt(0))
+        }
+        // Second pass: fill remaining slots from leftover entries.
+        if (picked.size < maxResults) {
+            val leftover = byHost.values.flatten()
+            for (r in leftover) {
+                if (picked.size >= maxResults) break
+                picked.add(r)
+            }
+        }
+        return picked
+    }
+
+    // Fetch the top 3 results and replace their snippet with extracted readable
+    // body text. Skip when the snippet is already strong, when the response is
+    // not HTML, or on any failure. Tolerant: failure to extract one page must
+    // not block the others, so each call is wrapped in runCatching.
+    private fun enrichWithExtractedContent(results: List<SearchResult>): List<SearchResult> {
+        if (results.isEmpty()) return results
+        return results.mapIndexed { index, result ->
+            if (index >= 3) return@mapIndexed result
+            if (result.snippet.length >= 150) return@mapIndexed result
+            if (result.url.isBlank() || !result.url.startsWith("http")) return@mapIndexed result
+            runCatching {
+                contentClient.newCall(searchRequest(result.url)).execute().use { response ->
+                    if (!response.isSuccessful) return@use result
+                    val contentType = response.header("Content-Type").orEmpty().lowercase()
+                    if (contentType.isNotBlank() &&
+                        !contentType.contains("html") &&
+                        !contentType.contains("xml") &&
+                        !contentType.contains("text/plain")
+                    ) {
+                        return@use result
+                    }
+                    val source = response.body?.source() ?: return@use result
+                    // Cap body read at 500KB to keep memory bounded.
+                    source.request(MAX_EXTRACT_BYTES)
+                    val buffer = source.buffer.snapshot(
+                        minOf(source.buffer.size, MAX_EXTRACT_BYTES).toInt()
+                    )
+                    val html = buffer.utf8()
+                    if (html.isBlank()) return@use result
+                    val extracted = extractReadable(html)
+                    if (extracted.isBlank()) result
+                    else result.copy(snippet = extracted)
+                }
+            }.getOrDefault(result)
+        }
+    }
+
+    // Pull readable text from an HTML page. Strategy: <article>, then <main>,
+    // then the longest cluster of <p> tags. Nav/script/style is stripped.
+    // Returns 500-800 chars of clean text or empty if nothing usable is found.
+    private fun extractReadable(html: String): String {
+        if (html.isBlank()) return ""
+        return runCatching {
+            val doc = Jsoup.parse(html)
+            doc.select("script, style, nav, header, footer, aside, noscript, iframe, form").remove()
+
+            val article = doc.selectFirst("article")?.text()?.cleanedWhitespace().orEmpty()
+            if (article.length >= 200) return@runCatching truncateReadable(article)
+
+            val main = doc.selectFirst("main")?.text()?.cleanedWhitespace().orEmpty()
+            if (main.length >= 200) return@runCatching truncateReadable(main)
+
+            // Longest <p> cluster: pick the parent whose direct <p> children
+            // have the most total text. Common pattern for news/blog bodies.
+            val paragraphs = doc.select("p")
+            if (paragraphs.isEmpty()) return@runCatching ""
+            val byParent = paragraphs.groupBy { it.parent() }
+            val bestCluster = byParent.maxByOrNull { (_, ps) ->
+                ps.sumOf { it.text().length }
+            }?.value.orEmpty()
+            val clusterText = bestCluster.joinToString(" ") { it.text() }.cleanedWhitespace()
+            if (clusterText.length >= 100) return@runCatching truncateReadable(clusterText)
+
+            // Last resort: join all paragraphs.
+            paragraphs.joinToString(" ") { it.text() }.cleanedWhitespace().let(::truncateReadable)
+        }.getOrDefault("")
+    }
+
+    private fun String.cleanedWhitespace(): String =
+        this.replace(Regex("\\s+"), " ").trim()
+
+    private fun truncateReadable(text: String): String {
+        if (text.length <= 800) return text
+        // Prefer cutting at the last sentence boundary inside the 500-800 window.
+        val window = text.substring(0, 800)
+        val cut = window.lastIndexOfAny(charArrayOf('.', '!', '?'), startIndex = 799)
+        return if (cut >= 500) window.substring(0, cut + 1) else window
+    }
+
     private fun formatResults(results: List<SearchResult>, query: String): String {
         return formatResults(results, query, plannedQueries = listOf(query), searchedProviders = emptyList())
     }
@@ -1043,6 +1204,22 @@ class WebSearchTool @Inject constructor(
     private companion object {
         const val DEFAULT_MAX_RESULTS = 5
         const val MAX_RESULTS_LIMIT = 8
+        const val MAX_EXTRACT_BYTES = 500L * 1024L
+
+        // Static domain-trust map. gov/edu are handled separately via host
+        // suffix in domainTrustFor(). Positive = boost, negative = penalize.
+        private val DOMAIN_TRUST = mapOf(
+            "wikipedia.org" to 5,
+            "reuters.com" to 4,
+            "bbc.com" to 4,
+            "apnews.com" to 4,
+            "nytimes.com" to 3,
+            "github.com" to 3,
+            "stackoverflow.com" to 3,
+            "medium.com" to -1,
+            "quora.com" to -1,
+            "pinterest.com" to -3
+        )
     }
 }
 

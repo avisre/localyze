@@ -27,6 +27,7 @@ import com.google.ai.edge.litertlm.SamplerConfig
 import com.google.ai.edge.litertlm.ToolProvider
 import com.google.ai.edge.litertlm.tool
 import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.OkHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -98,15 +99,27 @@ class GemmaInferenceEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val systemPromptBuilder: SystemPromptBuilder,
     private val toolRegistry: ToolRegistry,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val crashRecoveryStore: com.localyze.util.CrashRecoveryStore,
+    private val okHttpClient: OkHttpClient
 ) {
 
     companion object {
         private const val TAG = "GemmaInference"
+        // 4096 sized for the slim ~220-token system prompt (post-refactor).
+        // Was 8192 to leave headroom over the old ~4600-token prompt; with
+        // the slim prompt that's wasted KV-cache memory. Cutting in half
+        // drops GPU RSS ~1.5 GB and stays under OnePlus's gpu_limit
+        // watchdog (2 GB) that killed the app twice.
         private const val DEFAULT_MAX_TOKENS = 4096
-        private const val DEFAULT_TOP_K = 40
-        private const val DEFAULT_TEMPERATURE = 0.7f
-        private const val DEFAULT_TOP_P = 0.95f
+        // Sampler tuned for latency on GPU. Tighter than the LiteRT-LM
+        // demo defaults (top_k=40, top_p=0.95, T=0.7) — smaller candidate
+        // set per step ≈ faster decoding, and Gemma 4 still produces
+        // natural output at these values. Going fully greedy is ~10%
+        // faster again but triggers repetition loops on chit-chat.
+        private const val DEFAULT_TOP_K = 8
+        private const val DEFAULT_TEMPERATURE = 0.4f
+        private const val DEFAULT_TOP_P = 0.9f
         private const val MAX_IMAGE_INPUT_SIDE = 1024
         private const val ENGINE_READY_TIMEOUT_MS = 180_000L
 
@@ -146,11 +159,15 @@ class GemmaInferenceEngine @Inject constructor(
     var topP: Float = DEFAULT_TOP_P
         private set
 
-    fun setMaxTokens(value: Int) { maxTokens = value.coerceIn(256, 8192) }
+    fun setMaxTokens(value: Int) { maxTokens = value.coerceIn(2048, 8192) }
     fun setRandomSeed(value: Int) { randomSeed = value }
     fun setTemperature(value: Float) { temperature = value.coerceIn(0f, 2f) }
     fun setTopK(value: Int) { topK = value.coerceAtLeast(1) }
     fun setTopP(value: Float) { topP = value.coerceIn(0f, 1f) }
+
+    // Cached settings read once in initialize() — avoids runBlocking in buildToolProviders.
+    @Volatile private var cachedAllowWebSearch: Boolean = false
+    @Volatile private var cachedMemoryEnabled: Boolean = false
 
     // Force CPU backend on next engine init. Used when device-specific GPU
     // artifacts garble digits/identifiers (observed on Snapdragon 8 Gen 1
@@ -163,7 +180,7 @@ class GemmaInferenceEngine @Inject constructor(
             // Drop any loaded engine so the next inference triggers a fresh
             // initialize() with the new backend choice.
             engine = null
-            conversation = null
+            closeAllConversations()
             _modelLoadState.value = ModelLoadState.NotLoaded
             AppLog.d(TAG, "force_cpu set to $value — engine reset, will reload on next inference")
         }
@@ -188,12 +205,21 @@ class GemmaInferenceEngine @Inject constructor(
     @Volatile private var engine: Engine? = null
 
     /**
-     * The active Conversation — reused across messages.
-     * Only reset when explicitly requested (new chat, mode change).
-     * This is CRITICAL: the Conversation maintains the KV cache and
-     * tracks message history internally. Do NOT recreate per message.
+     * Per-mode Conversation pool. Each mode keeps its own LiteRT-LM
+     * Conversation alive across mode toggles so the KV cache (containing
+     * the system prompt prefill) is reused. Switching chat ↔ code ↔ data
+     * after each has been used once costs zero prefill, vs full prefill
+     * per switch under the old single-Conversation design.
+     *
+     * Keyed by capabilityMode. Thinking channels are ALWAYS created so
+     * toggling enableThinking does not invalidate the cache — when thinking
+     * is off, the thought-channel tokens are simply not surfaced to the UI.
      */
-    @Volatile private var conversation: Conversation? = null
+    private val conversationsByMode = java.util.concurrent.ConcurrentHashMap<String, Conversation>()
+
+    /** Tracks last-seen image/audio support flag per mode so we can recreate
+     *  only the affected mode's Conversation when the flag flips. */
+    private val supportFlagsByMode = java.util.concurrent.ConcurrentHashMap<String, Pair<Boolean, Boolean>>()
 
     /** Which backend is currently active. */
     @Volatile private var activeBackendType: String = "none"
@@ -204,13 +230,16 @@ class GemmaInferenceEngine @Inject constructor(
     /** The Backend object used — needed for SamplerConfig decision. */
     @Volatile private var activeBackend: Backend = Backend.CPU()
 
-    /** Current system instruction and capability mode — tracked for reset. */
-    @Volatile private var currentSystemInstruction: Contents? = null
-    @Volatile private var currentCapabilityMode: String = "chat"
-    @Volatile private var currentEnableThinking: Boolean = false
-    @Volatile private var currentSupportImage: Boolean = false
-    @Volatile private var currentSupportAudio: Boolean = false
+    /** Short prior-conversation summary to inject the next time we create
+     *  a Conversation. Replaces the old full-history-into-systemInstruction
+     *  path (which re-prefilled thousands of tokens on every restore). */
     @Volatile private var restoredConversationContext: String? = null
+
+    /** User memories (already formatted as plain strings) baked into the
+     *  system instruction at Conversation creation time. Snapshot is small
+     *  so prefill cost is bounded; changing it invalidates the pool so
+     *  the next inference rebuilds with current memories. */
+    @Volatile private var memorySnapshot: List<String> = emptyList()
 
     /**
      * Initialize the engine, trying NPU → GPU → CPU in order.
@@ -223,7 +252,7 @@ class GemmaInferenceEngine @Inject constructor(
 
         try {
             // Use ModelRepository's findModelFile() to locate the best model
-            val modelRepository = com.localyze.data.repository.ModelRepository(context, okhttp3.OkHttpClient())
+            val modelRepository = com.localyze.data.repository.ModelRepository(context, okHttpClient)
             val modelFile = modelRepository.findModelFile()
                 ?: File(context.filesDir, "models/${com.localyze.data.repository.ModelRepository.MODEL_FILENAME}")
             AppLog.d(TAG, "Model file: ${modelFile.absolutePath}, exists=${modelFile.exists()}, size=${modelFile.length()}")
@@ -264,24 +293,58 @@ class GemmaInferenceEngine @Inject constructor(
             // Read persisted force_cpu preference (set via Settings or
             // intent extra). Persisted so it survives the engine's first
             // background init, which would otherwise race.
+            cachedAllowWebSearch = runCatching { settingsDataStore.allowWebSearch.first() }.getOrDefault(false)
+            cachedMemoryEnabled = runCatching { settingsDataStore.memoryEnabled.first() }.getOrDefault(false)
             val persistedForceCpu = runCatching {
-                settingsDataStore.forceCpuBackendBlocking()
+                settingsDataStore.forceCpuBackend.first()
             }.getOrDefault(false)
-            val effectiveForceCpu = forceCpu || persistedForceCpu
+            val gpuPreviouslyCrashed = crashRecoveryStore.gpuInitPreviouslyCrashed
+            val effectiveForceCpu = forceCpu || persistedForceCpu || gpuPreviouslyCrashed
             // Always try GPU first, with CPU as fallback. Previously we skipped
             // GPU on emulator because Android Studio's `-gpu host` passthrough
             // has no OpenCL ICD, but the user wants the GPU path attempted
             // everywhere — fallback to CPU still kicks in if GPU init fails.
+            //
+            // GPU init sentinel: if the previous run died (SIGABRT/SIGSEGV inside
+            // the native GPU driver) during initialize(), the sentinel file persists
+            // across the restart and gpuPreviouslyCrashed will be true here — in
+            // that case we skip GPU entirely to break the crash-restart loop.
             val backends = when {
                 effectiveForceCpu -> {
-                    AppLog.d(TAG, "force_cpu=true (persisted=$persistedForceCpu) — skipping GPU, using CPU only")
+                    if (gpuPreviouslyCrashed) {
+                        AppLog.w(TAG, "GPU init sentinel detected — previous GPU init crashed, using CPU backend")
+                    } else {
+                        AppLog.d(TAG, "force_cpu=true (persisted=$persistedForceCpu) — skipping GPU, using CPU only")
+                    }
                     listOf("cpu" to Backend.CPU())
                 }
-                else -> listOf(
-                    "gpu" to Backend.GPU(),
-                    "cpu" to Backend.CPU()
-                )
+                else -> {
+                    // Pre-flight check: skip GPU on devices where OpenCL is absent or
+                    // the EGL driver is non-functional — these will SIGABRT otherwise.
+                    // GpuCompatibilityChecker.isGpuLikelySafe() never throws and never
+                    // touches the GPU driver itself, so it is always safe to call.
+                    if (!GpuCompatibilityChecker.isGpuLikelySafe()) {
+                        AppLog.w(TAG, "GPU pre-flight failed — falling back to CPU")
+                        listOf("cpu" to Backend.CPU())
+                    } else {
+                        // Write sentinel BEFORE touching the GPU driver. If Backend.GPU()
+                        // or e2.initialize() fires a native SIGABRT (uncatchable), the
+                        // sentinel persists across the restart and the next launch skips GPU.
+                        crashRecoveryStore.markGpuInitStarted()
+                        listOf(
+                            "gpu" to Backend.GPU(),
+                            "cpu" to Backend.CPU()
+                        )
+                    }
+                }
             }
+
+            // Multi-Token Prediction (speculative decoding) is OFF for now.
+            // It nearly doubles KV-cache memory because it runs a parallel
+            // draft model — combined with our 4096-token KV cache it pushed
+            // total GPU RSS over OnePlus's 2 GB gpu_limit watchdog and got
+            // the app killed. Re-enable once we shave more memory elsewhere.
+            ExperimentalFlags.enableSpeculativeDecoding = false
 
             var loaded = false
             for ((name, backend) in backends) {
@@ -360,6 +423,8 @@ class GemmaInferenceEngine @Inject constructor(
             }
 
             _modelLoadState.value = ModelLoadState.Loaded
+            // Clear the GPU init sentinel — engine loaded successfully (any backend).
+            crashRecoveryStore.markGpuInitCleared()
             AppLog.d(TAG, "Model init complete! Backend: $activeBackendType")
         } catch (e: ModelNotFoundException) {
             throw e
@@ -375,99 +440,140 @@ class GemmaInferenceEngine @Inject constructor(
     }
 
     /**
-     * Ensure a Conversation exists for the given configuration.
-     * Creates one if none exists, or if the configuration (mode, thinking, system prompt) changed.
+     * Ensure a Conversation exists for the given mode and return it.
      *
-     * This matches the Gallery pattern where a Conversation is created once
-     * and reused across messages. We only reset it when the configuration changes.
+     * Per-mode pool: each mode keeps its own Conversation alive across
+     * mode toggles, so the system-prompt prefill is paid at most once per
+     * mode per app session. enableThinking is NOT part of the key —
+     * thinking channels are always created and the UI just hides them when
+     * the toggle is off.
+     *
+     * supportImage / supportAudio flips DO invalidate the mode's
+     * Conversation (defensive — preserves prior behavior for the rare
+     * vision/audio handoff case).
      */
     private fun ensureConversation(
         capabilityMode: String,
-        enableThinking: Boolean,
+        @Suppress("UNUSED_PARAMETER") enableThinking: Boolean,
         supportImage: Boolean = false,
         supportAudio: Boolean = false
     ): Conversation {
         val theEngine = engine ?: throw ModelLoadException("Engine not initialized")
 
-        // Check if we need to reset the conversation (mode or thinking changed)
-        val needsReset = conversation != null &&
-            (currentCapabilityMode != capabilityMode ||
-             currentEnableThinking != enableThinking ||
-             currentSupportImage != supportImage ||
-             currentSupportAudio != supportAudio)
+        val priorFlags = supportFlagsByMode[capabilityMode]
+        val flagsChanged = priorFlags != null && priorFlags != (supportImage to supportAudio)
 
-        if (needsReset) {
-            AppLog.d(TAG, "Configuration changed (mode=$capabilityMode, thinking=$enableThinking), resetting conversation")
-            resetConversation()
+        if (flagsChanged) {
+            AppLog.d(TAG, "Modality flags flipped for mode=$capabilityMode — recreating its Conversation")
+            closeAndForgetConversation(capabilityMode)
         }
 
-        // If conversation already exists, reuse it (Gallery pattern!)
-        conversation?.let { return it }
+        conversationsByMode[capabilityMode]?.let { return it }
 
-        // Build system instruction from the system prompt builder
-        val systemPrompt = systemPromptBuilder.buildSystemPrompt(
+        // LiteRT-LM enforces a single active Conversation per Engine
+        // ("A session already exists. Only one session is supported at a
+        // time."). The conversationsByMode pool was previously theoretical
+        // — nobody triggered the constraint because nobody used two modes
+        // back-to-back. The synth recovery path does, so we must serialize:
+        // close every other mode before creating the new one. Mode-switch
+        // cost increases to one full prefill, which is fine because mode
+        // switches are rare.
+        for (otherMode in conversationsByMode.keys.toList()) {
+            if (otherMode != capabilityMode) {
+                AppLog.d(TAG, "Closing $otherMode Conversation to make room for $capabilityMode (LiteRT one-session limit)")
+                closeAndForgetConversation(otherMode)
+            }
+        }
+
+        // Build system instruction. Thinking instructions are included
+        // unconditionally; gating happens in the UI by ignoring thought
+        // tokens when the user has the toggle off. This keeps the KV cache
+        // valid across toggle flips at no measurable runtime cost.
+        val basePrompt = systemPromptBuilder.buildSystemPrompt(
             capabilityMode = capabilityMode,
-            enableThinking = enableThinking,
+            enableThinking = true,
             includeToolDescriptions = false
         )
         val restoredContext = restoredConversationContext
             ?.takeIf { it.isNotBlank() }
-            ?.let { "\n\nRecent saved conversation context:\n$it" }
+            // Hard-cap the prior context to avoid re-prefilling thousands of
+            // tokens on every restore. Callers should already be passing a
+            // short summary, but cap defensively.
+            ?.take(800)
+            ?.let { "\n\nPrior conversation context (summary): $it" }
             .orEmpty()
-        currentSystemInstruction = Contents.of(systemPrompt + restoredContext)
-        currentCapabilityMode = capabilityMode
-        currentEnableThinking = enableThinking
-        currentSupportImage = supportImage
-        currentSupportAudio = supportAudio
+        val memorySection = memorySnapshot
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString("\n") { "- $it" }
+            ?.let { "\n\nYou remember these facts about the user:\n$it" }
+            .orEmpty()
+        val systemInstruction = Contents.of(basePrompt + memorySection + restoredContext)
 
-        // Build thinking channels if enabled
-        val channels = if (enableThinking) {
-            listOf(Channel(channelName = "thought", start = "<thought>", end = "</thought>"))
-        } else {
-            null
-        }
+        // Gemma 3n E2B (the only shipped model) emits inconsistent <thought>
+        // markers. Registering a "thought" channel here causes the entire
+        // response to be parsed into a channel the UI hides, producing empty
+        // chat bubbles. Drop the channel registration; any literal
+        // <thought>...</thought> markup is stripped at the UI layer.
+        val channels = emptyList<Channel>()
 
-        // Build tool providers for native tool calling
-        val toolProviders = buildToolProviders()
+        // Build tool providers for native tool calling, scoped to this
+        // capability mode (pure-text modes get an empty list).
+        val toolProviders = buildToolProviders(capabilityMode)
 
         // Gallery pattern: SamplerConfig null on NPU
         val samplerConfig = samplerConfigForActiveBackend()
 
-        // Gallery pattern: optionally enable constrained decoding
-        ExperimentalFlags.enableConversationConstrainedDecoding = false
+        // Constrained decoding makes tool-call markup leaks ("<|tool_call>...")
+        // structurally impossible when tools are registered. We only enable
+        // it when there ARE tools; pure-chat conversations don't need it.
+        ExperimentalFlags.enableConversationConstrainedDecoding = toolProviders.isNotEmpty()
 
         val conversationConfig = ConversationConfig(
             samplerConfig = samplerConfig,
-            systemInstruction = currentSystemInstruction,
+            systemInstruction = systemInstruction,
             tools = toolProviders,
             channels = channels
         )
 
-        ExperimentalFlags.enableConversationConstrainedDecoding = false
-
         val newConversation = theEngine.createConversation(conversationConfig)
-        conversation = newConversation
+        conversationsByMode[capabilityMode] = newConversation
+        supportFlagsByMode[capabilityMode] = supportImage to supportAudio
 
-        AppLog.d(TAG, "Created new Conversation for mode=$capabilityMode, thinking=$enableThinking")
+        AppLog.d(TAG, "Created Conversation for mode=$capabilityMode (pool size=${conversationsByMode.size})")
         return newConversation
     }
 
-    /**
-     * Reset the conversation context (Gallery: resetConversation pattern).
-     * Closes the current conversation and creates a new one with the same config.
-     */
-    fun resetConversation() {
-        try {
-            conversation?.close()
-        } catch (e: Exception) {
-            Log.w(TAG, "Error closing conversation: ${e.message}")
+    private fun closeAndForgetConversation(capabilityMode: String) {
+        conversationsByMode.remove(capabilityMode)?.let {
+            try { it.close() } catch (e: Exception) {
+                Log.w(TAG, "Error closing conversation for mode=$capabilityMode: ${e.message}")
+            }
         }
-        conversation = null
-        currentSystemInstruction = null
+        supportFlagsByMode.remove(capabilityMode)
+    }
+
+    private fun closeAllConversations() {
+        for ((mode, conv) in conversationsByMode) {
+            try { conv.close() } catch (e: Exception) {
+                Log.w(TAG, "Error closing conversation for mode=$mode: ${e.message}")
+            }
+        }
+        conversationsByMode.clear()
+        supportFlagsByMode.clear()
     }
 
     /**
-     * Full reset: new conversation with updated configuration.
+     * Reset every mode's Conversation. Called when starting a brand-new
+     * chat session in the DB — all prior per-mode KV caches become stale.
+     */
+    fun resetConversation() {
+        closeAllConversations()
+    }
+
+    /**
+     * Reset and re-prime the given mode's Conversation.
+     * Closes the full pool (fresh DB conversation = fresh KV everywhere),
+     * then re-primes the requested mode.
      */
     fun resetConversation(
         capabilityMode: String,
@@ -475,18 +581,23 @@ class GemmaInferenceEngine @Inject constructor(
         supportImage: Boolean = false,
         supportAudio: Boolean = false
     ) {
-        try {
-            conversation?.close()
-        } catch (e: Exception) {
-            Log.w(TAG, "Error closing conversation: ${e.message}")
-        }
-        conversation = null
-        currentSystemInstruction = null
-        // Force recreation on next call
-        currentCapabilityMode = ""
-        currentEnableThinking = !enableThinking  // Force mismatch to trigger recreate
+        closeAllConversations()
+        // Guard race vs releaseForBackground: even if engine and state look
+        // good when we check here, another thread may close the native
+        // engine before createConversation runs inside ensureConversation.
+        // Catching native "Engine is not initialized" prevents an uncaught
+        // crash that took down the process. The engine will be re-primed
+        // on the next foreground initialize() call.
         if (engine != null && _modelLoadState.value is ModelLoadState.Loaded) {
-            ensureConversation(capabilityMode, enableThinking, supportImage, supportAudio)
+            try {
+                ensureConversation(capabilityMode, enableThinking, supportImage, supportAudio)
+            } catch (e: ModelLoadException) {
+                AppLog.w(TAG, "resetConversation: engine released mid-reset (${e.message}) — skipping")
+            } catch (e: IllegalStateException) {
+                AppLog.w(TAG, "resetConversation: native engine closed mid-reset (${e.message}) — skipping")
+            } catch (e: Exception) {
+                Log.w(TAG, "resetConversation: unexpected failure", e)
+            }
         }
     }
 
@@ -495,15 +606,31 @@ class GemmaInferenceEngine @Inject constructor(
     }
 
     /**
-     * Stop ongoing generation (Gallery: conversation.cancelProcess pattern).
+     * Update the user-memory snapshot baked into the system instruction.
+     * Pass an empty list to clear (e.g. when the memoryEnabled setting is
+     * off). Closes all pooled Conversations when the snapshot actually
+     * changes so the next inference picks up the new memories.
+     */
+    fun setMemorySnapshot(memories: List<String>) {
+        if (memorySnapshot == memories) return
+        memorySnapshot = memories
+        AppLog.d(TAG, "Memory snapshot updated (${memories.size} entries) — invalidating Conversation pool")
+        closeAllConversations()
+    }
+
+    /**
+     * Stop ongoing generation across all pooled Conversations
+     * (only one is generating at a time, but we don't track which here).
      */
     fun stopGeneration() {
-        try {
-            conversation?.cancelProcess()
-            AppLog.d(TAG, "Cancelled ongoing generation")
-        } catch (e: Exception) {
-            Log.w(TAG, "Error cancelling generation: ${e.message}")
+        for ((mode, conv) in conversationsByMode) {
+            try {
+                conv.cancelProcess()
+            } catch (e: Exception) {
+                Log.w(TAG, "Error cancelling generation for mode=$mode: ${e.message}")
+            }
         }
+        AppLog.d(TAG, "Cancelled ongoing generation (pool size=${conversationsByMode.size})")
     }
 
     /**
@@ -534,7 +661,7 @@ class GemmaInferenceEngine @Inject constructor(
             return@callbackFlow
         }
 
-        var responseReceived = false
+        val responseReceived = java.util.concurrent.atomic.AtomicBoolean(false)
         val timeoutJob = launch(Dispatchers.Default) {
             // 240s on emulator OR when force_cpu is on (CPU prefill is slow),
             // 30s on real device with GPU.
@@ -542,14 +669,21 @@ class GemmaInferenceEngine @Inject constructor(
                 Build.PRODUCT.contains("generic") ||
                 Build.HARDWARE.contains("ranchu") ||
                 Build.HARDWARE.contains("goldfish")
-            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 600000L else 30000L)
-            if (!responseReceived) {
+            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 240000L else 30000L)
+            if (responseReceived.compareAndSet(false, true)) {
                 Log.e(TAG, "Response timeout - no callback received within first-token deadline")
                 trySend(InferenceToken.Error("The model is not responding. Please try again or restart the app."))
                 trySend(InferenceToken.EndOfStream)
                 close()
             }
         }
+
+        // Speed-benchmark instrumentation (temporary): per-turn timings get
+        // logged with a BENCH_ prefix. Drive parser is /tmp/parse_bench.sh.
+        val genStartMs = System.currentTimeMillis()
+        val firstTokenLogged = java.util.concurrent.atomic.AtomicBoolean(false)
+        val benchTotalChars = java.util.concurrent.atomic.AtomicInteger(0)
+        AppLog.d(TAG, "BENCH_START mode=$capabilityMode thinking=$enableThinking")
 
         try {
             val conv = ensureConversation(capabilityMode, enableThinking)
@@ -565,12 +699,18 @@ class GemmaInferenceEngine @Inject constructor(
             val safeUserMessage = sanitizeForLiteRtLm(lastUserMessage)
             AppLog.d(TAG, "Sending message to model: '${safeUserMessage.take(50)}...'")
 
+            // Sentinel for native-crash detection. If this run SIGSEGVs
+            // inside LiteRT-LM, the JVM is torn down before any catch runs;
+            // on next launch CrashRecoveryStore sees this file and tells
+            // the user what crashed.
+            crashRecoveryStore.markInferenceStarted(safeUserMessage)
+
             // Gallery pattern: sendMessageAsync with MessageCallback
             conv.sendMessageAsync(
                 Contents.of(Content.Text(safeUserMessage)),
                 object : MessageCallback {
                     override fun onMessage(message: LiteRtMessage) {
-                        responseReceived = true
+                        responseReceived.set(true)
                         AppLog.d(TAG, "onMessage callback received")
 
                         // Extract thinking content from channels (Gallery pattern)
@@ -617,6 +757,11 @@ class GemmaInferenceEngine @Inject constructor(
                         // a single space is meaningful — dropping it fuses
                         // adjacent tokens, e.g. "between" + " " + "0" → "between0".
                         if (textContent.isNotEmpty()) {
+                            benchTotalChars.addAndGet(textContent.length)
+                            if (firstTokenLogged.compareAndSet(false, true)) {
+                                val ttftMs = System.currentTimeMillis() - genStartMs
+                                AppLog.d(TAG, "BENCH_FIRST_TOKEN mode=$capabilityMode ttft_ms=$ttftMs")
+                            }
                             for (chunk in textContent.chunked(2)) {
                                 trySend(InferenceToken.TextToken(chunk))
                             }
@@ -624,16 +769,22 @@ class GemmaInferenceEngine @Inject constructor(
                     }
 
                     override fun onDone() {
-                        responseReceived = true
+                        responseReceived.set(true)
+                        val totalMs = System.currentTimeMillis() - genStartMs
+                        val chars = benchTotalChars.get()
+                        val cps = if (totalMs > 0) (chars * 1000L / totalMs) else 0L
+                        AppLog.d(TAG, "BENCH_DONE mode=$capabilityMode total_ms=$totalMs chars=$chars cps=$cps")
                         AppLog.d(TAG, "onDone callback received")
                         timeoutJob.cancel()
+                        crashRecoveryStore.markInferenceEnded()
                         trySend(InferenceToken.EndOfStream)
                         close()
                     }
 
                     override fun onError(throwable: Throwable) {
-                        responseReceived = true
+                        responseReceived.set(true)
                         timeoutJob.cancel()
+                        crashRecoveryStore.markInferenceEnded()
                         if (throwable is CancellationException) {
                             Log.i(TAG, "Generation cancelled by user")
                             trySend(InferenceToken.EndOfStream)
@@ -648,12 +799,14 @@ class GemmaInferenceEngine @Inject constructor(
             )
         } catch (e: LiteRtLmJniException) {
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
             Log.e(TAG, "LiteRT-LM JNI error during inference", e)
             trySend(InferenceToken.Error("Inference error: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
             close()
         } catch (e: Exception) {
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
             Log.e(TAG, "Generation failed", e)
             trySend(InferenceToken.Error("Generation failed: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
@@ -666,6 +819,7 @@ class GemmaInferenceEngine @Inject constructor(
         awaitClose {
             AppLog.d(TAG, "callbackFlow closing, cancelling timeout job")
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
         }
     }.flowOn(Dispatchers.Default)
 
@@ -705,7 +859,7 @@ class GemmaInferenceEngine @Inject constructor(
             return@callbackFlow
         }
 
-        var responseReceived = false
+        val responseReceived = java.util.concurrent.atomic.AtomicBoolean(false)
         val timeoutJob = launch(Dispatchers.Default) {
             // 240s on emulator OR when force_cpu is on (CPU prefill is slow),
             // 30s on real device with GPU.
@@ -713,8 +867,8 @@ class GemmaInferenceEngine @Inject constructor(
                 Build.PRODUCT.contains("generic") ||
                 Build.HARDWARE.contains("ranchu") ||
                 Build.HARDWARE.contains("goldfish")
-            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 600000L else 30000L)
-            if (!responseReceived) {
+            delay(if (isEmu || forceCpu || activeBackendType == "cpu") 240000L else 30000L)
+            if (responseReceived.compareAndSet(false, true)) {
                 Log.e(TAG, "Response timeout - no callback received within first-token deadline")
                 trySend(InferenceToken.Error("The model is not responding. Please try again or restart the app."))
                 trySend(InferenceToken.EndOfStream)
@@ -737,6 +891,9 @@ class GemmaInferenceEngine @Inject constructor(
                 "Sending image to conversation: promptChars=${lastUserMessage.length}, imageBytes=${imageBytes.size}"
             )
 
+            // Sentinel for native-crash detection. See generateResponse() for rationale.
+            crashRecoveryStore.markInferenceStarted(lastUserMessage)
+
             conv.sendMessageAsync(
                 Contents.of(
                     Content.ImageBytes(imageBytes),
@@ -744,7 +901,7 @@ class GemmaInferenceEngine @Inject constructor(
                 ),
                 object : MessageCallback {
                     override fun onMessage(message: LiteRtMessage) {
-                        responseReceived = true
+                        responseReceived.set(true)
                         AppLog.d(TAG, "Image onMessage callback received")
 
                         val thinkingContent = message.channels["thought"]
@@ -789,16 +946,18 @@ class GemmaInferenceEngine @Inject constructor(
                     }
 
                     override fun onDone() {
-                        responseReceived = true
+                        responseReceived.set(true)
                         AppLog.d(TAG, "Image onDone callback received")
                         timeoutJob.cancel()
+                        crashRecoveryStore.markInferenceEnded()
                         trySend(InferenceToken.EndOfStream)
                         close()
                     }
 
                     override fun onError(throwable: Throwable) {
-                        responseReceived = true
+                        responseReceived.set(true)
                         timeoutJob.cancel()
+                        crashRecoveryStore.markInferenceEnded()
                         if (throwable is CancellationException) {
                             Log.i(TAG, "Generation cancelled by user")
                             trySend(InferenceToken.EndOfStream)
@@ -812,12 +971,14 @@ class GemmaInferenceEngine @Inject constructor(
             )
         } catch (e: LiteRtLmJniException) {
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
             Log.e(TAG, "LiteRT-LM JNI error during image inference", e)
             trySend(InferenceToken.Error("Image inference error: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
             close()
         } catch (e: Exception) {
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
             Log.e(TAG, "Image inference failed", e)
             trySend(InferenceToken.Error("Image inference failed: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
@@ -828,6 +989,7 @@ class GemmaInferenceEngine @Inject constructor(
         awaitClose {
             AppLog.d(TAG, "callbackFlow closing, cancelling timeout job")
             timeoutJob.cancel()
+            crashRecoveryStore.markInferenceEnded()
         }
     }.flowOn(Dispatchers.Default)
 
@@ -871,6 +1033,9 @@ class GemmaInferenceEngine @Inject constructor(
             val wavBytes = wrapPcmInWavHeader(audioBytes, SAMPLE_RATE)
             AppLog.d(TAG, "Audio: raw PCM ${audioBytes.size} bytes -> WAV ${wavBytes.size} bytes")
 
+            // Sentinel for native-crash detection. See generateResponse() for rationale.
+            crashRecoveryStore.markInferenceStarted(lastUserMessage)
+
             // Gallery pattern: Audio content first, then text
             conv.sendMessageAsync(
                 Contents.of(
@@ -898,11 +1063,13 @@ class GemmaInferenceEngine @Inject constructor(
                     }
 
                     override fun onDone() {
+                        crashRecoveryStore.markInferenceEnded()
                         trySend(InferenceToken.EndOfStream)
                         close()
                     }
 
                     override fun onError(throwable: Throwable) {
+                        crashRecoveryStore.markInferenceEnded()
                         if (throwable is CancellationException) {
                             trySend(InferenceToken.EndOfStream)
                         } else {
@@ -914,11 +1081,16 @@ class GemmaInferenceEngine @Inject constructor(
                 emptyMap()
             )
         } catch (e: Exception) {
+            crashRecoveryStore.markInferenceEnded()
             Log.e(TAG, "Audio inference failed", e)
             trySend(InferenceToken.Error("Audio inference failed: ${e.message}"))
             trySend(InferenceToken.EndOfStream)
             close()
         } finally {
+        }
+
+        awaitClose {
+            crashRecoveryStore.markInferenceEnded()
         }
     }.flowOn(Dispatchers.Default)
 
@@ -929,19 +1101,23 @@ class GemmaInferenceEngine @Inject constructor(
      *
      * This uses LiteRT-LM's native tool() function to create ToolProviders
      * that the model can call natively — matching the Gallery's approach.
+     *
+     * Tools are scoped per [capabilityMode]: pure-text modes (write, see,
+     * brainstorm) get an empty list so constrained decoding stays OFF and
+     * we skip the tool-schema prefill entirely. The remaining modes
+     * (chat, code, data, communication) keep the full toolset. Note that
+     * even in tool-less modes, preflight detection in SendMessageUseCase
+     * still handles weather/time/currency/news/calculator without the
+     * model — so toggling tools off here doesn't break those queries.
      */
-    private fun buildToolProviders(): List<ToolProvider> {
-        val toolSettings = runCatching {
-            runBlocking {
-                settingsDataStore.allowWebSearch.first() to settingsDataStore.memoryEnabled.first()
-            }
-        }.getOrDefault(false to false)
+    private fun buildToolProviders(capabilityMode: String): List<ToolProvider> {
+        if (!modeUsesTools(capabilityMode)) return emptyList()
         val appTools = toolRegistry.getAllTools()
             .filter { tool ->
                 shouldExposeToolToModel(
                     toolName = tool.name,
-                    allowWebSearch = toolSettings.first,
-                    memoryEnabled = toolSettings.second
+                    allowWebSearch = cachedAllowWebSearch,
+                    memoryEnabled = cachedMemoryEnabled
                 )
             }
         if (appTools.isEmpty()) return emptyList()
@@ -957,10 +1133,14 @@ class GemmaInferenceEngine @Inject constructor(
                 }
 
                 override fun execute(paramsJsonString: String): String {
-                    // When the model uses automatic tool calling, this is invoked
+                    // When the model uses automatic tool calling, this is invoked.
+                    // runBlocking is intentional: LiteRT-LM calls this on the
+                    // inference thread (not main/Default), and the suspend
+                    // appTool.execute() must be bridged to this sync interface.
                     return try {
                         val params = kotlinx.serialization.json.Json.decodeFromString<
                             kotlinx.serialization.json.JsonObject>(paramsJsonString)
+                        @Suppress("BlockingMethodInNonBlockingContext")
                         val result = kotlinx.coroutines.runBlocking {
                             appTool.execute(params)
                         }
@@ -981,13 +1161,48 @@ class GemmaInferenceEngine @Inject constructor(
     // ── Lifecycle ───────────────────────────────────────────────────────────
 
     fun release() {
-        try { conversation?.close() } catch (_: Exception) { }
+        closeAllConversations()
         try { engine?.close() } catch (_: Exception) { }
         engine = null
-        conversation = null
         activeBackendType = "none"
         activeBackend = Backend.CPU()
         _modelLoadState.value = ModelLoadState.NotLoaded
+    }
+
+    /**
+     * Release engine + KV-cache to free GPU memory when the app is backgrounded.
+     *
+     * Cancels any in-flight inference, closes Conversation and Engine (which
+     * implement AutoCloseable in the LiteRT-LM Kotlin API — Engine.close()
+     * tears down the native runtime and frees model weights + KV cache),
+     * nulls out the refs, and resets _modelLoadState to NotLoaded so the
+     * next initialize() call repopulates everything.
+     *
+     * Safe to call from any state (already-released, loading, loaded).
+     * After this returns, initialize() must be called again to use the engine.
+     */
+    suspend fun releaseForBackground() = withContext(Dispatchers.IO) {
+        if (_modelLoadState.value is ModelLoadState.NotLoaded && engine == null) {
+            AppLog.d(TAG, "releaseForBackground: already released, no-op")
+            return@withContext
+        }
+        AppLog.d(TAG, "releaseForBackground: cancelling inference and releasing engine")
+        // Cancel any in-flight generation across the pool, then close the pool.
+        for ((mode, conv) in conversationsByMode) {
+            try { conv.cancelProcess() } catch (e: Exception) {
+                Log.w(TAG, "Error cancelling in-flight inference for mode=$mode: ${e.message}")
+            }
+        }
+        closeAllConversations()
+        try { engine?.close() } catch (e: Exception) {
+            Log.w(TAG, "Error closing engine: ${e.message}")
+        }
+        engine = null
+        visionEnabled = false
+        activeBackendType = "none"
+        activeBackend = Backend.CPU()
+        _modelLoadState.value = ModelLoadState.NotLoaded
+        AppLog.d(TAG, "releaseForBackground: complete — GPU memory freed")
     }
 
     // ── Fallback ────────────────────────────────────────────────────────────
@@ -1020,6 +1235,22 @@ class GemmaInferenceEngine @Inject constructor(
                 .containsMatchIn(text) -> "data analysis"
             else -> null
         }
+    }
+
+    /**
+     * Modes where the model is allowed to call tools. Tool-less modes get
+     * constrained decoding disabled and skip the tool-schema prefill,
+     * which speeds up every turn in those modes.
+     *
+     * "summary" is an internal mode used by [SendMessageUseCase] when it
+     * needs the model to synthesize a natural-language answer from tool
+     * data without being able to call more tools — runs in its own
+     * pooled Conversation so the cache stays warm across synth calls.
+     */
+    private fun modeUsesTools(capabilityMode: String): Boolean = when (capabilityMode) {
+        "chat", "code", "data", "communication" -> true
+        "write", "see", "brainstorm", "summary" -> false
+        else -> true
     }
 
     private fun samplerConfigForActiveBackend(): SamplerConfig? {

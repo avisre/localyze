@@ -14,7 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -124,9 +129,31 @@ fun AssistantMessageBubble(
                 .widthIn(max = 720.dp)
         ) {
             Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-                StructuredMarkdownText(
-                    markdown = if (isStreaming) "$message|" else message
-                )
+                // Render the message as-is so its identity is stable and Compose
+                // can skip recomposing the (expensive) markdown parse when only
+                // the cursor blinks. The blinking caret is overlaid in a
+                // separate, end-aligned Box that toggles its own visibility.
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    StructuredMarkdownText(markdown = message)
+                    if (isStreaming) {
+                        var cursorVisible by remember { mutableStateOf(true) }
+                        LaunchedEffect(Unit) {
+                            while (true) {
+                                delay(500)
+                                cursorVisible = !cursorVisible
+                            }
+                        }
+                        if (cursorVisible) {
+                            Text(
+                                text = "|",
+                                color = TextSecondary,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                            )
+                        }
+                    }
+                }
                 if (chartResults.isNotEmpty()) {
                     ErrorBoundary(label = "chart") {
                         chartResults.forEach { chartResult ->
